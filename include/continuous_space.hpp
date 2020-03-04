@@ -12,14 +12,6 @@
 
 #include "abstract_bem_space.hpp"
 
-#include <exception>
-#include <utility>
-#include <vector>
-
-#include "abstract_parametrized_curve.hpp"
-#include "parametrized_mesh.hpp"
-#include <Eigen/Dense>
-
 namespace parametricbem2d {
 /**
  * \class ContinuousSpace
@@ -32,7 +24,6 @@ namespace parametricbem2d {
     public:
         ContinuousSpace() {
             throw std::invalid_argument("Class specialization not defined!");
-            std::cout << "Error! No specialization defined for p = " << p << std::endl;
         }
     };
 

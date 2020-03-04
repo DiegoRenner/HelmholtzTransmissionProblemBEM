@@ -24,37 +24,17 @@
 #include "parametrized_mesh.hpp"
 
 namespace parametricbem2d {
-    namespace adj_double_layer {
-
-        Eigen::MatrixXd GalerkinMatrix(const ParametrizedMesh mesh,
-                                       const AbstractBEMSpace &trial_space,
-                                       const AbstractBEMSpace &test_space,
-                                       const unsigned int &N) {
-            // Getting the adjoint double layer matrix by calculating the double layer
-            // Galerkin matrix and transposing it
-            /*return parametricbem2d::double_layer::GalerkinMatrix(mesh, trial_space,
-                                                                 test_space, N)
-                .transpose();*/
-            return parametricbem2d::double_layer::GalerkinMatrix(mesh, test_space,
-                                                                 trial_space, N);
-        }
-
-    } // namespace adj_double_layer
     namespace adj_double_layer_helmholtz {
         Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
                                        const AbstractBEMSpace &trial_space,
                                        const AbstractBEMSpace &test_space,
                                        const unsigned int &N,
-                                       const double c_o,
-                                       const double c_i)
+                                       const double k)
                                        {
             // Getting the adjoint double layer matrix by calculating the double layer
             // Galerkin matrix and transposing it
-            /*return parametricbem2d::double_layer::GalerkinMatrix(mesh, trial_space,
-                                                                 test_space, N)
-                .transpose();*/
             return parametricbem2d::double_layer_helmholtz::GalerkinMatrix(mesh, test_space,
-                                                                 trial_space, N, c_o, c_i);
+                                                                 trial_space, N, k);
 
         }
     } // namespace parametricbem2d

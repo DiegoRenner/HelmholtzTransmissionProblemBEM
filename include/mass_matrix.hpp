@@ -12,11 +12,9 @@
 #ifndef MASSMATRIXRHPP
 #define MASSMATRIXRHPP
 
-#include <Eigen/Dense>
 #include "abstract_bem_space.hpp"
 #include "abstract_parametrized_curve.hpp"
-#include "logweight_quadrature.hpp"
-#include "parametrized_mesh.hpp"
+#include "gauleg.hpp"
 
 namespace parametricbem2d {
     namespace mass_matrix{
@@ -38,8 +36,7 @@ namespace parametricbem2d {
                                          const AbstractParametrizedCurve &pi_p,
                                          const AbstractBEMSpace &trial_space,
                                          const AbstractBEMSpace &test_space,
-                                         const QuadRule &GaussQR,
-                                         const double c_o);
+                                         const QuadRule &GaussQR);
 /**
  * This function is used to evaluate the Interaction Matrix defined in
  * \f$\eqref{eq:Al}\f$ for the pair of panels \f$\Pi\f$ and \f$\Pi\f$', for the
@@ -72,9 +69,7 @@ namespace parametricbem2d {
                                            const AbstractBEMSpace &trial_space,
                                            const AbstractBEMSpace &test_space,
                                            const QuadRule &GaussQR,
-                                           const QuadRule &CGaussQR,
-                                           const double c_o,
-                                           const double c_i);
+                                           const QuadRule &CGaussQR);
 
 /**
  * This function is used to evaluate the full Galerkin matrix based on the
@@ -94,12 +89,7 @@ namespace parametricbem2d {
         Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
                                         const AbstractBEMSpace &trial_space,
                                         const AbstractBEMSpace &test_space,
-                                        const unsigned int &N,
-                                        const double c_o,
-                                        const double c_i);
-
-
-
+                                        const unsigned int &N);
     } //namespace mass_matrix
 } // namespace parametricbem2d
 

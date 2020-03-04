@@ -11,9 +11,6 @@
 
 #include "abstract_parametrized_curve.hpp"
 
-#include <utility>
-
-#include <Eigen/Dense>
 
 namespace parametricbem2d {
 /**

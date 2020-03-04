@@ -12,7 +12,6 @@
 #define LOGWEIGHTGQ
 
 #include <Eigen/Dense>
-#include <utility>
 #include <vector>
 
 /**

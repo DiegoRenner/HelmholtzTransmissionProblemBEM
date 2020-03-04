@@ -23,8 +23,6 @@
 // Source: http://people.sc.fsu.edu/~jburkardt/cpp_src/gen_laguerre_rule/gen_laguerre_rule.html
 //****************************************************************************
 
-# include <cstdlib>
-# include <cmath>
 # include <iostream>
 # include <fstream>
 # include <iomanip>

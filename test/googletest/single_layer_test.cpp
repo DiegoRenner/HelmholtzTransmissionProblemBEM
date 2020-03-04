@@ -29,14 +29,14 @@ double c_o = k;
 double c_i = k*sqrt(n_i);
 int numpanels = 50;
 parametricbem2d::ParametrizedMesh mesh(curve.split(numpanels));
-
-Eigen::VectorXcd V = parametricbem2d::single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, c_o, 0.0).block(0,0,1,numpanels).transpose();
+Eigen::VectorXcd V = parametricbem2d::single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, c_o).block(0,0,1,numpanels).transpose();
 Eigen::VectorXcd V_expected(numpanels);
 std::ifstream fp_data;
 double real, imag;
 char sign;
 int i = 0;
 std::string path = "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/single_layer_o_" + std::to_string(numpanels) + ".dat";
+
 TEST(SingleLayerTest, disjoint_fair) {
     fp_data.open(path);
     while(fp_data >> real >> imag) {
@@ -54,17 +54,6 @@ TEST(SingleLayerTest, disjoint_fair) {
     fp_data.close();
 }
 
-//TEST(SingleLayerTest, disjoint_precise) {
-//    fp_data.open(path);
-//    i = 0;
-//    while(fp_data >> real >> sign >> imag >> sign) {
-//        K_expected[i] = complex_t(real, imag);
-//        i++;
-//    }
-//    ASSERT_TRUE((K.segment(2,numpanels-3)-K_expected.segment(2,numpanels-3)).lpNorm<2>() < sqrt_epsilon);
-//    fp_data.close();
-//}
-//
 TEST(SingleLayerTest, coinciding_precise) {
     fp_data.open(path);
     i = 0;

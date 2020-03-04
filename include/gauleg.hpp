@@ -8,13 +8,7 @@
 #ifndef GAULEGHPP
 #define GAULEGHPP
 
-#include <cmath>
-#include <exception>
-#include <iostream>
-
 #include "logweight_quadrature.hpp"
-#include <Eigen/Dense>
-#define _USE_MATH_DEFINES
 
 /* Compute Gaussian quadrature nodes and weights for n nodes over
  * interval [a,b] \param[in] a,b Interval [a,b] endpoints \param[in] n Number of
@@ -100,9 +94,6 @@ gauleg(double a, double b, int n, double eps = 1.e-13) {
       wq(i) = wqi;
       wq(n - 1 - i) = wqi;
     }
-    //std::cout << xq << std::endl;
-    //std::cout << "--------------" << std::endl;
-    //std::cout << wq << std::endl;
   return std::make_pair(xq, wq);
 }
 
@@ -128,11 +119,6 @@ inline std::pair<Eigen::RowVectorXd, Eigen::RowVectorXd>
         xr=xl;
         xl=xl*sigma;
     };
-    //points = 2.*points-Eigen::VectorXd::Constant(N,1.).transpose();
-    //weights = 2.*weights;
-    //std::cout << points << std::endl;
-    //std::cout << "---------------" << std::endl;
-    //std::cout << weights << std::endl;
     return std::make_pair(points, weights);
 }
 
@@ -167,7 +153,6 @@ inline QuadRule getCGaussQR(unsigned N) {
     gauss.n = N*(N+1)/2-1;
     gauss.x = points;
     gauss.w = weights;
-    //std::cout << points << "---" << weights << std::endl;
     return gauss;
 }
 #endif

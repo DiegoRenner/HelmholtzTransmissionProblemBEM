@@ -29,8 +29,7 @@ double c_o = k;
 double c_i = k*sqrt(n_i);
 int numpanels = 50;
 parametricbem2d::ParametrizedMesh mesh(curve.split(numpanels));
-
-Eigen::VectorXcd W = parametricbem2d::hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, c_i, 0.0).block(0,0,1,numpanels).transpose();
+Eigen::VectorXcd W = parametricbem2d::hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, c_i).block(0,0,1,numpanels).transpose();
 Eigen::VectorXcd W_expected(numpanels);
 std::ifstream fp_data;
 double real, imag;

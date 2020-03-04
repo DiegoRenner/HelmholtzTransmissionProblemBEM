@@ -9,14 +9,11 @@
  * This File is a part of the 2D-Parametric BEM package
  */
 
-
 #ifndef SINGLELAYERHPP
 #define SINGLELAYERHPP
-#include <Eigen/Dense>
 #include "abstract_bem_space.hpp"
 #include "abstract_parametrized_curve.hpp"
-#include "logweight_quadrature.hpp"
-#include "parametrized_mesh.hpp"
+#include "gauleg.hpp"
 
 namespace parametricbem2d {
     namespace single_layer_helmholtz {
@@ -36,16 +33,10 @@ namespace parametricbem2d {
  *         where Q is number of local shape functions in BEM space
  */
         Eigen::MatrixXcd ComputeIntegralAdjacent(const AbstractParametrizedCurve &pi,
-                                                const AbstractParametrizedCurve &pi_p,
-                                                const AbstractBEMSpace &space,
-                                                const QuadRule &GaussQR,
-                                                const double c_o);
-        Eigen::MatrixXcd ComputeIntegralAdjacentDiff(const AbstractParametrizedCurve &pi,
                                                  const AbstractParametrizedCurve &pi_p,
                                                  const AbstractBEMSpace &space,
                                                  const QuadRule &GaussQR,
-                                                 const double c_o,
-                                                 const double c_i);
+                                                 const double k);
 
 /**
  * This function is used to evaluate the Interaction Matrix for the pair
@@ -63,16 +54,10 @@ namespace parametricbem2d {
  *         where Q is number of local shape functions in BEM space
  */
         Eigen::MatrixXcd ComputeIntegralCoinciding(const AbstractParametrizedCurve &pi,
-                                                  const AbstractParametrizedCurve &pi_p,
-                                                  const AbstractBEMSpace &space,
-                                                  const QuadRule &GaussQR,
-                                                  const double c_o);
-        Eigen::MatrixXcd ComputeIntegralCoincidingDiff(const AbstractParametrizedCurve &pi,
                                                    const AbstractParametrizedCurve &pi_p,
                                                    const AbstractBEMSpace &space,
                                                    const QuadRule &GaussQR,
-                                                   const double c_o,
-                                                   const double c_i);
+                                                   const double k);
 
 /**
  * This function is used to evaluate the Interaction Matrix for the pair
@@ -89,16 +74,10 @@ namespace parametricbem2d {
  *         where Q is number of local shape functions in BEM space
  */
         Eigen::MatrixXcd ComputeIntegralGeneral(const AbstractParametrizedCurve &pi,
-                                               const AbstractParametrizedCurve &pi_p,
-                                               const AbstractBEMSpace &space,
-                                               const QuadRule &GaussQR,
-                                               const double c_o);
-        Eigen::MatrixXcd ComputeIntegralGeneralDiff(const AbstractParametrizedCurve &pi,
                                                 const AbstractParametrizedCurve &pi_p,
                                                 const AbstractBEMSpace &space,
                                                 const QuadRule &GaussQR,
-                                                const double c_o,
-                                                const double c_i);
+                                                const double k);
 /**
  * This function is used to evaluate the Interaction Matrix defined in
  * \f$\eqref{eq:Al}\f$ for the pair of panels \f$\Pi\f$ and \f$\Pi\f$', for the
@@ -127,12 +106,11 @@ namespace parametricbem2d {
  *         where Q is number of local shape functions in BEM space
  */
         Eigen::MatrixXcd InteractionMatrix(const AbstractParametrizedCurve &pi,
-                                          const AbstractParametrizedCurve &pi_p,
-                                          const AbstractBEMSpace &space,
-                                          const QuadRule &GaussQR,
-                                          const QuadRule &CGaussQR,
-                                          const double c_o,
-                                          const double c_i);
+                                           const AbstractParametrizedCurve &pi_p,
+                                           const AbstractBEMSpace &space,
+                                           const QuadRule &GaussQR,
+                                           const QuadRule &CGaussQR,
+                                           const double k);
 
 /**
  * This function is used to evaluate the full Galerkin matrix based on the
@@ -150,32 +128,9 @@ namespace parametricbem2d {
  * @return An Eigen::MatrixXd type Galerkin Matrix for the given mesh and space
  */
         Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
-                                       const AbstractBEMSpace &space,
-                                       const unsigned int &N,
-                                       const double c_o,
-                                       const double c_i);
-
-/**
- * This function is used to evaluate the Single Layer Potential given by
- * \f$\Psi^{\Delta}_{SL}\Phi(x) = \int_{\Gamma} -\frac{1}{2\Pi} log ||x-y|| \Phi
- * (y) dS(y) \f$ for the function \f$\Phi = \sum_{i=1}^{N} c_{i} b^{i}_{N}\f$
- * where \f$c_{i}\f$ are the coefficients and \f$b^{i}_{N}\f$ are the basis
- * functions for the given BEM space and mesh. The Single Layer Potential is
- * evaluated using quadrature, at the evaluation point x passed as an input.
- *
- * @param x An Eigen::Vector2d type for the evaluation point
- * @param coeffs An Eigen::VectorXd type containing the coefficients \f$c_{i}\f$
- *               as mentioned above
- * @param mesh ParametrizedMesh object containing all the parametrized
- *             panels in the mesh
- * @param space The BEM space used for evaluating the Single Layer Potential
- * @param N Order for Gauss Quadrature
- * @return double representing the Single Layer Potential at the test point
- */
-        double Potential(const Eigen::Vector2d &x, const Eigen::VectorXd &coeffs,
-                         const ParametrizedMesh &mesh, const AbstractBEMSpace &space,
-                         const unsigned int &N);
-
+                                        const AbstractBEMSpace &space,
+                                        const unsigned int &N,
+                                        const double k);
 
     }
 } // namespace parametricbem2d

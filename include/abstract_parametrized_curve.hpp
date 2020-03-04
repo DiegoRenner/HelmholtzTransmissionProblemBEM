@@ -9,13 +9,10 @@
 #ifndef PARAMETRIZEDCURVEHPP
 #define PARAMETRIZEDCURVEHPP
 
-#include <iostream>
-#include <iterator>
 #include <memory>
-#include <utility>
 #include <vector>
-
 #include <Eigen/Dense>
+
 /**
  * \namespace parametricbem2d
  * \brief This namespace contains all the classes and functions for

@@ -8,14 +8,7 @@
 #ifndef ABSTRACTBEMSPACEHPP
 #define ABSTRACTBEMSPACEHPP
 
-#include <cassert>
-#include <exception>
-#include <functional>
-#include <utility>
-#include <vector>
-
 #include "parametrized_mesh.hpp"
-#include <Eigen/Dense>
 
 namespace parametricbem2d {
 /**
