@@ -48,7 +48,7 @@ namespace parametricbem2d {
                 // Build rhs for solving
                 Eigen::VectorXcd rhs = (0.5*M+K.transpose())*u_neu_N;
                 // Solving for coefficients
-                Eigen::HouseholderQR<Eigen::MatrixXcd> dec(W);
+                Eigen::HouseholderQR<Eigen::MatrixXcd> dec(-W);
                 Eigen::VectorXcd sol = dec.solve(rhs);
                 std::ofstream filename;
                 filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/neumann_problem_L2norm.dat", std::ios_base::app);
@@ -94,7 +94,7 @@ namespace parametricbem2d {
                 // Build rhs for solving
                 Eigen::VectorXcd rhs = (0.5*M-K)*u_dir_N;
                 // Solving for coefficients
-                Eigen::HouseholderQR<Eigen::MatrixXcd> dec(V);
+                Eigen::HouseholderQR<Eigen::MatrixXcd> dec(-V);
                 Eigen::VectorXcd sol = dec.solve(rhs);
                 std::ofstream filename;
                 filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/dirichlet_problem_L2norm.dat", std::ios_base::app);
@@ -391,7 +391,6 @@ namespace parametricbem2d {
                 Eigen::MatrixXcd K_o =
                         double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k_o);
                 std::cout << "double layer helmholtz rhs computed" << std::endl;
-                //std::cout << K_o << std::endl;
                 Eigen::MatrixXcd K_i =
                         double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k_i);
                 std::cout << "double layer helmholtz computed" << std::endl;
@@ -412,7 +411,7 @@ namespace parametricbem2d {
                 std::cout << "mass matrix computed" << std::endl;
 
                 Eigen::MatrixXcd A(K_o.rows() + W_o.rows(), K_o.cols() + V_o.cols());
-                A.block(0, 0, K_o.rows(), K_o.cols()) = - K_o + K_i+M;
+                A.block(0, 0, K_o.rows(), K_o.cols()) = -K_o + K_i+M;
                 A.block(0, K_o.cols(), V_o.rows(), V_o.cols()) = V_o-V_i;
                 A.block(K_o.rows(), 0, W_o.rows(), W_o.cols()) = W_o-W_i;
                 A.block(K_o.rows(), K_o.cols(), K_o.cols(), K_o.rows()) =
@@ -436,6 +435,11 @@ namespace parametricbem2d {
                 // Solving for coefficients
                 Eigen::HouseholderQR<Eigen::MatrixXcd> dec(A);
                 Eigen::VectorXcd sol = dec.solve(rhs);
+                std::cout << "-----------------"<< std::endl;
+                std::cout << sol.segment(0,2*numpanels).transpose() << std::endl;
+                std::cout << "**************************"<< std::endl;
+                std::cout << u_sol_N.segment(0,2*numpanels).transpose() << std::endl;
+                std::cout << "-----------------"<< std::endl;
 
                 std::ofstream filename;
                 filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/transmission_problem_L2norm_dir.dat", std::ios_base::app);
@@ -451,19 +455,61 @@ namespace parametricbem2d {
                          << 2 * M_PI / numpanels << std::endl;
                 filename.close();
                 filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/transmission_problem_L2norm_neu.dat", std::ios_base::app);
-                filename << sqrt(abs((sol.real() - ii*sol.imag() - u_sol_N).segment(numpanels, numpanels).dot((sol.real() - ii*sol.imag() - u_sol_N).segment(numpanels, numpanels)))) << " "
+                filename << sqrt(abs((sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels).dot((sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels)))) << " "
                          << 2 * M_PI / numpanels << std::endl;
                 filename.close();
                 filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/transmission_problem_Mnorm_neu.dat", std::ios_base::app);
-                filename << sqrt(abs((sol.real() - ii*sol.imag() - u_sol_N).segment(numpanels, numpanels).dot(M*(sol.real() - ii*sol.imag() - u_sol_N).segment(numpanels, numpanels))))  << " "
+                filename << sqrt(abs((sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels).dot(M*(sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels))))  << " "
                          << 2 * M_PI / numpanels << std::endl;
                 filename.close();
                 filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/transmission_problem_Vnorm_neu.dat", std::ios_base::app);
-                filename << sqrt(abs((sol.real() - ii*sol.imag() - u_sol_N).segment(numpanels, numpanels).dot(V_o*(sol.real() - ii*sol.imag() - u_sol_N).segment(numpanels, numpanels)))) << " "
+                filename << sqrt(abs((sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels).dot(V_o*(sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels)))) << " "
                          << 2 * M_PI / numpanels << std::endl;
                 filename.close();
                 std::cout << "****************************" << std::endl;
                 return sol;
+            }
+            Eigen::MatrixXcd compute_operator(const ParametrizedMesh &mesh,
+                                   unsigned order,
+                                   const double k_o,
+                                   const double k_i) {
+                int numpanels = mesh.getNumPanels();
+                // Same trial and test spaces
+                DiscontinuousSpace<0> discont_space;
+                //DiscontinuousSpace<0> test_space;
+                // Space used for interpolation of Dirichlet data
+                ContinuousSpace<1> cont_space;
+                // Computing V matrix
+                std::cout << "starting computation of operators for " << numpanels << " panels." << std::endl;
+                Eigen::MatrixXcd K_o =
+                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k_o);
+                std::cout << "double layer helmholtz rhs computed" << std::endl;
+                Eigen::MatrixXcd K_i =
+                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k_i);
+                std::cout << "double layer helmholtz computed" << std::endl;
+                Eigen::MatrixXcd W_i =
+                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k_i);
+                std::cout << "hypersingular helmholtz computed" << std::endl;
+                Eigen::MatrixXcd W_o =
+                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order,k_o);
+                std::cout << "hypersingular helmholtz rhs computed" << std::endl;
+                Eigen::MatrixXcd V_o =
+                        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k_o);
+                std::cout << "single layer helmholtz rhs computed" << std::endl;
+                Eigen::MatrixXcd V_i =
+                        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k_i);
+                std::cout << "single layer helmholtz computed" << std::endl;
+                Eigen::MatrixXcd M =
+                        mass_matrix::GalerkinMatrix(mesh,discont_space,cont_space,order);
+                std::cout << "mass matrix computed" << std::endl;
+
+                Eigen::MatrixXcd A(K_o.rows() + W_o.rows(), K_o.cols() + V_o.cols());
+                A.block(0, 0, K_o.rows(), K_o.cols()) = -K_o + K_i+M;
+                A.block(0, K_o.cols(), V_o.rows(), V_o.cols()) = V_o-V_i;
+                A.block(K_o.rows(), 0, W_o.rows(), W_o.cols()) = W_o-W_i;
+                A.block(K_o.rows(), K_o.cols(), K_o.cols(), K_o.rows()) =
+                        (K_o-K_i).transpose()+M;
+                return A;
             }
         } // namespace direct_second_kind
     } // namespace tsp

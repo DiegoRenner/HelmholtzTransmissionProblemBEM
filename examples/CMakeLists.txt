@@ -7,6 +7,7 @@ add_executable(matlab_read_test matlab_read_test.cpp)
 add_executable(dirichlet_example dirichlet_example.cpp)
 add_executable(neumann_example neumann_example.cpp)
 add_executable(transmission_example transmission_example.cpp)
+add_executable(SV_analysis SV_analysis.cpp)
 
 add_library(generate_solution STATIC generate_solution.cpp )
 
@@ -14,4 +15,5 @@ target_link_libraries(helmholtz_test single_layer mass_matrix generate_solution 
 target_link_libraries(dirichlet_example parametrizations generate_solution solvers)
 target_link_libraries(neumann_example parametrizations generate_solution solvers)
 target_link_libraries(transmission_example parametrizations generate_solution solvers)
+target_link_libraries(SV_analysis parametrizations solvers)
 
