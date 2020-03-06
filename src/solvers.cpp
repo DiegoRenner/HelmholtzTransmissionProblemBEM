@@ -105,7 +105,7 @@ namespace parametricbem2d {
                 filename << sqrt(abs((sol - u_neu_N).dot(M*(sol - u_neu_N)))) << " "
                          << 2 * M_PI / numpanels << std::endl;
                 filename.close();
-                filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/dirichlet_problem_data_Vnorm.dat", std::ios_base::app);
+                filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/dirichlet_problem_Vnorm.dat", std::ios_base::app);
                 filename << sqrt(abs((sol - u_neu_N).dot(V*(sol - u_neu_N)))) << " "
                          << 2 * M_PI / numpanels << std::endl;
                 filename.close();
