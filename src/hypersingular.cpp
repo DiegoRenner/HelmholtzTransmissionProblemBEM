@@ -168,13 +168,13 @@ namespace parametricbem2d {
                             if ((pi.swapped_op(s)-pi_p[t]).norm() > epsilon && fabs((pi.swapped_op(s)-pi_p[t]).dot(normal)) > epsilon) {
                                 result = complex_t(-y0(k * (pi[s] - pi_p.swapped_op(t)).norm()),j0(k * (pi[s] - pi_p.swapped_op(t)).norm()));
                             }
-                        }else
+                        }else {
                             if ((pi[s]-pi_p.swapped_op(t)).norm() > epsilon && fabs((pi[s]-pi_p.swapped_op(t)).dot(normal)) > epsilon) {
                                 result = complex_t(-y0(k * (pi.swapped_op(s)- pi_p[t]).norm()),j0(k * (pi.swapped_op(s)- pi_p[t]).norm()));
                             }
                         }
                         return result * (F_arc(t) * G_arc(s) - k * k * F(t) * G(s) * normal.dot(normal_p));
-                    };{
+                    };
                     complex_t integral = complex_t(0.,0.);
                     // Tensor product quadrature for double integral in \f$\eqref{eq:Kidp}\f$
                     for (unsigned int k = 0; k < N; ++k) {
