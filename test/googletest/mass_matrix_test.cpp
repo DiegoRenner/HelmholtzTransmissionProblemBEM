@@ -1,11 +1,11 @@
 //
 // Created by diegorenner on 2/20/20.
 //
-#include "single_layer_test.hpp"
+#include "mass_matrix.hpp"
 #include <complex>
 #include <Eigen/Dense>
 #include <gtest/gtest.h>
-#include "single_layer_smooth.hpp"
+#include "mass_matrix.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
@@ -27,30 +27,30 @@ parametricbem2d::ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI
 unsigned order = 11;
 double c_o = k;
 double c_i = k*sqrt(n_i);
-int numpanels = 400;
+int numpanels = 50;
 parametricbem2d::ParametrizedMesh mesh(curve.split(numpanels));
-Eigen::VectorXcd V = parametricbem2d::single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, c_o).block(0,0,1,numpanels).transpose();
-Eigen::VectorXcd V_expected(numpanels);
+Eigen::VectorXcd M = parametricbem2d::mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, order).block(0,0,1,numpanels).transpose();
+Eigen::VectorXcd M_expected(numpanels);
 std::ifstream fp_data;
 double real, imag;
 char sign;
 int i = 0;
-std::string path = "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/single_layer_o_" + std::to_string(numpanels) + ".dat";
+std::string path = "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/mass_matrix_cont_" + std::to_string(numpanels) + ".dat";
 
 TEST(SingleLayerTest, disjoint_fair) {
     fp_data.open(path);
     while(fp_data >> real >> imag) {
-        V_expected(i) = complex_t((sign=='-')?-real:real,imag);
+        M_expected(i) = complex_t((sign=='-')?-real:real,imag);
         i++;
         if (i==numpanels) break;
         fp_data >> sign >> sign;
     }
-    std::cout << V.transpose() << std::endl;
+    std::cout << M.transpose() << std::endl;
     std::cout << "***********************************" << std::endl;
-    std::cout << V_expected.transpose() << std::endl;
+    std::cout << M_expected.transpose() << std::endl;
     std::cout << "***********************************" << std::endl;
-    std::cout << (V.segment(2,numpanels-3)-V_expected.segment(2,numpanels-3)).lpNorm<2>()/(numpanels-3) << std::endl;
-    ASSERT_TRUE((V.segment(2,numpanels-3)-V_expected.segment(2,numpanels-3)).lpNorm<2>()/(numpanels-3) < sqrt_epsilon);
+    std::cout << (M.segment(2,numpanels-3)-M_expected.segment(2,numpanels-3)).lpNorm<2>()/(numpanels-3) << std::endl;
+    ASSERT_TRUE((M.segment(2,numpanels-3)-M_expected.segment(2,numpanels-3)).lpNorm<2>()/(numpanels-3) < sqrt_epsilon);
     fp_data.close();
 }
 
@@ -58,10 +58,10 @@ TEST(SingleLayerTest, coinciding_precise) {
     fp_data.open(path);
     i = 0;
     while(fp_data >> real >> sign >> imag >> sign) {
-        V_expected[i] = complex_t(real, imag);
+        M_expected[i] = complex_t(real, imag);
         i++;
     }
-    ASSERT_TRUE(abs(V[0]-V_expected[0]) < 0.0001);
+    ASSERT_TRUE(abs(M[0]-M_expected[0]) < 0.0001);
     fp_data.close();
 }
 
@@ -69,10 +69,10 @@ TEST(SingleLayerTest, adjacent_precise) {
     fp_data.open(path);
     i = 0;
     while(fp_data >> real >> sign >> imag >> sign) {
-        V_expected[i] = complex_t(real, imag);
+        M_expected[i] = complex_t(real, imag);
         i++;
     }
-    ASSERT_TRUE(abs(V[1]-V_expected[1]) < 0.0001);
-    ASSERT_TRUE(abs(V[numpanels-1]-V_expected[numpanels-1]) < 0.0001);
+    ASSERT_TRUE(abs(M[1]-M_expected[1]) < 0.0001);
+    ASSERT_TRUE(abs(M[numpanels-1]-M_expected[numpanels-1]) < 0.0001);
     fp_data.close();
 }

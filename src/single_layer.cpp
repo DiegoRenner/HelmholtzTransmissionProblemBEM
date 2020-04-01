@@ -212,7 +212,7 @@ namespace parametricbem2d {
             // Initializing the Galerkin matrix with zeros
             Eigen::MatrixXcd output = Eigen::MatrixXcd::Zero(dims, dims);
             // Panel oriented assembly \f$\ref{pc:ass}\f$
-            QuadRule GaussQR = getGaussQR(N);
+            QuadRule GaussQR = getGaussQR(N,0.,1.);
             QuadRule CGaussQR = getCGaussQR(N);
             for (unsigned int i = 0; i < numpanels; ++i) {
                 for (unsigned int j = 0; j < numpanels; ++j) {
@@ -222,8 +222,8 @@ namespace parametricbem2d {
                     // Local to global mapping of the elements in interaction matrix
                     for (unsigned int I = 0; I < Q; ++I) {
                         for (unsigned int J = 0; J < Q; ++J) {
-                            int II = space.LocGlobMap2(I + 1, i + 1, mesh) - 1;
-                            int JJ = space.LocGlobMap2(J + 1, j + 1, mesh) - 1;
+                            int II = space.LocGlobMap(I + 1, i + 1, numpanels) - 1;
+                            int JJ = space.LocGlobMap(J + 1, j + 1, numpanels) - 1;
                             // Filling the Galerkin matrix entries
                             output(II, JJ) += interaction_matrix(I, J);
                         }

@@ -12,29 +12,29 @@ namespace sol {
     complex_t ii = complex_t(0., 1.);
 
     complex_t hn(int n, double x) {
-    return jn(n,x) + ii*yn(n,x);
+        return jn(n, x) + ii * yn(n, x);
     }
 
     complex_t fund_sol(double k, double x1, double x2, double ipt1, double ipt2) {
-        double r = sqrt((x1-ipt1)*(x1-ipt1) + (x2-ipt2)*(x2-ipt2));
-        return ii/4.*hn(0,k*r);
+        double r = sqrt((x1 - ipt1) * (x1 - ipt1) + (x2 - ipt2) * (x2 - ipt2));
+        return ii / 4. * hn(0, k * r);
     }
 
     complex_t fund_sol_N(double k, double x1, double x2, double ipt1, double ipt2) {
-        Eigen::Vector2d x(x1,x2);
+        Eigen::Vector2d x(x1, x2);
         Eigen::Vector2d normal = x.normalized();
-        Eigen::Vector2d ipt(ipt1,ipt2);
-        double r = (x-ipt).norm();
+        Eigen::Vector2d ipt(ipt1, ipt2);
+        double r = (x - ipt).norm();
 
-        return k*ii/4.*hn_der(0,k*r)*(x-ipt).normalized().dot(normal);
+        return k * ii / 4. * hn_der(0, k * r) * (x - ipt).normalized().dot(normal);
     }
 
     complex_t hn_der(int n, double x) {
-        return (hn(n-1,x) - hn(n+1,x))/2.;
+        return (hn(n - 1, x) - hn(n + 1, x)) / 2.;
     }
 
     complex_t jn_der(int n, double x) {
-        return (jn(n-1,x) - jn(n+1,x))/2.;
+        return (jn(n - 1, x) - jn(n + 1, x)) / 2.;
     }
 
     complex_t t_coeff(int n,
@@ -43,7 +43,8 @@ namespace sol {
                       double n_i) {
         double k_eps = k * eps;
         double lambda = sqrt(n_i);
-        complex_t result = (2. * ii /( M_PI * k_eps)) / (hn_der(n, k_eps) * jn(n, lambda * k_eps) - lambda * jn_der(n, lambda * k_eps) * hn(n, k_eps));
+        complex_t result = (2. * ii / (M_PI * k_eps)) / (hn_der(n, k_eps) * jn(n, lambda * k_eps) -
+                                                         lambda * jn_der(n, lambda * k_eps) * hn(n, k_eps));
         return result;
     };
 
@@ -67,7 +68,7 @@ namespace sol {
         complex_t result = complex_t(0.0, 0.0);
         double r = sqrt(x1 * x1 + x2 * x2);
         double eta = atan2(x2 / r, x1 / r);
-        if (eta < 0 ) eta += M_PI;
+        if (eta < 0) eta += M_PI;
         for (int i = 0; i < 2 * l + 1; i++) {
             result += a_n[i] * jn(i - l, k * r) * complex_t(cos((i - l) * eta), sin((i - l) * eta));
         }
@@ -84,7 +85,7 @@ namespace sol {
         complex_t result = complex_t(0.0, 0.0);
         double r = sqrt(x1 * x1 + x2 * x2);
         double eta = atan2(x2 / r, x1 / r);
-        if (eta < 0 ) eta += M_PI;
+        if (eta < 0) eta += M_PI;
         for (int i = 0; i < 2 * l + 1; i++) {
             result += a_n[i] * r_coeff(i - l, eps, k, n_i) * hn(i - l, k * r) *
                       complex_t(cos((i - l) * eta), sin((i - l) * eta));
@@ -103,7 +104,7 @@ namespace sol {
         double lambda = sqrt(n_i);
         double r = sqrt(x1 * x1 + x2 * x2);
         double eta = atan2(x2 / r, x1 / r);
-        if (eta < 0 ) eta += M_PI;
+        if (eta < 0) eta += M_PI;
         for (int i = 0; i < 2 * l + 1; i++) {
             result += a_n[i] * t_coeff(i - l, eps, k, n_i) * jn(i - l, lambda * k * r) *
                       complex_t(cos((i - l) * eta), sin((i - l) * eta));
@@ -121,7 +122,7 @@ namespace sol {
         Eigen::Vector2cd result;
         double r = sqrt(x1 * x1 + x2 * x2);
         double eta = atan2(x2 / r, x1 / r);
-        if (eta < 0 ) eta += M_PI;
+        if (eta < 0) eta += M_PI;
         Eigen::Vector2d e_r;
         e_r << cos(eta), sin(eta);
         Eigen::Vector2d e_eta;
@@ -143,7 +144,7 @@ namespace sol {
         Eigen::Vector2cd result;
         double r = sqrt(x1 * x1 + x2 * x2);
         double eta = atan2(x2 / r, x1 / r);
-        if (eta < 0 ) eta += M_PI;
+        if (eta < 0) eta += M_PI;
         Eigen::Vector2d e_r;
         e_r << cos(eta), sin(eta);
         Eigen::Vector2d e_eta;
@@ -166,15 +167,16 @@ namespace sol {
         double lambda = sqrt(n_i);
         double r = sqrt(x1 * x1 + x2 * x2);
         double eta = atan2(x2 / r, x1 / r);
-        if (eta < 0 ) eta += M_PI;
+        if (eta < 0) eta += M_PI;
         Eigen::Vector2d e_r;
         e_r << cos(eta), sin(eta);
         Eigen::Vector2d e_eta;
         e_eta << -sin(eta), cos(eta);
         for (int i = 0; i < 2 * l + 1; i++) {
-            result += a_n[i] * (t_coeff(i - l, eps, k, n_i).real() - ii*t_coeff(i - l, eps, k, n_i).imag()) * complex_t(cos((i - l) * eta), sin((i - l) * eta)) *
-                      (lambda * k * jn_der(i - l, lambda * k * r) * e_r) ;//+ ii * double(i - l) * jn(i - l, lambda * k * r) * 1. / r * e_eta);
-            std::cout << eta << std::endl;
+            result += (a_n[i] * (t_coeff(i - l, eps, k, n_i).real() - ii * t_coeff(i - l, eps, k, n_i).imag()) *
+                       complex_t(cos((i - l) * eta), sin((i - l) * eta)) *
+                       (lambda * k * jn_der(i - l, lambda * k * r) *
+                        e_r));//+ ii * double(i - l) * jn(i - l, lambda * k * r) * 1. / r * e_eta);
         }
         return result.dot(e_r);
     }

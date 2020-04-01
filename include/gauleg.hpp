@@ -130,11 +130,11 @@ inline std::pair<Eigen::RowVectorXd, Eigen::RowVectorXd>
  * @param N Order for Gaussian Quadrature
  * @return QuadRule object containing the quadrature rule
  */
-inline QuadRule getGaussQR(unsigned N) {
+inline QuadRule getGaussQR(unsigned N, double a, double b) {
   // Getting standard Gauss Legendre Quadrature weights and nodes
   Eigen::RowVectorXd weights, points;
   std::tie(points, weights) =
-      gauleg(0, 1, N, std::numeric_limits<double>::epsilon());
+      gauleg(a, b, N, std::numeric_limits<double>::epsilon());
   QuadRule gauss;
   gauss.dim = 1;
   gauss.n = N;

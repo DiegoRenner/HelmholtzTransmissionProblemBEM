@@ -10,17 +10,18 @@ int main() {
 
     // define radius of circle
     double eps = 0.25;
-    int l = 1;
+    int l = 0;
     double a_n[2*l+1];
     double n_i = 23.;
     double n_o = 1.;
-    double k = 0.001;//2.75679178324354;
+    double k = 100.;//2.75679178324354;
     double k_i = k*sqrt(n_i);
     double k_o = k*sqrt(n_o);
     parametricbem2d::ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
     unsigned order = 11;
     for( int i = 0; i<2*l+1; i++) {
-        a_n[i] = 1./((k*k*(n_o-n_i))*sqrt(3*M_PI*eps*eps*(jn(i-l,k)*jn(i-l,k)-jn(i-l-1,k)*jn(i-l+1,k))));
+        a_n[i] = 1./((k*k*(n_o-n_i))*sqrt((2*l+1)*M_PI*eps*eps*(jn(i-l,k)*jn(i-l,k)-jn(i-l-1,k)*jn(i-l+1,k))));
+        std::cout << a_n[i] << std::endl;
     }
     unsigned n_runs = 20;
     double numpanels[n_runs];
@@ -43,7 +44,7 @@ int main() {
     // Loop over number of panels
     for (unsigned i = 0; i <= n_runs; i++) {
         parametricbem2d::ParametrizedMesh mesh(curve.split(numpanels[i]));
-        Eigen::VectorXcd Tn_dfk = parametricbem2d::tsp::direct_second_kind::solve(
+        Eigen::VectorXcd Tn_dfk = parametricbem2d::tsp::direct_second_kind::solve_debug_3(
                 mesh, u_i_dir, u_i_neu, u_t_dir, u_t_neu, order, k_o, k_i);
     }
 return 0;

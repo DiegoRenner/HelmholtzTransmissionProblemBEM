@@ -9,100 +9,101 @@
  * This File is a part of the 2D-Parametric BEM package
  */
 
-#include "mass_matrix.hpp"
+#include "single_layer_smooth.hpp"
+#include <math.h>
 
 namespace parametricbem2d {
-    namespace mass_matrix {
+    namespace single_layer_smooth_helmholtz {
 
         typedef std::complex<double> complex_t;
+        double sqrt_epsilon = sqrt(std::numeric_limits<double>::epsilon());
+        double epsilon = std::numeric_limits<double>::epsilon();
 
         Eigen::MatrixXcd InteractionMatrix(const AbstractParametrizedCurve &pi,
                                            const AbstractParametrizedCurve &pi_p,
-                                           const AbstractBEMSpace &trial_space,
-                                           const AbstractBEMSpace &test_space,
+                                           const AbstractBEMSpace &space,
                                            const QuadRule &GaussQR,
-                                           const QuadRule &CGaussQR) {
-            if (&pi == &pi_p) { // Same Panels case
-                return ComputeIntegral(pi, pi_p, trial_space, test_space, GaussQR);
-            } else {
-                unsigned int Qtrial = trial_space.getQ();
-                unsigned int Qtest = test_space.getQ();
-                // Interaction matrix with size Q x Q
-                Eigen::MatrixXcd interaction_matrix = Eigen::MatrixXcd::Zero(Qtest,Qtrial);
-                return interaction_matrix;
-            }
+                                           const double k) {
+            return ComputeIntegral(pi, pi_p, space, GaussQR, k);
         }
 
-
         Eigen::MatrixXcd ComputeIntegral(const AbstractParametrizedCurve &pi,
-                                                const AbstractParametrizedCurve &pi_p,
-                                                const AbstractBEMSpace &trial_space,
-                                                const AbstractBEMSpace &test_space,
-                                                const QuadRule &GaussQR){
+                                         const AbstractParametrizedCurve &pi_p,
+                                         const AbstractBEMSpace &space,
+                                         const QuadRule &GaussQR,
+                                         const double k) {
             unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
             // Calculating the quadrature order for stable evaluation of integrands for
             // disjoint panels as mentioned in \f$\ref{par:distpan}\f$
             // No. of Reference Shape Functions in trial/test space
-            int Qtrial = trial_space.getQ();
-            int Qtest = test_space.getQ();
+            int Q = space.getQ();
             // Interaction matrix with size Q x Q
-            Eigen::MatrixXcd interaction_matrix(Qtest, Qtrial);
+            Eigen::MatrixXcd interaction_matrix(Q, Q);
             // Computing the (i,j)th matrix entry
-            for (int i = 0; i < Qtest; ++i) {
-                for (int j = 0; j < Qtrial; ++j) {
+            for (int i = 0; i < Q; ++i) {
+                for (int j = 0; j < Q; ++j) {
                     // Lambda expression for functions F and G in \f$\eqref{eq:titg}\f$ for
                     // Single Layer BIO
                     auto F = [&](double t) { // Function associated with panel pi_p
-                        return trial_space.evaluateShapeFunction_01(j, t) * pi_p.Derivative_01(t).norm();
+                        return space.evaluateShapeFunction(j, t) * pi_p.Derivative(t).norm();
                     };
                     auto G = [&](double s) { // Function associated with panel pi
-                        return test_space.evaluateShapeFunction_01(i, s)*pi.Derivative_01(s).norm();
+                        return space.evaluateShapeFunction(i, s) * pi.Derivative(s).norm();
+                    };
+                    auto integrand = [&](double s, double t) {
+                        complex_t result = complex_t(0.0,0.0);
+                        if ( (pi(s)-pi_p(t)).norm() > epsilon) {
+                            result = complex_t(-y0(k*(pi(s)-pi_p(t)).norm())+(2/M_PI)*log(k*(pi(s)-pi_p(t)).norm()),
+                                               j0(k*(pi(s)-pi_p(t)).norm()));
+                        } else {
+                            result = complex_t(0.0,
+                                               j0(k*(pi(s)-pi_p(t)).norm()));
+                        }
+                        return result*F(t)*G(s);
                     };
                     complex_t integral = complex_t(0.,0.);
+                    // Tensor product quadrature rule
                     for (unsigned int k = 0; k < N; ++k) {
-                        // Tensor product quadrature rule
                         for (unsigned int l = 0; l < N; ++l) {
                             double s = GaussQR.x(k);
                             double t = GaussQR.x(l);
-                            integral += GaussQR.w(k)*GaussQR.w(l)*F(t)*G(s);
+                            double w = GaussQR.w(k)*GaussQR.w(l);
+                            integral += w*integrand(s,t);
                         }
                     }
                     // Filling up the matrix entry
-                    interaction_matrix(i, j) = integral;
+                    interaction_matrix(i, j) = integral/4.;
                 }
             }
-            return interaction_matrix.transpose();
+            return interaction_matrix;
         }
 
         Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
-                                       const AbstractBEMSpace &trial_space,
-                                        const AbstractBEMSpace &test_space,
-                                       const unsigned int &N) {
-                // Getting the number of panels in the mesh
+                                        const AbstractBEMSpace &space,
+                                        const unsigned int &N,
+                                        const double k) {
+            // Getting the number of panels in the mesh
             unsigned int numpanels = mesh.getNumPanels();
             // Getting dimensions of trial/test space
+            unsigned int dims = space.getSpaceDim(numpanels);
             // Getting the panels from the mesh
             PanelVector panels = mesh.getPanels();
             // Getting the number of local shape functions in the trial/test space
-            unsigned int Qtrial = trial_space.getQ();
-            unsigned int Qtest = test_space.getQ();
-            unsigned int rows = test_space.getSpaceDim(numpanels);
-            unsigned int cols = trial_space.getSpaceDim(numpanels);
+            unsigned int Q = space.getQ();
             // Initializing the Galerkin matrix with zeros
-            Eigen::MatrixXcd output = Eigen::MatrixXcd::Zero(rows, cols);
+            Eigen::MatrixXcd output = Eigen::MatrixXcd::Zero(dims, dims);
             // Panel oriented assembly \f$\ref{pc:ass}\f$
-            QuadRule GaussQR = getGaussQR(N,0.,1.);
-            QuadRule CGaussQR = getCGaussQR(N);
+            QuadRule GaussQR = getGaussQR(N,-1.,1.);
             for (unsigned int i = 0; i < numpanels; ++i) {
                 for (unsigned int j = 0; j < numpanels; ++j) {
                     // Getting the interaction matrix for the pair of panels i and j
                     Eigen::MatrixXcd interaction_matrix =
-                            InteractionMatrix(*panels[i], *panels[j], trial_space, test_space, GaussQR, CGaussQR);
+                            InteractionMatrix(*panels[i], *panels[j], space, GaussQR, k);
                     // Local to global mapping of the elements in interaction matrix
-                    for (unsigned int I = 0; I < Qtest; ++I) {
-                        for (unsigned int J = 0; J < Qtrial; ++J) {
-                            int II = test_space.LocGlobMap(I + 1, i + 1, numpanels) - 1;
-                            int JJ = trial_space.LocGlobMap(J + 1, j + 1, numpanels) - 1;
+                    for (unsigned int I = 0; I < Q; ++I) {
+                        for (unsigned int J = 0; J < Q; ++J) {
+                            int II = space.LocGlobMap2(I + 1, i + 1, mesh) - 1;
+                            int JJ = space.LocGlobMap2(J + 1, j + 1, mesh) - 1;
                             // Filling the Galerkin matrix entries
                             output(II, JJ) += interaction_matrix(I, J);
                         }
@@ -111,5 +112,6 @@ namespace parametricbem2d {
             }
             return output;
         }
+
     } //namespace single_layer_helmholtz
 } // namespace parametricbem2d

@@ -34,6 +34,14 @@ namespace parametricbem2d {
     } // namespace bvp
     namespace tsp {
         namespace direct_second_kind {
+            Eigen::VectorXcd solve_debug_3(const ParametrizedMesh &mesh,
+                                           std::function<std::complex<double>(double, double)> u_inc_dir,
+                                           std::function<std::complex<double>(double, double)> u_inc_neu,
+                                           std::function<std::complex<double>(double, double)> sol_dir,
+                                           std::function<std::complex<double>(double, double)> sol_neu,
+                                           unsigned order,
+                                           const double k_o,
+                                           const double k_i);
             Eigen::VectorXcd solve_debug_2(const ParametrizedMesh &mesh,
                                            std::function<std::complex<double>(double, double)> u_inc_dir,
                                            std::function<std::complex<double>(double, double)> u_inc_neu,

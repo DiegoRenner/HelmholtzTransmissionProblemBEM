@@ -10,6 +10,7 @@
  */
 
 #include "hypersingular.hpp"
+#include "discontinuous_space.hpp"
 
 namespace parametricbem2d {
     namespace hypersingular_helmholtz {
@@ -78,7 +79,8 @@ namespace parametricbem2d {
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
                         if ((pi[s]-pi_p[t]).norm() > epsilon && fabs((pi[s]-pi_p[t]).dot(normal)) > epsilon) {
-                            result = complex_t(-y0(k * (pi[s] - pi_p[t]).norm()),j0(k * (pi[s] - pi_p[t]).norm()));
+                            result = complex_t(-y0(k * (pi[s] - pi_p[t]).norm()),
+                                    j0(k * (pi[s] - pi_p[t]).norm()));
                         }
                         return result * (F_arc(t) * G_arc(s) - k * k * F(t) * G(s) * normal.dot(normal_p));
                     };
@@ -166,13 +168,13 @@ namespace parametricbem2d {
                             if ((pi.swapped_op(s)-pi_p[t]).norm() > epsilon && fabs((pi.swapped_op(s)-pi_p[t]).dot(normal)) > epsilon) {
                                 result = complex_t(-y0(k * (pi[s] - pi_p.swapped_op(t)).norm()),j0(k * (pi[s] - pi_p.swapped_op(t)).norm()));
                             }
-                        }else {
+                        }else
                             if ((pi[s]-pi_p.swapped_op(t)).norm() > epsilon && fabs((pi[s]-pi_p.swapped_op(t)).dot(normal)) > epsilon) {
                                 result = complex_t(-y0(k * (pi.swapped_op(s)- pi_p[t]).norm()),j0(k * (pi.swapped_op(s)- pi_p[t]).norm()));
                             }
                         }
                         return result * (F_arc(t) * G_arc(s) - k * k * F(t) * G(s) * normal.dot(normal_p));
-                    };
+                    };{
                     complex_t integral = complex_t(0.,0.);
                     // Tensor product quadrature for double integral in \f$\eqref{eq:Kidp}\f$
                     for (unsigned int k = 0; k < N; ++k) {
@@ -190,6 +192,7 @@ namespace parametricbem2d {
             }
             return interaction_matrix;
         }
+
         Eigen::MatrixXcd ComputeIntegralGeneral(const AbstractParametrizedCurve &pi,
                                                 const AbstractParametrizedCurve &pi_p,
                                                 const AbstractBEMSpace &space,
@@ -201,6 +204,7 @@ namespace parametricbem2d {
             // The number of Reference Shape Functions in space
             // Interaction matrix with size Qtest x Qtrial
             Eigen::MatrixXcd interaction_matrix(Q, Q);
+            DiscontinuousSpace<0> discont_space;
             // Computing the (i,j)th matrix entry
             for (int i = 0; i < Q; ++i) {
                 for (int j = 0; j < Q; ++j) {
@@ -273,7 +277,7 @@ namespace parametricbem2d {
             Eigen::MatrixXcd output = Eigen::MatrixXd::Zero(dims, dims);
             // Panel oriented assembly \f$\ref{pc:ass}\f$
             //QuadRule LogWeightQR = getLogWeightQR(1, N);
-            QuadRule GaussQR = getGaussQR(N);
+            QuadRule GaussQR = getGaussQR(N,0.,1.);
             QuadRule CGaussQR = getCGaussQR(N);
             for (unsigned int i = 0; i < numpanels; ++i) {
                 for (unsigned int j = 0; j < numpanels; ++j) {
@@ -283,8 +287,8 @@ namespace parametricbem2d {
                     // Local to global mapping of the elements in interaction matrix
                     for (unsigned int I = 0; I < Q; ++I) {
                         for (unsigned int J = 0; J < Q; ++J) {
-                            int II = space.LocGlobMap2(I + 1, i + 1, mesh) - 1;
-                            int JJ = space.LocGlobMap2(J + 1, j + 1, mesh) - 1;
+                            int II = space.LocGlobMap(I + 1, i + 1, numpanels) - 1;
+                            int JJ = space.LocGlobMap(J + 1, j + 1, numpanels) - 1;
                             // Filling the Galerkin matrix entries
                             output(II, JJ) += interaction_matrix(I, J);
                         }

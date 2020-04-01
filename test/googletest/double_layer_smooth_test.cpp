@@ -5,7 +5,8 @@
 #include <complex>
 #include <Eigen/Dense>
 #include <gtest/gtest.h>
-#include "double_layer.hpp"
+#include "double_layer_smooth.hpp"
+#include "double_layer_correction.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
@@ -20,17 +21,18 @@ double sqrt_epsilon = std::sqrt(std::numeric_limits<double>::epsilon());
 parametricbem2d::DiscontinuousSpace<0> discont_space;
 parametricbem2d::ContinuousSpace<1> cont_space;
 
-double k = 1.0;
+double k = 0.63;
 double n_i = 23.0;
-double eps = 0.25;
+double eps = 0.7;
 parametricbem2d::ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
 unsigned order = 11;
 double c_o = k;
 double c_i = k*sqrt(n_i);
 int numpanels = 50;
 parametricbem2d::ParametrizedMesh mesh(curve.split(numpanels));
-Eigen::VectorXcd K = parametricbem2d::double_layer_helmholtz::GalerkinMatrix(mesh,cont_space,discont_space,order,c_o)
-        .block(0,0,1,numpanels).transpose();
+Eigen::VectorXcd K_smooth = parametricbem2d::double_layer_smooth_helmholtz::GalerkinMatrix(mesh,cont_space,discont_space,order,c_o);
+Eigen::VectorXcd K_correction = parametricbem2d::double_layer_correction::GalerkinMatrix(mesh,cont_space,discont_space,order);
+Eigen::VectorXcd K = K_smooth + K_correction;
 Eigen::VectorXcd K_expected(numpanels);
 std::ifstream fp_data;
 double real, imag;

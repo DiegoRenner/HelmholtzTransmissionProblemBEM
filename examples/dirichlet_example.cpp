@@ -13,7 +13,7 @@ int main() {
     // define radius of circle
     double eps = 0.25;
     Eigen::Vector2d ipt(0.125,0.0);
-    double k = 0.63;
+    double k = 1.0;
     parametricbem2d::ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
     unsigned order = 11;
     unsigned n_runs = 20;

@@ -12,7 +12,7 @@ add_executable(SV_analysis SV_analysis.cpp)
 add_library(generate_solution STATIC generate_solution.cpp )
 
 target_link_libraries(helmholtz_test single_layer mass_matrix generate_solution parametrizations quadrature hypersingular double_layer)
-target_link_libraries(dirichlet_example parametrizations generate_solution solvers)
+target_link_libraries(dirichlet_example parametrizations quadrature generate_solution solvers)
 target_link_libraries(neumann_example parametrizations generate_solution solvers)
 target_link_libraries(transmission_example parametrizations generate_solution solvers)
 target_link_libraries(SV_analysis parametrizations solvers)

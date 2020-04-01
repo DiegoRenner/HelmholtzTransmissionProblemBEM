@@ -10,6 +10,8 @@
 #include "parametrized_circular_arc.hpp"
 #include "solvers.hpp"
 #include "generate_solution.hpp"
+#include "continuous_space.hpp"
+#include "discontinuous_space.hpp"
 
 #define _USE_MATH_DEFINES // for Pi
 typedef std::complex<double> complex_t;
@@ -83,7 +85,7 @@ int main() {
     // Loop over number of panels
     for (unsigned i = 0; i <= n_runs; i++) {
         parametricbem2d::ParametrizedMesh mesh(curve.split(numpanels[i]));
-        Eigen::VectorXcd Tn_dfk = parametricbem2d::transmission_bvp::direct_second_kind::solve_3(
+        Eigen::VectorXcd Tn_dfk = parametricbem2d::tsp::direct_second_kind::solve(
                 mesh, f_i, f_i_N, fund_sol, fund_sol_N, order, c_o, c_i);
     }
 
