@@ -30,7 +30,7 @@ parametricbem2d::ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI
 unsigned order = 11;
 double c_o = k;
 double c_i = k*sqrt(n_i);
-int numpanels = 400;
+int numpanels = 50;
 parametricbem2d::ParametrizedMesh mesh(curve.split(numpanels));
 //Eigen::VectorXcd W_cont =
 //        parametricbem2d::hypersingular_helmholtz_cont::GalerkinMatrix(mesh, cont_space, order, c_i).block(0,0,1,numpanels).transpose();

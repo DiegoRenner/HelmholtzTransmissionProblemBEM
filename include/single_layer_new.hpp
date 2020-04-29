@@ -9,14 +9,14 @@
  * This File is a part of the 2D-Parametric BEM package
  */
 
-#ifndef SINGLELAYERHPP
-#define SINGLELAYERHPP
+#ifndef SINGLELAYERNEWHPP
+#define SINGLELAYERNEWHPP
 #include "abstract_bem_space.hpp"
 #include "abstract_parametrized_curve.hpp"
 #include "gauleg.hpp"
 
 namespace parametricbem2d {
-    namespace single_layer_helmholtz {
+    namespace single_layer_helmholtz_new {
 /**
  * This function is used to evaluate the Interaction Matrix for the pair
  * of panels \f$\Pi\f$ and \f$\Pi\f$', for the bilinear form induced by
@@ -109,7 +109,6 @@ namespace parametricbem2d {
                                            const AbstractParametrizedCurve &pi_p,
                                            const AbstractBEMSpace &space,
                                            const QuadRule &GaussQR,
-                                           const QuadRule &CGaussQR,
                                            std::complex<double> k);
 
 /**

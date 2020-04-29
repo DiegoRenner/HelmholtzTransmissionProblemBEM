@@ -9,8 +9,8 @@
  * This File is a part of the 2D-Parametric BEM package
  */
 
-#ifndef DOUBLELAYERHPP
-#define DOUBLELAYERHPP
+#ifndef DOUBLELAYERDERHPP
+#define DOUBLELAYERDERHPP
 
 #include "abstract_bem_space.hpp"
 #include "abstract_parametrized_curve.hpp"
@@ -21,7 +21,7 @@ namespace parametricbem2d {
  * This namespace contains all the functions for evaluating the Double Layer
  * Galerkin Matrix using quadrature and panel oriented assembly
  */
-    namespace double_layer_helmholtz {
+    namespace double_layer_helmholtz_der {
 /**
  * This function is used to evaluate the Interaction Matrix for a pair of
  * panels \f$\Pi\f$ and \f$\Pi\f$' for the bilinear form induced by the Double

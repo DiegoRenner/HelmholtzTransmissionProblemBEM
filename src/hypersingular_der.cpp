@@ -1,20 +1,20 @@
 /**
- * \file double_layer.cpp
+ * \file hypersingular.cpp
  * \brief This file declares the functions to evaluate the entries of
  *        Galerkin matrices based on the bilinear form induced by the
- *        Double Layer BIO, using the transformations given in
+ *        Hypersingular BIO, using the transformations given in
  *        \f$\ref{ss:quadapprox}\f$ in the Lecture Notes for Advanced Numerical
  *        Methods for CSE.
  *
- * This File is a part of the 2D-Parametric BEM package test
+ * This File is a part of the 2D-Parametric BEM package
  */
 
-#include <iostream>
-#include "double_layer.hpp"
-#include </usr/include/complex_bessel.h>
+#include "hypersingular_der.hpp"
+#include "discontinuous_space.hpp"
+#include "/usr/include/complex_bessel.h"
 
 namespace parametricbem2d {
-    namespace double_layer_helmholtz {
+    namespace hypersingular_helmholtz_der {
 
         typedef std::complex<double> complex_t;
         complex_t ii = complex_t(0.0,1.0);
@@ -22,62 +22,71 @@ namespace parametricbem2d {
 
         Eigen::MatrixXcd InteractionMatrix(const AbstractParametrizedCurve &pi,
                                            const AbstractParametrizedCurve &pi_p,
-                                           const AbstractBEMSpace &trial_space,
-                                           const AbstractBEMSpace &test_space,
+                                           const AbstractBEMSpace &space,
                                            const QuadRule &GaussQR,
                                            const QuadRule &CGaussQR,
-                                           complex_t k) {
+                                           complex_t k){
             if (&pi == &pi_p) { // Same Panels case
-                return ComputeIntegralCoinciding(pi, pi_p, trial_space, test_space, CGaussQR, k);
+                return ComputeIntegralCoinciding(pi, pi_p, space, CGaussQR, k);
             }
             else if ((pi(1) - pi_p(-1)).norm() / 100. < epsilon ||
                      (pi(-1) - pi_p(1)).norm() / 100. < epsilon) {// Adjacent Panels case
-                return ComputeIntegralAdjacent(pi, pi_p, trial_space, test_space, CGaussQR, k);
-            } else { //Disjoint panels case
-                return ComputeIntegralGeneral(pi, pi_p, trial_space, test_space, GaussQR, k);
+                return ComputeIntegralAdjacent(pi, pi_p, space, CGaussQR, k);
+            }
+            else {// Disjoint panels case*/
+                return ComputeIntegralGeneral(pi, pi_p, space, GaussQR, k);
             }
         }
 
         Eigen::MatrixXcd ComputeIntegralCoinciding(const AbstractParametrizedCurve &pi,
                                                    const AbstractParametrizedCurve &pi_p,
-                                                   const AbstractBEMSpace &trial_space,
-                                                   const AbstractBEMSpace &test_space,
+                                                   const AbstractBEMSpace &space,
                                                    const QuadRule &GaussQR,
-                                                   complex_t k){
+                                                   complex_t k) {
             unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
-            int Qtrial = trial_space.getQ();
-            // The number of Reference Shape Functions in test space
-            int Qtest = test_space.getQ();
+            int Q = space.getQ();
             // Interaction matrix with size Qtest x Qtrial
-            Eigen::MatrixXcd interaction_matrix(Qtest, Qtrial);
+            Eigen::MatrixXcd interaction_matrix(Q, Q);
             // Computing the (i,j)th matrix entry
-            for (int i = 0; i < Qtest; ++i) {
-                for (int j = 0; j < Qtrial; ++j) {
-                    // Lambda expression for functions F and G in \f$\eqref{eq:Kidp}\f$
-                    auto F = [&](double t) {
-                        return trial_space.evaluateShapeFunction_01(j, t) * pi_p.Derivative_01(t).norm();
+            for (int i = 0; i < Q; ++i) {
+                for (int j = 0; j < Q; ++j) {
+                    // Lambda expression for functions F and G in \f$\eqref{eq:Vidp}\f$
+                    auto F = [&](double t) { // Function associated with panel pi_p
+                        return space.evaluateShapeFunction_01(j, t)*pi_p.Derivative_01(t).norm();
                     };
-                    auto G = [&](double s) {
-                        return test_space.evaluateShapeFunction_01(i, s) * pi.Derivative_01(s).norm();
+                    auto G = [&](double s) { // Function associated with panel pi
+                        return space.evaluateShapeFunction_01(i, s)*pi.Derivative_01(s).norm();
+                    };
+                    auto F_arc = [&](double t) { // Function associated with panel pi_p
+                        return space.evaluateShapeFunctionDot_01(j, t);
+                    };
+                    auto G_arc = [&](double s) { // Function associated with panel pi
+                        return space.evaluateShapeFunctionDot_01(i, s);
                     };
                     // Lambda expression for the integrand in \f$\eqref{eq:Kidp}\f$
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.,0.);
                         // Finding the tangent of pi_p to get its normal
-                        Eigen::Vector2d tangent = pi_p.Derivative_01(t);
+                        Eigen::Vector2d tangent_p = pi_p.Derivative_01(t);
+                        Eigen::Vector2d normal_p;
+                        // Outward normal vector
+                        normal_p << tangent_p(1), -tangent_p(0);
+                        // Normalizing the normal vector
+                        normal_p = normal_p / normal_p.norm();
+                        Eigen::Vector2d tangent = pi.Derivative_01(s);
                         Eigen::Vector2d normal;
                         // Outward normal vector
                         normal << tangent(1), -tangent(0);
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
-                        if ( (pi[s]-pi_p[t]).norm() > epsilon && fabs((pi[s]-pi_p[t]).dot(normal)) > epsilon) { // Away from singularity
-                            result = ii*sp_bessel::hankelH1(1,k * (pi[s] - pi_p[t]).norm())
-                                     *k*((pi[s] - pi_p[t]).normalized()).dot(normal);
+                        if ((pi[s]-pi_p[t]).norm() > epsilon && fabs((pi[s]-pi_p[t]).dot(normal)) > epsilon) {
+                            result = ii*(sp_bessel::hankelH1p(0,k*(pi[s]-pi_p[t]).norm())*(pi[s]-pi_p[t]).norm()*(F_arc(t) * G_arc(s) - k * k * F(t) * G(s) * normal.dot(normal_p))
+                                    - sp_bessel::hankelH1(0,k*(pi[s]-pi_p[t]).norm())*(2.0*k*F(t)*G(s)*normal.dot(normal_p)));
                         }
-                        return result*F(t)*G(s);
+                        return result;
                     };
-                    complex_t integral = complex_t(0.,0.);
+                    complex_t integral = 0;
                     // Tensor product quadrature for double integral in \f$\eqref{eq:Kidp}\f$
                     for (unsigned int k = 0; k < N; ++k) {
                         for (unsigned int l = 0; l < N; ++l) {
@@ -97,62 +106,79 @@ namespace parametricbem2d {
 
         Eigen::MatrixXcd ComputeIntegralAdjacent(const AbstractParametrizedCurve &pi,
                                                  const AbstractParametrizedCurve &pi_p,
-                                                 const AbstractBEMSpace &trial_space,
-                                                 const AbstractBEMSpace &test_space,
+                                                 const AbstractBEMSpace &space,
                                                  const QuadRule &GaussQR,
-                                                 complex_t k){
+                                                 complex_t k) {
             unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
-            int Qtrial = trial_space.getQ();
+            int Qtrial = space.getQ();
             // The number of Reference Shape Functions in test space
-            int Qtest = test_space.getQ();
+            int Qtest = space.getQ();
             // Interaction matrix with size Qtest x Qtrial
             Eigen::MatrixXcd interaction_matrix(Qtest, Qtrial);
             // Computing the (i,j)th matrix entry
-            bool swap = ((pi(1) - pi_p(-1)).norm() / 100. > sqrt(epsilon));
+            bool swap = ((pi(1) - pi_p(-1)).norm() / 100. > epsilon);
             for (int i = 0; i < Qtest; ++i) {
                 for (int j = 0; j < Qtrial; ++j) {
                     // Lambda expression for functions F and G in \f$\eqref{eq:Kidp}\f$
                     auto F = [&](double t) {
                         if (swap) {
-                            return trial_space.evaluateShapeFunction_01_swapped(j, t) * pi_p.Derivative_01_swapped(t).norm();
+                            return space.evaluateShapeFunction_01_swapped(j, t) * pi_p.Derivative_01_swapped(t).norm();
                         } else {
-                            return trial_space.evaluateShapeFunction_01(j, t) * pi_p.Derivative_01(t).norm();
+                            return space.evaluateShapeFunction_01(j, t) * pi_p.Derivative_01(t).norm();
                         }
                     };
                     auto G = [&](double s) {
                         if (swap) {
-                            return test_space.evaluateShapeFunction_01(i, s) * pi.Derivative_01(s).norm();
+                            return space.evaluateShapeFunction_01(i, s) * pi.Derivative_01(s).norm();
                         } else {
-                            return test_space.evaluateShapeFunction_01_swapped(i, s) * pi.Derivative_01_swapped(s).norm();
+                            return space.evaluateShapeFunction_01_swapped(i, s) * pi.Derivative_01_swapped(s).norm();
+                        }
+                    };
+                    auto F_arc = [&](double t) { // Function associated with panel pi_p
+                        if (swap) {
+                            return space.evaluateShapeFunctionDot_01_swapped(j, t);
+                        } else {
+
+                            return space.evaluateShapeFunctionDot_01(j, t);
+                        }
+                    };
+                    auto G_arc = [&](double s) { // Function associated with panel pi
+                        if (swap) {
+                            return space.evaluateShapeFunctionDot_01(i, s);
+                        } else {
+                            return space.evaluateShapeFunctionDot_01_swapped(i, s);
                         }
                     };
                     // Lambda expression for the integrand in \f$\eqref{eq:Kidp}\f$
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.,0.);
                         // Finding the tangent of pi_p to get its normal
-                        Eigen::Vector2d tangent = swap ? pi_p.Derivative_01_swapped(t) : pi_p.Derivative_01(t);
+                        Eigen::Vector2d tangent_p = swap ? pi_p.Derivative_01_swapped(t) : pi_p.Derivative_01_swapped(t);
+                        Eigen::Vector2d normal_p;
+                        // Outward normal vector
+                        normal_p << tangent_p(1), -tangent_p(0);
+                        // Normalizing the normal vector
+                        normal_p = normal_p / normal_p.norm();
+                        Eigen::Vector2d tangent = swap ? pi.Derivative_01(s) : pi.Derivative_01_swapped(s);
                         Eigen::Vector2d normal;
                         // Outward normal vector
-                        if (swap) {
-                            normal << -tangent(1), tangent(0);
-                        } else {
-                            normal << tangent(1), -tangent(0);
-                        }
+                        normal << tangent(1), -tangent(0);
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
-                        if (swap) {
-                            if ( (pi[s]-pi_p.swapped_op(t)).norm() > epsilon && fabs((pi[s]-pi_p.swapped_op(t)).dot(normal)) > epsilon) { // Away from singularity
-                                result = ii*sp_bessel::hankelH1(1,k * (pi[s] - pi_p.swapped_op(t)).norm())
-                                        * k *((pi[s] - pi_p.swapped_op(t)).normalized()).dot(normal);
+                        return result;
+                        if (swap){
+                            if ((pi[s]-pi_p.swapped_op(t)).norm() > epsilon && fabs((pi[s]-pi_p.swapped_op(t)).dot(normal)) > epsilon) {
+                                result = ii*(sp_bessel::hankelH1p(0,k*(pi[s]-pi_p.swapped_op(t)).norm())*(pi[s]-pi_p.swapped_op(t)).norm()*(F_arc(t) * G_arc(s) - k * k * F(t) * G(s) * normal.dot(normal_p))
+                                             - sp_bessel::hankelH1(0,k*(pi[s]-pi_p.swapped_op(t)).norm())*(2.0*k*F(t)*G(s)*normal.dot(normal_p)));
                             }
-                        } else {
-                            if ( (pi.swapped_op(s)-pi_p[t]).norm() > epsilon && fabs((pi.swapped_op(s)-pi_p[t]).dot(normal)) > epsilon) { // Away from singularity
-                                result = ii*sp_bessel::hankelH1(1,k * (pi.swapped_op(s) - pi_p[t]).norm())
-                                        * k *((pi.swapped_op(s) - pi_p[t]).normalized()).dot( normal);
+                        }else {
+                            if ((pi.swapped_op(s)-pi_p[t]).norm() > epsilon && fabs((pi.swapped_op(s)-pi_p[t]).dot(normal)) > epsilon) {
+                                result = ii*(sp_bessel::hankelH1p(0,k*(pi.swapped_op(s)-pi_p[t]).norm())*(pi.swapped_op(s)-pi_p[t]).norm()*(F_arc(t) * G_arc(s) - k * k * F(t) * G(s) * normal.dot(normal_p))
+                                             - sp_bessel::hankelH1(0,k*(pi.swapped_op(s)-pi_p[t]).norm())*(2.0*k*F(t)*G(s)*normal.dot(normal_p)));
                             }
                         }
-                        return result * F(t) * G(s);
+                        return result;
                     };
                     complex_t integral = complex_t(0.,0.);
                     // Tensor product quadrature for double integral in \f$\eqref{eq:Kidp}\f$
@@ -174,47 +200,55 @@ namespace parametricbem2d {
 
         Eigen::MatrixXcd ComputeIntegralGeneral(const AbstractParametrizedCurve &pi,
                                                 const AbstractParametrizedCurve &pi_p,
-                                                const AbstractBEMSpace &trial_space,
-                                                const AbstractBEMSpace &test_space,
+                                                const AbstractBEMSpace &space,
                                                 const QuadRule &GaussQR,
-                                                complex_t k){
+                                                complex_t k) {
             unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in space
-            int Qtrial = trial_space.getQ();
+            int Q = space.getQ();
             // The number of Reference Shape Functions in space
-            int Qtest = test_space.getQ();
             // Interaction matrix with size Qtest x Qtrial
-            Eigen::MatrixXcd interaction_matrix(Qtest, Qtrial);
+            Eigen::MatrixXcd interaction_matrix(Q, Q);
+            DiscontinuousSpace<0> discont_space;
             // Computing the (i,j)th matrix entry
-            for (int i = 0; i < Qtest; ++i) {
-                for (int j = 0; j < Qtrial; ++j) {
+            for (int i = 0; i < Q; ++i) {
+                for (int j = 0; j < Q; ++j) {
                     // Lambda expression for functions F and G in \f$\eqref{eq:titg}\f$ for
                     // Double Layer BIO
                     auto F = [&](double t) { // Function associated with panel pi_p
-                        return trial_space.evaluateShapeFunction_01(j, t) *
-                               pi_p.Derivative_01(t).norm();
+                        return space.evaluateShapeFunction_01(j, t)*pi_p.Derivative_01(t).norm();
                     };
                     auto G = [&](double s) { // Function associated with panel pi
-                        return test_space.evaluateShapeFunction_01(i, s) *
-                               pi.Derivative_01(s).norm();
+                        return space.evaluateShapeFunction_01(i, s)*pi.Derivative_01(s).norm();
+                    };
+                    auto F_arc = [&](double t) { // Function associated with panel pi_p
+                        return space.evaluateShapeFunctionDot_01(j, t);
+                    };
+                    auto G_arc = [&](double s) { // Function associated with panel pi
+                        return space.evaluateShapeFunctionDot_01(i, s);
                     };
                     // Lambda expression for \f$\hat{K}\f$ in \f$\eqref{eq:titg}\f$ for double
                     // Layer BIO
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.,0.);
                         // Finding the tangent of pi_p to get its normal
-                        Eigen::Vector2d tangent = pi_p.Derivative_01(t);
+                        Eigen::Vector2d tangent_p = pi_p.Derivative_01(t);
+                        Eigen::Vector2d normal_p;
+                        // Outward normal vector
+                        normal_p << tangent_p(1), -tangent_p(0);
+                        // Normalizing the normal vector
+                        normal_p = normal_p / normal_p.norm();
+                        Eigen::Vector2d tangent = pi.Derivative_01(s);
                         Eigen::Vector2d normal;
                         // Outward normal vector
                         normal << tangent(1), -tangent(0);
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
-                        if ( (pi[s]-pi_p[t]).norm() > epsilon && fabs((pi[s]-pi_p[t]).dot(normal)) > epsilon) { // Away from singularity
-                            result = ii*sp_bessel::hankelH1(1,k * (pi[s] - pi_p[t]).norm())
-                                    * k *(pi[s] - pi_p[t]).normalized().dot(normal);
-
+                        if ((pi[s]-pi_p[t]).norm() > epsilon && fabs((pi[s]-pi_p[t]).dot(normal)) > epsilon) {
+                            result = ii*(sp_bessel::hankelH1p(0,k*(pi[s]-pi_p[t]).norm())*(pi[s]-pi_p[t]).norm()*(F_arc(t) * G_arc(s) - k * k * F(t) * G(s) * normal.dot(normal_p))
+                                         - sp_bessel::hankelH1(0,k*(pi[s]-pi_p[t]).norm())*(2.0*k*F(t)*G(s)*normal.dot(normal_p)));
                         }
-                        return result*F(t)*G(s);
+                        return result;
                     };
                     complex_t integral = complex_t(0.,0.);
                     // Tensor product quadrature for double integral
@@ -222,7 +256,7 @@ namespace parametricbem2d {
                         for (unsigned int j = 0; j < N; ++j) {
                             double s = GaussQR.x(i);
                             double t = GaussQR.x(j);
-                            double w = GaussQR.w(i) * GaussQR.w(j);
+                            double w = GaussQR.w(i)*GaussQR.w(j);
                             integral += w*integrand(s, t);
                         }
                     }
@@ -232,23 +266,21 @@ namespace parametricbem2d {
             }
             return interaction_matrix;
         }
+
         Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
-                                        const AbstractBEMSpace &trial_space,
-                                        const AbstractBEMSpace &test_space,
+                                        const AbstractBEMSpace &space,
                                         const unsigned int &N,
                                         complex_t k){
-            // Getting number of panels in the mesh
+            // Getting the number of panels in the mesh
             unsigned int numpanels = mesh.getNumPanels();
-            // Getting dimensions for trial and test spaces
-            unsigned int rows = test_space.getSpaceDim(numpanels);
-            unsigned int cols = trial_space.getSpaceDim(numpanels);
+            // Getting dimensions of trial/test space
+            unsigned int dims = space.getSpaceDim(numpanels);
             // Getting the panels from the mesh
             PanelVector panels = mesh.getPanels();
-            // Getting the number of local shape functions in the trial and test spaces
-            unsigned int Qtest = test_space.getQ();
-            unsigned int Qtrial = trial_space.getQ();
+            // Getting the number of local shape functions in the trial/test space
+            unsigned int Q = space.getQ();
             // Initializing the Galerkin matrix with zeros
-            Eigen::MatrixXcd output = Eigen::MatrixXd::Zero(rows, cols);
+            Eigen::MatrixXcd output = Eigen::MatrixXd::Zero(dims, dims);
             // Panel oriented assembly \f$\ref{pc:ass}\f$
             //QuadRule LogWeightQR = getLogWeightQR(1, N);
             QuadRule GaussQR = getGaussQR(N,0.,1.);
@@ -256,15 +288,13 @@ namespace parametricbem2d {
             for (unsigned int i = 0; i < numpanels; ++i) {
                 for (unsigned int j = 0; j < numpanels; ++j) {
                     // Getting the interaction matrix for the pair of panels i and j
-                    Eigen::MatrixXcd interaction_matrix = InteractionMatrix(
-                            *panels[i], *panels[j], trial_space, test_space, GaussQR, CGaussQR, k);
+                    Eigen::MatrixXcd interaction_matrix =
+                            InteractionMatrix(*panels[i], *panels[j], space, GaussQR, CGaussQR, k);
                     // Local to global mapping of the elements in interaction matrix
-                    for (unsigned int I = 0; I < Qtest; ++I) {
-                        for (unsigned int J = 0; J < Qtrial; ++J) {
-                            //int II = test_space.LocGlobMap(I + 1, i + 1, numpanels) - 1;
-                            //int JJ = trial_space.LocGlobMap(J + 1, j + 1, numpanels) - 1;
-                            int II = test_space.LocGlobMap(I + 1, i + 1, numpanels) - 1;
-                            int JJ = trial_space.LocGlobMap(J + 1, j + 1, numpanels) - 1;
+                    for (unsigned int I = 0; I < Q; ++I) {
+                        for (unsigned int J = 0; J < Q; ++J) {
+                            int II = space.LocGlobMap(I + 1, i + 1, numpanels) - 1;
+                            int JJ = space.LocGlobMap(J + 1, j + 1, numpanels) - 1;
                             // Filling the Galerkin matrix entries
                             output(II, JJ) += interaction_matrix(I, J);
                         }
@@ -274,5 +304,5 @@ namespace parametricbem2d {
             return output;
         }
 
-    } // namespace double_layer_helmholtz
+    }// namespace hypersingular_helmholtz
 } // namespace parametricbem2d

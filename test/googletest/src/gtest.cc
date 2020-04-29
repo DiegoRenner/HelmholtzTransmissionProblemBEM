@@ -130,6 +130,8 @@
 # include <netdb.h>  // NOLINT
 # include <sys/socket.h>  // NOLINT
 # include <sys/types.h>  // NOLINT
+#include <boost/config/no_tr1/complex.hpp>
+
 #endif
 
 #include "src/gtest-internal-inl.h"

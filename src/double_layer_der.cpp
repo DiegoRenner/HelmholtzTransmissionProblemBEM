@@ -10,11 +10,12 @@
  */
 
 #include <iostream>
-#include "double_layer.hpp"
-#include </usr/include/complex_bessel.h>
+#include "double_layer_der.hpp"
+#include "/usr/include/complex_bessel.h"
+#include <boost/math/special_functions/bessel.hpp>
 
 namespace parametricbem2d {
-    namespace double_layer_helmholtz {
+    namespace double_layer_helmholtz_der {
 
         typedef std::complex<double> complex_t;
         complex_t ii = complex_t(0.0,1.0);
@@ -72,8 +73,10 @@ namespace parametricbem2d {
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
                         if ( (pi[s]-pi_p[t]).norm() > epsilon && fabs((pi[s]-pi_p[t]).dot(normal)) > epsilon) { // Away from singularity
-                            result = ii*sp_bessel::hankelH1(1,k * (pi[s] - pi_p[t]).norm())
-                                     *k*((pi[s] - pi_p[t]).normalized()).dot(normal);
+                            result = ii*(sp_bessel::hankelH1p(1,k*(pi[s]-pi_p[t]).norm())*(pi[s]-pi_p[t])*k
+                                         +sp_bessel::hankelH1(1,k*(pi[s]-pi_p[t]).norm())
+                                     *(pi[s]-pi_p[t]).normalized()).dot(normal);
+                            //std::cout << sp_bessel::hankelH1p(1,k*(pi[s]-pi[t]).norm()) << std::endl;
                         }
                         return result*F(t)*G(s);
                     };
@@ -143,13 +146,15 @@ namespace parametricbem2d {
                         normal = normal / normal.norm();
                         if (swap) {
                             if ( (pi[s]-pi_p.swapped_op(t)).norm() > epsilon && fabs((pi[s]-pi_p.swapped_op(t)).dot(normal)) > epsilon) { // Away from singularity
-                                result = ii*sp_bessel::hankelH1(1,k * (pi[s] - pi_p.swapped_op(t)).norm())
-                                        * k *((pi[s] - pi_p.swapped_op(t)).normalized()).dot(normal);
+                                result = ii*(sp_bessel::hankelH1p(1,k*(pi[s]-pi_p.swapped_op(t)).norm())*(pi[s]-pi_p.swapped_op(t))*k
+                                             +sp_bessel::hankelH1(1,k*(pi[s]-pi_p.swapped_op(t)).norm())
+                                         *(pi[s]-pi_p.swapped_op(t)).normalized()).dot(normal);
                             }
                         } else {
                             if ( (pi.swapped_op(s)-pi_p[t]).norm() > epsilon && fabs((pi.swapped_op(s)-pi_p[t]).dot(normal)) > epsilon) { // Away from singularity
-                                result = ii*sp_bessel::hankelH1(1,k * (pi.swapped_op(s) - pi_p[t]).norm())
-                                        * k *((pi.swapped_op(s) - pi_p[t]).normalized()).dot( normal);
+                                result = ii*(sp_bessel::hankelH1p(1,k*(pi.swapped_op(s)-pi_p[t]).norm())*(pi.swapped_op(s)-pi_p[t])*k
+                                             +sp_bessel::hankelH1(1,k*(pi.swapped_op(s)-pi_p[t]).norm())
+                                         *(pi.swapped_op(s)-pi_p[t]).normalized()).dot(normal);
                             }
                         }
                         return result * F(t) * G(s);
@@ -210,9 +215,9 @@ namespace parametricbem2d {
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
                         if ( (pi[s]-pi_p[t]).norm() > epsilon && fabs((pi[s]-pi_p[t]).dot(normal)) > epsilon) { // Away from singularity
-                            result = ii*sp_bessel::hankelH1(1,k * (pi[s] - pi_p[t]).norm())
-                                    * k *(pi[s] - pi_p[t]).normalized().dot(normal);
-
+                            result = ii*(sp_bessel::hankelH1p(1,k*(pi[s]-pi_p[t]).norm())*(pi[s]-pi_p[t])*k
+                                        +sp_bessel::hankelH1(1,k*(pi[s]-pi_p[t]).norm())
+                                                *(pi[s]-pi_p[t]).normalized()).dot(normal);
                         }
                         return result*F(t)*G(s);
                     };
@@ -232,6 +237,7 @@ namespace parametricbem2d {
             }
             return interaction_matrix;
         }
+
         Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
                                         const AbstractBEMSpace &trial_space,
                                         const AbstractBEMSpace &test_space,
@@ -276,3 +282,4 @@ namespace parametricbem2d {
 
     } // namespace double_layer_helmholtz
 } // namespace parametricbem2d
+

@@ -597,37 +597,37 @@ namespace parametricbem2d {
                 Eigen::HouseholderQR<Eigen::MatrixXcd> dec(A);
                 Eigen::VectorXcd sol = dec.solve(rhs);
                 std::cout << "-----------------"<< std::endl;
-                std::cout << sol.segment(0,2*numpanels).transpose() << std::endl;
-                std::cout << "**************************"<< std::endl;
-                std::cout << u_sol_N.segment(0,2*numpanels).transpose() << std::endl;
-                std::cout << "-----------------"<< std::endl;
+                //std::cout << sol.segment(0,2*numpanels).transpose() << std::endl;
+                //std::cout << "**************************"<< std::endl;
+                //std::cout << u_sol_N.segment(0,2*numpanels).transpose() << std::endl;
+                //std::cout << "-----------------"<< std::endl;
 
                 std::ofstream filename;
                 filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/transmission_problem_L2norm_dir.dat", std::ios_base::app);
-                filename << sqrt(abs((sol - u_sol_N).segment(0, numpanels).dot((sol - u_sol_N).segment(0, numpanels)))) << " "
-                         << 2 * M_PI / numpanels << std::endl;
+                filename << sqrt((sol - u_sol_N).segment(0, numpanels).dot((sol - u_sol_N).segment(0, numpanels))).real() << " "
+                         << 2 * M_PI*0.25 / numpanels << std::endl;
                 filename.close();
                 filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/transmission_problem_Mnorm_dir.dat", std::ios_base::app);
-                filename << sqrt(abs((sol - u_sol_N).segment(0, numpanels).dot(M_cont*(sol - u_sol_N).segment(0, numpanels))))  << " "
-                         << 2 * M_PI / numpanels << std::endl;
+                filename << sqrt((sol - u_sol_N).segment(0, numpanels).dot(M_cont*(sol - u_sol_N).segment(0, numpanels))).real()  << " "
+                         << 2 * M_PI*0.25 / numpanels << std::endl;
                 filename.close();
                 filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/transmission_problem_Wnorm_dir.dat", std::ios_base::app);
-                filename << sqrt(abs((sol - u_sol_N).segment(0, numpanels).dot(W_o*(sol - u_sol_N).segment(0, numpanels)))) << " "
-                         << 2 * M_PI / numpanels << std::endl;
+                filename << sqrt((sol - u_sol_N).segment(0, numpanels).dot(W_o*(sol - u_sol_N).segment(0, numpanels))).real() << " "
+                         << 2 * M_PI*0.25 / numpanels << std::endl;
                 filename.close();
                 filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/transmission_problem_L2norm_neu.dat", std::ios_base::app);
-                filename << sqrt(abs((sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels).dot((sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels)))) << " "
-                         << 2 * M_PI / numpanels << std::endl;
+                filename << sqrt((sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels).dot((sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels))).real() << " "
+                         << 2 * M_PI*0.25 / numpanels << std::endl;
                 filename.close();
                 filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/transmission_problem_Mnorm_neu.dat", std::ios_base::app);
-                filename << sqrt(abs((sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels).dot(M_discont.transpose()*(sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels))))  << " "
-                         << 2 * M_PI / numpanels << std::endl;
+                filename << sqrt((sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels).dot(M_discont.transpose()*(sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels))).real()  << " "
+                         << 2 * M_PI*0.25 / numpanels << std::endl;
                 filename.close();
                 filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/transmission_problem_Vnorm_neu.dat", std::ios_base::app);
-                filename << sqrt(abs((sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels).dot(V_o*(sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels)))) << " "
-                         << 2 * M_PI / numpanels << std::endl;
+                filename << sqrt((sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels).dot(V_o*(sol.real() + ii*sol.imag() - u_sol_N).segment(numpanels, numpanels))).real() << " "
+                         << 2 * M_PI*0.25 / numpanels << std::endl;
                 filename.close();
-                std::cout << "****************************" << std::endl;
+                //std::cout << "****************************" << std::endl;
                 return sol;
             }
 
@@ -733,8 +733,8 @@ namespace parametricbem2d {
 
             Eigen::MatrixXcd compute_operator(const ParametrizedMesh &mesh,
                                    unsigned order,
-                                   const double k_o,
-                                   const double k_i) {
+                                   complex_t k_o,
+                                   complex_t  k_i) {
                 int numpanels = mesh.getNumPanels();
                 // Same trial and test spaces
                 DiscontinuousSpace<0> discont_space;
@@ -764,10 +764,8 @@ namespace parametricbem2d {
 
                 double h = mesh.getPanels()[0]->length()/6.;
                 Eigen::VectorXcd H = Eigen::VectorXcd::Ones(numpanels)*h;
-                Eigen::MatrixXcd M_cont= (4*H).asDiagonal();
-                M_cont.diagonal(-1) = H.segment(0,numpanels-1);
-                M_cont.diagonal(+1) = H.segment(0,numpanels-1);
-                Eigen::MatrixXcd M_discont = 6*(H).asDiagonal();
+                Eigen::MatrixXcd M_cont= mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
+                Eigen::MatrixXcd M_discont = mass_matrix::GalerkinMatrix(mesh,discont_space,discont_space,order);
                 Eigen::MatrixXcd M = Eigen::MatrixXcd::Zero(K_o.rows() + W_o.rows(), K_o.cols() + V_o.cols());
                 M.block(0, 0, K_o.rows(), K_o.cols()) = M_cont;
                 M.block(K_o.rows(), K_o.cols(), K_o.cols(), K_o.rows()) = M_discont;
@@ -787,9 +785,14 @@ namespace parametricbem2d {
                 res = llt.matrixU() * res;
                 res = llt.vectorD().cwiseSqrt().asDiagonal() * res;
                 Eigen::MatrixXcd L = res.transpose();
-
-                return L.inverse()*A*L.inverse().transpose();
+                Eigen::HouseholderQR<Eigen::MatrixXcd> qr(L);
+                Eigen::MatrixXcd R = qr.matrixQR().triangularView<Eigen::Upper>();
+                Eigen::MatrixXcd Q = qr.householderQ();
+                Eigen::MatrixXcd T = R.inverse()*Q.transpose();
+                return T*A*T.transpose();
             }
+
+
         } // namespace direct_second_kind
     } // namespace tsp
 } // namespace parametricbem2d

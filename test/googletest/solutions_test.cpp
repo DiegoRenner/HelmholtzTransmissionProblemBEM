@@ -8,12 +8,15 @@
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
+//#include <CLucene/search/Query.h>
 #include "parametrized_circular_arc.hpp"
 #include "abstract_bem_space.hpp"
 #include "continuous_space.hpp"
 #include "discontinuous_space.hpp"
 #include "generate_solution.hpp"
 #include "math.h"
+#include <boost/math/special_functions.hpp>
+#include </usr/include/complex_bessel.h>
 
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0.,1.);
@@ -36,11 +39,28 @@ parametricbem2d::ParametrizedMesh mesh(curve.split(numpanels));
 
 TEST(FuntionsTest, Bessel){
     ASSERT_TRUE(jn(0,0.0)==1.0);
+    ASSERT_TRUE(boost::math::cyl_bessel_j(0,0.0)==1.0);
+    ASSERT_TRUE(sp_bessel::besselJ(0,0.0)==1.0);
+
     ASSERT_NEAR(jn(0,M_PI),-0.304242177644093864202,tol);
+    ASSERT_NEAR(boost::math::cyl_bessel_j(0,M_PI),-0.304242177644093864202,tol);
+    ASSERT_NEAR(sp_bessel::besselJ(0,M_PI,0.0).real(),-0.304242177644093864202,tol);
+
     ASSERT_NEAR(sol::jn_der(0.0,0.0).real(),0.0,tol);
+    ASSERT_NEAR(boost::math::cyl_bessel_j_prime(0.0,0.0),0.0,tol);
+    ASSERT_NEAR(sp_bessel::besselJp(0.0,0.0).real(),0.0,tol);
+
     ASSERT_NEAR(sol::jn_der(0.0,M_PI).real(),-0.284615343179752757345310599686,tol);
+    ASSERT_NEAR(boost::math::cyl_bessel_j_prime(0.0,M_PI),-0.284615343179752757345310599686,tol);
+    ASSERT_NEAR(sp_bessel::besselJp(0.0,M_PI).real(),-0.284615343179752757345310599686,tol);
+
     ASSERT_NEAR(sol::hn_der(0.0,0.1).imag(),6.45895,100*sqrt_epsilon);
     ASSERT_NEAR(sol::hn_der(0.0,0.1).real(),-0.0499375,100*sqrt_epsilon);
+    ASSERT_NEAR(boost::math::cyl_neumann_prime(0.0,0.1),6.45895,100*sqrt_epsilon);
+    ASSERT_NEAR(boost::math::cyl_bessel_j_prime(0.0,0.1),-0.0499375,100*sqrt_epsilon);
+    ASSERT_NEAR(sp_bessel::hankelH1p(0.0,0.1).imag(),6.45895,100*sqrt_epsilon);
+    ASSERT_NEAR(sp_bessel::hankelH1p(0.0,0.1).real(),-0.0499375,100*sqrt_epsilon);
+
     ASSERT_NEAR(exp(ii*(3./4.)*M_PI).imag(),complex_t(cos((3./4.)*M_PI),sin((3./4.)*M_PI)).imag(),tol);
     ASSERT_NEAR(sol::r_coeff(30,1.0,31.4683226,4.).real(),-1.,sqrt_epsilon);
 

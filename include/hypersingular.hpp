@@ -41,7 +41,7 @@ namespace hypersingular_helmholtz {
                                             const AbstractParametrizedCurve &pi_p,
                                             const AbstractBEMSpace &space,
                                             const QuadRule &GaussQR,
-                                            const double k);
+                                            std::complex<double> k);
 
 /**
  * This function is used to evaluate the Interaction Matrix for the pair
@@ -62,7 +62,7 @@ namespace hypersingular_helmholtz {
                                               const AbstractParametrizedCurve &pi_p,
                                               const AbstractBEMSpace &space,
                                               const QuadRule &GaussQR,
-                                              const double k);
+                                              std::complex<double> k);
 
 /**
  * This function is used to evaluate the Interaction Matrix for the pair
@@ -82,7 +82,7 @@ namespace hypersingular_helmholtz {
                                            const AbstractParametrizedCurve &pi_p,
                                            const AbstractBEMSpace &space,
                                            const QuadRule &GaussQR,
-                                           const double k);
+                                           std::complex<double> k);
 /**
  * This function is used to evaluate the Interaction Matrix defined in
  * \f$\eqref{eq:Al}\f$ for the pair of panels \f$\Pi\f$ and \f$\Pi\f$', for the
@@ -115,7 +115,7 @@ namespace hypersingular_helmholtz {
                                       const AbstractBEMSpace &space,
                                       const QuadRule &GaussQR,
                                        const QuadRule &CGaussQR,
-                                      const double k);
+                                      std::complex<double> k);
 
 /**
  * This function is used to evaluate the full Galerkin matrix based on the
@@ -135,7 +135,7 @@ namespace hypersingular_helmholtz {
     Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
                                    const AbstractBEMSpace &space,
                                    const unsigned int &N,
-                                   const double k);
+                                   std::complex<double> k);
 
 
 } // namespace hypersingular_helmholtz

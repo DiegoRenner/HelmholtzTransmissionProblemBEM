@@ -6,6 +6,7 @@
 #include <Eigen/Dense>
 #include <gtest/gtest.h>
 #include "single_layer_smooth.hpp"
+#include "single_layer_new.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
@@ -27,10 +28,11 @@ parametricbem2d::ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI
 unsigned order = 11;
 double c_o = k;
 double c_i = k*sqrt(n_i);
-int numpanels = 400;
+int numpanels = 50;
 parametricbem2d::ParametrizedMesh mesh(curve.split(numpanels));
 Eigen::VectorXcd V = parametricbem2d::single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, c_o).block(0,0,1,numpanels).transpose();
-Eigen::VectorXcd V_expected(numpanels);
+Eigen::VectorXcd V_expected = parametricbem2d::single_layer_helmholtz_new::GalerkinMatrix(mesh, discont_space, order, c_o).block(0,0,1,numpanels).transpose();
+//Eigen::VectorXcd V_expected(numpanels);
 std::ifstream fp_data;
 double real, imag;
 char sign;
@@ -38,20 +40,20 @@ int i = 0;
 std::string path = "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/single_layer_o_" + std::to_string(numpanels) + ".dat";
 
 TEST(SingleLayerTest, disjoint_fair) {
-    fp_data.open(path);
-    while(fp_data >> real >> imag) {
-        V_expected(i) = complex_t((sign=='-')?-real:real,imag);
-        i++;
-        if (i==numpanels) break;
-        fp_data >> sign >> sign;
-    }
+    //fp_data.open(path);
+    //while(fp_data >> real >> imag) {
+    //    V_expected(i) = complex_t((sign=='-')?-real:real,imag);
+    //    i++;
+    //    if (i==numpanels) break;
+    //    fp_data >> sign >> sign;
+    //}
     std::cout << V.transpose() << std::endl;
     std::cout << "***********************************" << std::endl;
     std::cout << V_expected.transpose() << std::endl;
     std::cout << "***********************************" << std::endl;
     std::cout << (V.segment(2,numpanels-3)-V_expected.segment(2,numpanels-3)).lpNorm<2>()/(numpanels-3) << std::endl;
     ASSERT_TRUE((V.segment(2,numpanels-3)-V_expected.segment(2,numpanels-3)).lpNorm<2>()/(numpanels-3) < sqrt_epsilon);
-    fp_data.close();
+    //fp_data.close();
 }
 
 TEST(SingleLayerTest, coinciding_precise) {

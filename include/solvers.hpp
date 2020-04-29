@@ -68,8 +68,8 @@ namespace parametricbem2d {
                                    const double k_i);
             Eigen::MatrixXcd compute_operator(const ParametrizedMesh &mesh,
                                    unsigned order,
-                                   const double k_o,
-                                   const double k_i);
+                                   std::complex<double> k_o,
+                                   std::complex<double> k_i);
         } // namespace direct_second_kind
 /**
  * This function is used to solve the Dirichlet boundary value problem given

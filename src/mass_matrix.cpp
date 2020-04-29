@@ -9,6 +9,7 @@
  * This File is a part of the 2D-Parametric BEM package
  */
 
+#include <iostream>
 #include "mass_matrix.hpp"
 
 namespace parametricbem2d {
@@ -56,22 +57,19 @@ namespace parametricbem2d {
                         return trial_space.evaluateShapeFunction_01(j, t) * pi_p.Derivative_01(t).norm();
                     };
                     auto G = [&](double s) { // Function associated with panel pi
-                        return test_space.evaluateShapeFunction_01(i, s)*pi.Derivative_01(s).norm();
+                        return test_space.evaluateShapeFunction_01(i, s);
                     };
                     complex_t integral = complex_t(0.,0.);
                     for (unsigned int k = 0; k < N; ++k) {
                         // Tensor product quadrature rule
-                        for (unsigned int l = 0; l < N; ++l) {
                             double s = GaussQR.x(k);
-                            double t = GaussQR.x(l);
-                            integral += GaussQR.w(k)*GaussQR.w(l)*F(t)*G(s);
-                        }
+                            integral += GaussQR.w(k)*F(s)*G(s);
                     }
                     // Filling up the matrix entry
                     interaction_matrix(i, j) = integral;
                 }
             }
-            return interaction_matrix.transpose();
+            return interaction_matrix;//.transpose();
         }
 
         Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,

@@ -9,15 +9,16 @@
  * This File is a part of the 2D-Parametric BEM package
  */
 
-#include "single_layer.hpp"
+#include "single_layer_der.hpp"
 #include "/usr/include/complex_bessel.h"
 
 namespace parametricbem2d {
-    namespace single_layer_helmholtz {
+    namespace single_layer_helmholtz_der {
 
         typedef std::complex<double> complex_t;
-        complex_t ii = complex_t (0.0,1.0);
+        complex_t ii = complex_t(0.0,1.0);
         double epsilon = std::numeric_limits<double>::epsilon();
+
         Eigen::MatrixXcd InteractionMatrix(const AbstractParametrizedCurve &pi,
                                            const AbstractParametrizedCurve &pi_p,
                                            const AbstractBEMSpace &space,
@@ -72,13 +73,14 @@ namespace parametricbem2d {
                         complex_t result = complex_t(0.,0.);
                         if (swap) {
                             if ( (pi[s]-pi_p.swapped_op(t)).norm() > epsilon) {
-                                result = (-sp_bessel::besselY(0,k*(pi[s]-pi_p.swapped_op(t)).norm())+ii*
-                                                   sp_bessel::besselJ(0,k*(pi[s]-pi_p.swapped_op(t)).norm()));
-                            };
+                                result = (sp_bessel::besselY(1,k*(pi[s]-pi_p.swapped_op(t)).norm())-ii*
+                                                   sp_bessel::besselJ(1,k*(pi[s]-pi_p.swapped_op(t)).norm()))
+                                                           *(pi[s]-pi_p.swapped_op(t)).norm();                            };
                         } else {
                             if ( (pi.swapped_op(s)-pi_p[t]).norm() > epsilon) {
-                                result = (-sp_bessel::besselY(0,k*(pi.swapped_op(s)-pi_p[t]).norm())+ii*
-                                                   sp_bessel::besselJ(0,k*(pi.swapped_op(s)-pi_p[t]).norm()));
+                                result = (sp_bessel::besselY(1,k*(pi.swapped_op(s)-pi_p[t]).norm())-ii*
+                                                   sp_bessel::besselJ(1,k*(pi.swapped_op(s)-pi_p[t]).norm()))
+                                                            *(pi.swapped_op(s)-pi_p[t]).norm();
                             };
                         }
                         return result * F(t) * G(s);
@@ -127,7 +129,9 @@ namespace parametricbem2d {
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.0,0.0);
                         if ( (pi[s]-pi_p[t]).norm() > epsilon) {
-                            result = ii*sp_bessel::hankelH1(0,k * (pi[s] - pi_p[t]).norm());
+                            result = (sp_bessel::besselY(1,k * (pi[s] - pi_p[t]).norm())-ii*
+                                               sp_bessel::besselJ(1,k * (pi[s] - pi_p[t]).norm()))
+                                                       *(pi[s] - pi_p[t]).norm();
                         }
                         return result*F(t)*G(s);
                     };
@@ -175,7 +179,9 @@ namespace parametricbem2d {
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.0,0.0);
                         if ( (pi[s]-pi_p[t]).norm() > epsilon) {
-                            result = ii*sp_bessel::hankelH1(0,k*(pi[s]-pi_p[t]).norm());
+                            result = (sp_bessel::besselY(1,k * (pi[s] - pi_p[t]).norm())-ii*
+                                               sp_bessel::besselJ(1,k * (pi[s] - pi_p[t]).norm()))
+                                                        *(pi[s] - pi_p[t]).norm();
                         }
                         return result*F(t)*G(s);
                     };
