@@ -71,9 +71,11 @@ namespace parametricbem2d {
                         normal << tangent(1), -tangent(0);
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
-                        if ( (pi[s]-pi_p[t]).norm() > epsilon && fabs((pi[s]-pi_p[t]).dot(normal)) > epsilon) { // Away from singularity
-                            result = ii*sp_bessel::hankelH1(1,k * (pi[s] - pi_p[t]).norm())
-                                     *k*((pi[s] - pi_p[t]).normalized()).dot(normal);
+                        if ( abs(k)*(pi[s]-pi_p[t]).norm() > epsilon ) { // Away from singularity
+                            result = ii*k*sp_bessel::hankelH1(1,k * (pi[s] - pi_p[t]).norm())
+                                     *((pi[s] - pi_p[t]).normalized()).dot(normal)/4.;
+                        } else if ((pi[s]-pi_p[t]).norm() > epsilon) {
+                            result = 1/(2*M_PI)*(pi[s] - pi_p[t]).dot(normal) / (pi[s] - pi_p[t]).squaredNorm();
                         }
                         return result*F(t)*G(s);
                     };
@@ -89,7 +91,7 @@ namespace parametricbem2d {
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = integral/4.;
+                    interaction_matrix(i, j) = integral;
                 }
             }
             return interaction_matrix;
@@ -142,14 +144,18 @@ namespace parametricbem2d {
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
                         if (swap) {
-                            if ( (pi[s]-pi_p.swapped_op(t)).norm() > epsilon && fabs((pi[s]-pi_p.swapped_op(t)).dot(normal)) > epsilon) { // Away from singularity
-                                result = ii*sp_bessel::hankelH1(1,k * (pi[s] - pi_p.swapped_op(t)).norm())
-                                        * k *((pi[s] - pi_p.swapped_op(t)).normalized()).dot(normal);
+                            if ( abs(k)*(pi[s]-pi_p.swapped_op(t)).norm() > epsilon ) { // Away from singularity
+                                result = ii*k*sp_bessel::hankelH1(1,k * (pi[s] - pi_p.swapped_op(t)).norm())
+                                         * ((pi[s] - pi_p.swapped_op(t)).normalized()).dot(normal)/4.;
+                            } else if ((pi[s]-pi_p.swapped_op(t)).norm() > epsilon) {
+                                result = 1/(2*M_PI)*(pi[s] - pi_p.swapped_op(t)).dot(normal) / (pi[s] - pi_p.swapped_op(t)).squaredNorm();
                             }
                         } else {
-                            if ( (pi.swapped_op(s)-pi_p[t]).norm() > epsilon && fabs((pi.swapped_op(s)-pi_p[t]).dot(normal)) > epsilon) { // Away from singularity
-                                result = ii*sp_bessel::hankelH1(1,k * (pi.swapped_op(s) - pi_p[t]).norm())
-                                        * k *((pi.swapped_op(s) - pi_p[t]).normalized()).dot( normal);
+                            if ( abs(k)*(pi.swapped_op(s)-pi_p[t]).norm() > epsilon ) { // Away from singularity
+                                result = ii*k*sp_bessel::hankelH1(1,k * (pi.swapped_op(s) - pi_p[t]).norm())
+                                         * ((pi.swapped_op(s) - pi_p[t]).normalized()).dot( normal)/4.;
+                            } else if ((pi.swapped_op(s)-pi_p[t]).norm() > epsilon) {
+                                result = 1/(2*M_PI)*(pi.swapped_op(s) - pi_p[t]).dot(normal) / (pi.swapped_op(s) - pi_p[t]).squaredNorm();
                             }
                         }
                         return result * F(t) * G(s);
@@ -166,7 +172,7 @@ namespace parametricbem2d {
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = integral/4.;
+                    interaction_matrix(i, j) = integral;
                 }
             }
             return interaction_matrix;
@@ -209,10 +215,11 @@ namespace parametricbem2d {
                         normal << tangent(1), -tangent(0);
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
-                        if ( (pi[s]-pi_p[t]).norm() > epsilon && fabs((pi[s]-pi_p[t]).dot(normal)) > epsilon) { // Away from singularity
-                            result = ii*sp_bessel::hankelH1(1,k * (pi[s] - pi_p[t]).norm())
-                                    * k *(pi[s] - pi_p[t]).normalized().dot(normal);
-
+                        if ( abs(k)*(pi[s]-pi_p[t]).norm() > epsilon ) { // Away from singularity
+                            result = ii*k*sp_bessel::hankelH1(1,k * (pi[s] - pi_p[t]).norm())
+                                     * (pi[s] - pi_p[t]).normalized().dot(normal)/4.;
+                        } else if ((pi[s]-pi_p[t]).norm() > epsilon) {
+                            result = 1/(2*M_PI)*(pi[s] - pi_p[t]).dot(normal) / (pi[s] - pi_p[t]).squaredNorm();
                         }
                         return result*F(t)*G(s);
                     };
@@ -227,7 +234,7 @@ namespace parametricbem2d {
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = integral/4.;
+                    interaction_matrix(i, j) = integral;
                 }
             }
             return interaction_matrix;

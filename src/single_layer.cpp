@@ -71,15 +71,17 @@ namespace parametricbem2d {
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.,0.);
                         if (swap) {
-                            if ( (pi[s]-pi_p.swapped_op(t)).norm() > epsilon) {
-                                result = (-sp_bessel::besselY(0,k*(pi[s]-pi_p.swapped_op(t)).norm())+ii*
-                                                   sp_bessel::besselJ(0,k*(pi[s]-pi_p.swapped_op(t)).norm()));
-                            };
+                            if ( abs(k)*(pi[s]-pi_p.swapped_op(t)).norm() > epsilon) {
+                                result = ii*sp_bessel::hankelH1(0,k*(pi[s]-pi_p.swapped_op(t)).norm())/4.;
+                            } else if ((pi[s]-pi_p.swapped_op(t)).norm() > epsilon){
+                                result = -1/(2*M_PI)*log((pi[s]-pi_p.swapped_op(t)).norm());
+                            }
                         } else {
-                            if ( (pi.swapped_op(s)-pi_p[t]).norm() > epsilon) {
-                                result = (-sp_bessel::besselY(0,k*(pi.swapped_op(s)-pi_p[t]).norm())+ii*
-                                                   sp_bessel::besselJ(0,k*(pi.swapped_op(s)-pi_p[t]).norm()));
-                            };
+                            if ( abs(k)*(pi.swapped_op(s)-pi_p[t]).norm() > epsilon) {
+                                result = ii*sp_bessel::hankelH1(0,k*(pi.swapped_op(s)-pi_p[t]).norm())/4.;
+                            } else if ((pi.swapped_op(s)-pi_p[t]).norm() > epsilon){
+                                result = -1/(2*M_PI)*log((pi.swapped_op(s)-pi_p[t]).norm());
+                            }
                         }
                         return result * F(t) * G(s);
                     };
@@ -95,7 +97,7 @@ namespace parametricbem2d {
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = integral/4.;
+                    interaction_matrix(i, j) = integral;
                 }
             }
             return interaction_matrix;
@@ -126,8 +128,10 @@ namespace parametricbem2d {
                     };
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.0,0.0);
-                        if ( (pi[s]-pi_p[t]).norm() > epsilon) {
-                            result = ii*sp_bessel::hankelH1(0,k * (pi[s] - pi_p[t]).norm());
+                        if ( abs(k)*(pi[s]-pi_p[t]).norm() > epsilon) {
+                            result = ii*sp_bessel::hankelH1(0,k * (pi[s] - pi_p[t]).norm())/4.;
+                        } else if ((pi[s]-pi_p[t]).norm() > epsilon){
+                            result = -1/(2*M_PI)*log((pi[s]-pi_p[t]).norm());
                         }
                         return result*F(t)*G(s);
                     };
@@ -143,7 +147,7 @@ namespace parametricbem2d {
                         }
                     }
                     // Filling up the matrix entry
-                    interaction_matrix(i, j) = integral/4.;
+                    interaction_matrix(i, j) = integral;
                 }
             }
             return interaction_matrix;
@@ -174,8 +178,10 @@ namespace parametricbem2d {
                     };
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.0,0.0);
-                        if ( (pi[s]-pi_p[t]).norm() > epsilon) {
-                            result = ii*sp_bessel::hankelH1(0,k*(pi[s]-pi_p[t]).norm());
+                        if ( abs(k)*(pi[s]-pi_p[t]).norm() > epsilon) {
+                            result = ii*sp_bessel::hankelH1(0,k*(pi[s]-pi_p[t]).norm())/4.;
+                        } else if ((pi[s]-pi_p[t]).norm() > epsilon){
+                            result = -1/(2*M_PI)*log((pi[s]-pi_p[t]).norm());
                         }
                         return result*F(t)*G(s);
                     };
@@ -190,7 +196,7 @@ namespace parametricbem2d {
                         }
                     }
                     // Filling up the matrix entry
-                    interaction_matrix(i, j) = integral/4.;
+                    interaction_matrix(i, j) = integral;
                 }
             }
             return interaction_matrix;

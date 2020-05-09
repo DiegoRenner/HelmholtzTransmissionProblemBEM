@@ -19,11 +19,14 @@ int main() {
     unsigned n_runs_N = 1;
     unsigned n_debug = 19;
     double numpanels[n_runs_N];
-    numpanels[0] = 50;
+    numpanels[0] = 10;
 
     for (int i=1; i<n_runs_N; i++) {
         numpanels[i] = 2 * numpanels[i - 1];
     }
+    std::ofstream filename;
+    filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/SV_analysis_der_debug.dat", std::ofstream::out | std::ofstream::trunc);
+    filename.close();
     parametricbem2d::ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
     unsigned order = 11;
     // Loop over number of panels
@@ -31,13 +34,13 @@ int main() {
     double k_i = (k_0*sqrt(n_i)).real();
     for (unsigned i = 0; i < n_runs_N; i++) {
         parametricbem2d::ParametrizedMesh mesh(curve.split(numpanels[i]));
-        for (unsigned j = 75; j < n_points_x; j++) {
+        for (unsigned j = 0; j < n_points_x; j++) {
             for (unsigned k = 0; k < n_points_y; k++) {
                 //for (unsigned l = 0; l < n_debug; l++) {
                 k_o = ((k_0+j*9.9/n_points_x+ii*double(k)*2.0/double(n_points_y))*sqrt(n_o)).real();
                 k_i = ((k_0+j*9.9/n_points_x+ii*double(k)*2.0/double(n_points_y))*sqrt(n_i)).real();
                 std::cout << "*****************************" << std::endl;
-                complex_t res = parametricbem2d::compute_SV_der_debug(mesh, order, k_o, k_i);
+                complex_t res = parametricbem2d::compute_SV_der_debug(mesh, order, sqrt(n_i), k_o, k_i);
             }
         }
     }

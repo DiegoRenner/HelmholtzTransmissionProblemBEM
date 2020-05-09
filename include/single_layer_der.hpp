@@ -36,7 +36,8 @@ namespace parametricbem2d {
                                                  const AbstractParametrizedCurve &pi_p,
                                                  const AbstractBEMSpace &space,
                                                  const QuadRule &GaussQR,
-                                                 std::complex<double> k);
+                                                 const double c,
+                                                 const std::complex<double> k);
 
 /**
  * This function is used to evaluate the Interaction Matrix for the pair
@@ -57,7 +58,8 @@ namespace parametricbem2d {
                                                    const AbstractParametrizedCurve &pi_p,
                                                    const AbstractBEMSpace &space,
                                                    const QuadRule &GaussQR,
-                                                   std::complex<double> k);
+                                                   const double c,
+                                                   const std::complex<double> k);
 
 /**
  * This function is used to evaluate the Interaction Matrix for the pair
@@ -77,7 +79,8 @@ namespace parametricbem2d {
                                                 const AbstractParametrizedCurve &pi_p,
                                                 const AbstractBEMSpace &space,
                                                 const QuadRule &GaussQR,
-                                                std::complex<double> k);
+                                                const double c,
+                                                const std::complex<double> k);
 /**
  * This function is used to evaluate the Interaction Matrix defined in
  * \f$\eqref{eq:Al}\f$ for the pair of panels \f$\Pi\f$ and \f$\Pi\f$', for the
@@ -110,7 +113,8 @@ namespace parametricbem2d {
                                            const AbstractBEMSpace &space,
                                            const QuadRule &GaussQR,
                                            const QuadRule &CGaussQR,
-                                           std::complex<double> k);
+                                           const double c,
+                                           const std::complex<double> k);
 
 /**
  * This function is used to evaluate the full Galerkin matrix based on the
@@ -130,7 +134,8 @@ namespace parametricbem2d {
         Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
                                         const AbstractBEMSpace &space,
                                         const unsigned int &N,
-                                        std::complex<double> k);
+                                        const double c,
+                                        const std::complex<double> k);
 
     }
 } // namespace parametricbem2d

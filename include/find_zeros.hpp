@@ -6,10 +6,16 @@
 #define HELMHOLTZTRANSMISSIONPROBLEM_FIND_ZEROS_HPP
 
 namespace parametricbem2d {
+    double zbrent( const std::function<double(double)> f,
+                   double x1,
+                   double x2,
+                   double tol);
+
     double secant_method( const std::function<double(double)> f,
             double x0,
             double x1,
             const double tol,
             const unsigned maxIter);
+
 }
 #endif //HELMHOLTZTRANSMISSIONPROBLEM_FIND_ZEROS_HPP

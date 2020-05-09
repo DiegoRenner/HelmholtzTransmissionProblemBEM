@@ -762,8 +762,6 @@ namespace parametricbem2d {
                         single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k_i);
                 std::cout << "single layer helmholtz computed" << std::endl;
 
-                double h = mesh.getPanels()[0]->length()/6.;
-                Eigen::VectorXcd H = Eigen::VectorXcd::Ones(numpanels)*h;
                 Eigen::MatrixXcd M_cont= mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
                 Eigen::MatrixXcd M_discont = mass_matrix::GalerkinMatrix(mesh,discont_space,discont_space,order);
                 Eigen::MatrixXcd M = Eigen::MatrixXcd::Zero(K_o.rows() + W_o.rows(), K_o.cols() + V_o.cols());

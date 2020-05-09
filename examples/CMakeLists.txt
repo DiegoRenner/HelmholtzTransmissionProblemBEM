@@ -13,7 +13,7 @@ add_executable(SV_analysis_by_der SV_analysis_by_der.cpp)
 add_executable(SV_analysis_by_der_debug SV_analysis_by_der_debug.cpp)
 add_executable(SV_analysis_by_extrapolation SV_analysis_by_extrapolation.cpp)
 add_executable(SV_analysis_by_extrapolation_debug SV_analysis_by_extrapolation_debug.cpp)
-add_executable(find_res_by_SV_der find_res_by_SV_der.cpp)
+add_executable(find_res_by_SV_der1 find_res_by_SV_der.cpp)
 
 add_library(generate_solution STATIC generate_solution.cpp )
 
@@ -27,5 +27,5 @@ target_link_libraries(SV_analysis_by_der parametrizations compute_SV_der complex
 target_link_libraries(SV_analysis_by_der_debug parametrizations compute_SV_der complex_bessel)
 target_link_libraries(SV_analysis_by_extrapolation parametrizations compute_SV_der complex_bessel)
 target_link_libraries(SV_analysis_by_extrapolation_debug parametrizations compute_SV_der complex_bessel)
-target_link_libraries(find_res_by_SV_der parametrizations find_zeros complex_bessel)
+target_link_libraries(find_res_by_SV_der1 parametrizations find_zeros complex_bessel compute_SV_der)
 
