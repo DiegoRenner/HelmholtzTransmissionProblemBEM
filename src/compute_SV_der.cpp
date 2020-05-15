@@ -3,10 +3,13 @@
 #include "discontinuous_space.hpp"
 #include "single_layer.hpp"
 #include "single_layer_der.hpp"
+#include "single_layer_der2.hpp"
 #include "double_layer.hpp"
 #include "double_layer_der.hpp"
+#include "double_layer_der2.hpp"
 #include "hypersingular.hpp"
 #include "hypersingular_der.hpp"
+#include "hypersingular_der2.hpp"
 #include "parametrized_mesh.hpp"
 #include "compute_SV_der.hpp"
 #include <fstream>
@@ -117,6 +120,148 @@ namespace parametricbem2d {
         filename << k_o << std::endl;
         filename.close();
         return val2;
+    }
+    complex_t compute_SV_der_alt(const ParametrizedMesh &mesh,
+                             unsigned order,
+                             const double c,
+                             const double k_o,
+                             const double k_i){
+        int numpanels = mesh.getNumPanels();
+        DiscontinuousSpace<0> discont_space;
+        ContinuousSpace<1> cont_space;
+
+        Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, order);
+        //Eigen::MatrixXcd M_discont = mass_matrix::GalerkinMatrix(mesh, discont_space, discont_space, order);
+        Eigen::MatrixXcd M = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
+        M.block(0,0,numpanels,numpanels) = M_cont;
+        M.block(numpanels,numpanels,numpanels,numpanels) = M_cont;
+        std::cout << "mass matrix computed" << std::endl;
+
+        Eigen::MatrixXcd res(2*numpanels,2*numpanels);
+        Eigen::LDLT<Eigen::MatrixXcd> llt(M);
+        res.setIdentity();
+        res = llt.transpositionsP()*res;
+        res = llt.matrixU() * res;
+        res = llt.vectorD().cwiseSqrt().asDiagonal() * res;
+        Eigen::MatrixXcd L = res.transpose();
+        Eigen::HouseholderQR<Eigen::MatrixXcd> qr_cont(L);
+        Eigen::MatrixXcd R = qr_cont.matrixQR().triangularView<Eigen::Upper>();
+        Eigen::MatrixXcd Q = qr_cont.householderQ();
+        Eigen::MatrixXcd Trafo = R.inverse()*Q.transpose();
+
+        std::cout << "starting computation of operators for " << numpanels << " panels." << std::endl;
+        Eigen::MatrixXcd K_o =
+                double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k_o);
+        Eigen::MatrixXcd K_o_der =
+                double_layer_helmholtz_der::GalerkinMatrix(mesh, cont_space, cont_space, order, 1, k_o);
+        Eigen::MatrixXcd K_o_der2 =
+                double_layer_helmholtz_der2::GalerkinMatrix(mesh, cont_space, cont_space, order, 1, k_o);
+        std::cout << "double layer helmholtz rhs computed" << std::endl;
+        Eigen::MatrixXcd K_i =
+                double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k_i);
+        Eigen::MatrixXcd K_i_der =
+                double_layer_helmholtz_der::GalerkinMatrix(mesh, cont_space, cont_space, order, c, k_i);
+        Eigen::MatrixXcd K_i_der2 =
+                double_layer_helmholtz_der2::GalerkinMatrix(mesh, cont_space, cont_space, order, c, k_i);
+        std::cout << "double layer helmholtz computed" << std::endl;
+        Eigen::MatrixXcd W_i =
+                hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k_i);
+        Eigen::MatrixXcd W_i_der =
+                hypersingular_helmholtz_der::GalerkinMatrix(mesh, cont_space, order, c, k_i);
+        Eigen::MatrixXcd W_i_der2 =
+                hypersingular_helmholtz_der2::GalerkinMatrix(mesh, cont_space, order, c, k_i);
+        std::cout << "hypersingular helmholtz computed" << std::endl;
+        Eigen::MatrixXcd W_o =
+                hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order,k_o);
+        Eigen::MatrixXcd W_o_der =
+                hypersingular_helmholtz_der::GalerkinMatrix(mesh, cont_space, order, 1, k_o);
+        Eigen::MatrixXcd W_o_der2 =
+                hypersingular_helmholtz_der2::GalerkinMatrix(mesh, cont_space, order, 1, k_o);
+        std::cout << "hypersingular helmholtz rhs computed" << std::endl;
+        Eigen::MatrixXcd V_o =
+                single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k_o);
+        Eigen::MatrixXcd V_o_der =
+                single_layer_helmholtz_der::GalerkinMatrix(mesh, cont_space, order, 1, k_o);
+        Eigen::MatrixXcd V_o_der2 =
+                single_layer_helmholtz_der2::GalerkinMatrix(mesh, cont_space, order, 1, k_o);
+        std::cout << "single layer helmholtz rhs computed" << std::endl;
+        Eigen::MatrixXcd V_i =
+                single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k_i);
+        Eigen::MatrixXcd V_i_der =
+                single_layer_helmholtz_der::GalerkinMatrix(mesh, cont_space, order, c, k_i);
+        Eigen::MatrixXcd V_i_der2 =
+                single_layer_helmholtz_der2::GalerkinMatrix(mesh, cont_space, order, c, k_i);
+        std::cout << "single layer helmholtz computed" << std::endl;
+
+        Eigen::MatrixXcd T = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
+        T.block(0, 0, K_o.rows(), K_o.cols()) = (-K_o + K_i);
+        T.block(0, K_o.cols(), V_o.rows(), V_o.cols()) = (V_o - V_i);
+        T.block(K_o.rows(), 0, W_o.rows(), W_o.cols()) = W_o -W_i;
+        T.block(K_o.rows(), K_o.cols(), K_o.cols(), K_o.rows()) =
+                (K_o - K_i).transpose();
+        T = T + M;
+        T = Trafo*T*Trafo.transpose();
+        Eigen::MatrixXcd T_der = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
+        T_der.block(0, 0, K_o.rows(), K_o.cols()) = (-K_o_der + K_i_der);
+        T_der.block(0, K_o.cols(), V_o.rows(), V_o.cols()) = (V_o_der - V_i_der);
+        T_der.block(K_o.rows(), 0, W_o.rows(), W_o.cols()) = W_o_der - W_i_der;
+        T_der.block(K_o.rows(), K_o.cols(), K_o.cols(), K_o.rows()) =
+                (K_o_der - K_i_der).transpose();
+        T_der = Trafo*T_der*Trafo.transpose();
+        Eigen::MatrixXcd T_der2 = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
+        T_der2.block(0, 0, K_o.rows(), K_o.cols()) = (-K_o_der2 + K_i_der2);
+        T_der2.block(0, K_o.cols(), V_o.rows(), V_o.cols()) = (V_o_der2 - V_i_der2);
+        T_der2.block(K_o.rows(), 0, W_o.rows(), W_o.cols()) = W_o_der2 - W_i_der2;
+        T_der2.block(K_o.rows(), K_o.cols(), K_o.cols(), K_o.rows()) =
+                (K_o_der2 - K_i_der2).transpose();
+        T_der2 = Trafo*T_der2*Trafo.transpose();
+
+        Eigen::MatrixXcd W = Eigen::MatrixXcd::Zero(4*numpanels,4*numpanels);
+        W.block(0,2*numpanels,2*numpanels,2*numpanels) = T;
+        W.block(2*numpanels,0,2*numpanels,2*numpanels) = T.transpose().conjugate();
+        Eigen::MatrixXcd W_der = Eigen::MatrixXcd::Zero(4*numpanels,4*numpanels);
+        W_der.block(0,2*numpanels,2*numpanels,2*numpanels) = T_der;
+        W_der.block(2*numpanels,0,2*numpanels,2*numpanels) = T_der.transpose().conjugate();
+        Eigen::MatrixXcd W_der2 = Eigen::MatrixXcd::Zero(4*numpanels,4*numpanels);
+        W_der2.block(0,2*numpanels,2*numpanels,2*numpanels) = T_der2;
+        W_der2.block(2*numpanels,0,2*numpanels,2*numpanels) = T_der2.transpose().conjugate();
+        Eigen::ComplexEigenSolver<Eigen::MatrixXcd> sol(W);
+
+        double temp = 0;
+        int m = 5;
+        //for(int i = 0; i< 4*numpanels; i++){
+        //   if (abs(sol.eigenvectors().col(0)[i])>temp){
+        //       temp =abs(sol.eigenvectors().col(0)[i]);
+        //       m = i;
+        //   }
+        //}
+        Eigen::MatrixXcd B(4*numpanels,4*numpanels);
+        complex_t rescale = sol.eigenvectors().coeff(m-1,0);
+        Eigen::MatrixXcd u = sol.eigenvectors().block(0,0,4*numpanels,1)/rescale;
+        B.block(0,0,4*numpanels,m-1)
+                = (W-sol.eigenvalues()[0]*Eigen::MatrixXcd::Identity(4*numpanels,4*numpanels)).block(0,0,4*numpanels,m-1);
+        B.block(0,m-1,4*numpanels,4*numpanels-m)
+                = (W-sol.eigenvalues()[0]*Eigen::MatrixXcd::Identity(4*numpanels,4*numpanels)).block(0,m,4*numpanels,4*numpanels-m);
+        B.block(0,4*numpanels-1,4*numpanels,1) = -u;
+        Eigen::VectorXcd r(4*numpanels);
+        Eigen::VectorXcd s(4*numpanels);
+        Eigen::VectorXcd u_der(4*numpanels);
+        Eigen::VectorXcd u_der_temp(4*numpanels);
+        Eigen::VectorXcd u_der2(4*numpanels);
+        r.segment(0,4*numpanels) = -W_der*u;
+        u_der_temp = B.inverse()*r;
+        complex_t ev_der = u_der_temp[4*numpanels-1];
+        u_der.segment(0,m-1) = u_der_temp.segment(0,m-1);
+        u_der[m-1] = 0;
+        u_der.segment(m,4*numpanels-m) = u_der_temp.segment(m-1,4*numpanels-m);
+
+
+        s = -W_der2*u -2.*(W_der-ev_der*Eigen::MatrixXcd::Identity(4*numpanels,4*numpanels))*u_der;
+        u_der2 = B.inverse()*s;
+
+        complex_t ev_der2 = u_der2[4*numpanels-1];
+        std::cout << ev_der << " " << ev_der2 << std::endl;
+        return ev_der2;
     }
 
     complex_t compute_SV_der_debug(const ParametrizedMesh &mesh,
@@ -411,7 +556,6 @@ namespace parametricbem2d {
         }
         return val1;
     }
-
 
     // Extrapolation based numerical differentation
 // with a posteriori error control

@@ -9,14 +9,14 @@
  * This File is a part of the 2D-Parametric BEM package
  */
 
-#ifndef SINGLELAYERDERHPP
-#define SINGLELAYERDERHPP
+#ifndef SINGLELAYERDER2HPP
+#define SINGLELAYERDER2HPP
 #include "abstract_bem_space.hpp"
 #include "abstract_parametrized_curve.hpp"
 #include "gauleg.hpp"
 
 namespace parametricbem2d {
-    namespace single_layer_helmholtz_der {
+    namespace single_layer_helmholtz_der2 {
 /**
  * This function is used to evaluate the Interaction Matrix for the pair
  * of panels \f$\Pi\f$ and \f$\Pi\f$', for the bilinear form induced by

@@ -17,6 +17,11 @@ namespace parametricbem2d {
                                         const double c,
                                         const double k_o,
                                         const double k_i);
+    std::complex<double> compute_SV_der_alt(const ParametrizedMesh &mesh,
+                                        unsigned order,
+                                        const double c,
+                                        const double k_o,
+                                        const double k_i);
     std::complex<double> compute_SV_der_debug(const ParametrizedMesh &mesh,
                                               unsigned order,
                                               const double c,
