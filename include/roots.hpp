@@ -5,8 +5,15 @@
 #ifndef HELMHOLTZTRANSMISSIONPROBLEM_FIND_ZEROS_HPP
 #define HELMHOLTZTRANSMISSIONPROBLEM_FIND_ZEROS_HPP
 
+#include <Eigen/Dense>
+
 namespace parametricbem2d {
     double zbrent( const std::function<double(double)> f,
+                   double x1,
+                   double x2,
+                   double tol);
+
+    double rtsafe( const std::function<Eigen::MatrixXd(double)> f,
                    double x1,
                    double x2,
                    double tol);

@@ -7,9 +7,10 @@
 #include <iostream>
 #include <cmath>
 #include <fstream>
-#include "find_zeros.hpp"
+#include "roots.hpp"
 
 #define ITMAX 100
+#define MAXIT 100
 #define EPS std::numeric_limits<double>::epsilon()
 
 
@@ -89,6 +90,73 @@ namespace parametricbem2d {
         cout << "Maximum number of iterations exceeded in zbrent" << endl;
         return 0.0; //Never get here.
     }
+
+    double rtsafe( const std::function<Eigen::MatrixXd(double)> fct,
+                   double x1,
+                   double x2,
+                   double tol){
+        int j;
+        double df,dx,dxold,f,fh,fl;
+        double temp,xh,xl,rts;
+        Eigen::MatrixXd tempM = fct(x1);
+        fl = tempM(0,0);
+        df = tempM(0,1);
+        tempM = fct(x2);
+        fh = tempM(0,0);
+        df = tempM(0,1);
+        if ((fl > 0.0 && fh > 0.0) || (fl < 0.0 && fh < 0.0)) {
+            std::cout << "Root must be bracketed in rtsafe" << std::endl;
+            return 0.;
+        }
+        if (fl == 0.0) return x1;
+        if (fh == 0.0) return x2;
+        if (fl < 0.0) {
+            //Orient the search so that f (xl) < 0.
+            xl=x1;
+            xh=x2;
+        } else {
+            xh=x1;
+            xl=x2;
+        }
+        rts=0.5*(x1+x2);
+        // Initialize the guess for root,the “stepsize before last,”and the last step.
+        dxold=fabs(x2-x1);
+        dx=dxold;
+        tempM = fct(rts);
+        f = tempM(0,0);
+        df = tempM(0,1);
+        for (j=1;j<=MAXIT;j++) {
+            //Loop over allowed iterations. || Bisect if Newton out of range,or not decreasing fast enough.
+            if ((((rts-xh)*df-f)*((rts-xl)*df-f) > 0.0) || (fabs(2.0*f) > fabs(dxold*df))) {
+                dxold=dx;
+                dx=0.5*(xh-xl);
+                rts=xl+dx;
+                //Change in root is negligible.
+                if (xl == rts) return rts;
+            } else {
+                //Newton step acceptable. Take it.
+                dxold=dx;
+                dx=f/df;
+                temp=rts;
+                rts -= dx;
+                if (temp == rts) return rts;
+            }
+            if (fabs(dx) < tol) return rts;
+            //Convergence criterion.
+            tempM = fct(rts);
+            f = tempM(0,0);
+            df = tempM(0,1);
+            //The one new function evaluation per iteration.
+            //Maintain the bracket on the root.
+            if (f < 0.0)
+                xl=rts;
+            else
+                xh=rts;
+        }
+        std::cout << "Maximum number of iterations exceeded in rtsafe" << std::endl;
+        return 0.0;
+        //Never get here.
+    };
 
     double secant_method(const function<double(double)> f,
                          double x1,

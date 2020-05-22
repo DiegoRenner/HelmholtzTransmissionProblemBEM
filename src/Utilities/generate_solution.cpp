@@ -68,7 +68,7 @@ namespace sol {
         complex_t result = complex_t(0.0, 0.0);
         double r = sqrt(x1 * x1 + x2 * x2);
         double eta = atan2(x2 / r, x1 / r);
-        if (eta < 0) eta += M_PI;
+        if (eta < 0) eta += 2*M_PI;
         for (int i = 0; i < 2 * l + 1; i++) {
             result += a_n[i] * jn(i - l, k * r) * complex_t(cos((i - l) * eta), sin((i - l) * eta));
         }
@@ -85,7 +85,7 @@ namespace sol {
         complex_t result = complex_t(0.0, 0.0);
         double r = sqrt(x1 * x1 + x2 * x2);
         double eta = atan2(x2 / r, x1 / r);
-        if (eta < 0) eta += M_PI;
+        if (eta < 0) eta += 2*M_PI;
         for (int i = 0; i < 2 * l + 1; i++) {
             result += a_n[i] * r_coeff(i - l, eps, k, n_i) * hn(i - l, k * r) *
                       complex_t(cos((i - l) * eta), sin((i - l) * eta));
@@ -104,7 +104,7 @@ namespace sol {
         double lambda = sqrt(n_i);
         double r = sqrt(x1 * x1 + x2 * x2);
         double eta = atan2(x2 / r, x1 / r);
-        if (eta < 0) eta += M_PI;
+        if (eta < 0) eta += 2*M_PI;
         for (int i = 0; i < 2 * l + 1; i++) {
             result += a_n[i] * t_coeff(i - l, eps, k, n_i) * jn(i - l, lambda * k * r) *
                       complex_t(cos((i - l) * eta), sin((i - l) * eta));
@@ -119,19 +119,19 @@ namespace sol {
                     double *a_n,
                     double k,
                     double n_i) {
-        Eigen::Vector2cd result;
+        complex_t result;
         double r = sqrt(x1 * x1 + x2 * x2);
         double eta = atan2(x2 / r, x1 / r);
-        if (eta < 0) eta += M_PI;
+        //if (eta < 0) eta += 2*M_PI;
         Eigen::Vector2d e_r;
         e_r << cos(eta), sin(eta);
         Eigen::Vector2d e_eta;
         e_eta << -sin(eta), cos(eta);
         for (int i = 0; i < 2 * l + 1; i++) {
             result += a_n[i] * complex_t(cos((i - l) * eta), sin((i - l) * eta)) *
-                      (k * jn_der(i - l, k * r) * e_r + ii * double(i - l) * jn(i - l, k * r) / r * e_eta);
+                      k * jn_der(i - l, k * r);
         }
-        return result.dot(e_r);
+        return result;
     }
 
     complex_t u_s_N(double x1,
@@ -141,19 +141,19 @@ namespace sol {
                     double *a_n,
                     double k,
                     double n_i) {
-        Eigen::Vector2cd result;
+        complex_t result;
         double r = sqrt(x1 * x1 + x2 * x2);
         double eta = atan2(x2 / r, x1 / r);
-        if (eta < 0) eta += M_PI;
+        if (eta < 0) eta += 2*M_PI;
         Eigen::Vector2d e_r;
         e_r << cos(eta), sin(eta);
         Eigen::Vector2d e_eta;
         e_eta << -sin(eta), cos(eta);
         for (int i = 0; i < 2 * l + 1; i++) {
             result += a_n[i] * r_coeff(i - l, eps, k, n_i) * complex_t(cos((i - l) * eta), sin((i - l) * eta)) *
-                      (k * hn_der(i - l, k * r) * e_r + ii * double(i - l) * hn(i - l, k * r) * 1. / r * e_eta);
+                      k * hn_der(i - l, k * r);
         }
-        return result.dot(e_r);
+        return result;
     }
 
     complex_t u_t_N(double x1,
@@ -163,21 +163,20 @@ namespace sol {
                     double *a_n,
                     double k,
                     double n_i) {
-        Eigen::Vector2cd result;
+        complex_t result;
         double lambda = sqrt(n_i);
         double r = sqrt(x1 * x1 + x2 * x2);
         double eta = atan2(x2 / r, x1 / r);
-        if (eta < 0) eta += M_PI;
+        //if (eta < 0) eta += 2*M_PI;
         Eigen::Vector2d e_r;
         e_r << cos(eta), sin(eta);
         Eigen::Vector2d e_eta;
         e_eta << -sin(eta), cos(eta);
         for (int i = 0; i < 2 * l + 1; i++) {
-            result += (a_n[i] * (t_coeff(i - l, eps, k, n_i).real() - ii * t_coeff(i - l, eps, k, n_i).imag()) *
+            result += (a_n[i] * t_coeff(i - l, eps, k, n_i) *
                        complex_t(cos((i - l) * eta), sin((i - l) * eta)) *
-                       (lambda * k * jn_der(i - l, lambda * k * r) *
-                        e_r));//+ ii * double(i - l) * jn(i - l, lambda * k * r) * 1. / r * e_eta);
+                       lambda * k * jn_der(i - l, lambda * k * r));
         }
-        return result.dot(e_r);
+        return result;
     }
 }
