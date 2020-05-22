@@ -12,7 +12,6 @@
 
 #include "abstract_bem_space.hpp"
 
-namespace parametricbem2d {
 /**
  * \class DiscontinuousSpace
  * \brief This template class inherits from the class AbstractBEMSpace
@@ -205,6 +204,5 @@ namespace parametricbem2d {
             referenceshapefunctiondots_.push_back(b2dot);
         }
     };
-} // namespace parametricbem2d
 
 #endif // DISCONTSPACEHPP

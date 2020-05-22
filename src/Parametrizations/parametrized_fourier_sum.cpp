@@ -17,7 +17,6 @@
 
 #include <Eigen/Dense>
 
-namespace parametricbem2d {
 using CoefficientsList = typename ParametrizedFourierSum::CoefficientsList;
 
 ParametrizedFourierSum::ParametrizedFourierSum(Eigen::Vector2d center,
@@ -112,4 +111,3 @@ PanelVector ParametrizedFourierSum::split(unsigned int N) const {
   }
   return parametrization_parts;
 }
-} // namespace parametricbem2d

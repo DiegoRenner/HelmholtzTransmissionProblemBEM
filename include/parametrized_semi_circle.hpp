@@ -15,7 +15,6 @@
 
 #include <Eigen/Dense>
 
-namespace parametricbem2d {
 /**
  * \class ParametrizedSemiCircle
  * \brief This class represents the parametrization
@@ -63,6 +62,5 @@ private:
    */
   const double radius_;
 }; // class ParametrizedSemiCircle
-} // namespace parametricbem2d
 
 #endif // PARAMETRIZEDSEMICIRCLEHPP

@@ -11,7 +11,6 @@
 
 #include "abstract_parametrized_curve.hpp"
 
-namespace parametricbem2d {
 /**
  * \class ParametrizedPolynomial
  * \brief This class represents a polynomial parametrization
@@ -76,6 +75,5 @@ private:
    */
   const double tmin_, tmax_;
 }; // class ParametrizedPolynomial
-} // namespace parametricbem2d
 
 #endif // PARAMETRIZEDPOLYNOMIALHPP

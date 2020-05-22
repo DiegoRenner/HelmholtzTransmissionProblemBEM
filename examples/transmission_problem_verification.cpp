@@ -15,7 +15,7 @@ int main() {
     double c_i = 23.;
     double c_o = 1.;
     double k = 1.;//2.75679178324354;
-    parametricbem2d::ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
+    ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
     unsigned order = 11;
     for( int i = 0; i<2*l+1; i++) {
         a_n[i] = 1./((k*k*(c_o-c_i))*sqrt((2*l+1)*M_PI*eps*eps*(jn(i-l,k)*jn(i-l,k)-jn(i-l-1,k)*jn(i-l+1,k))));
@@ -41,8 +41,8 @@ int main() {
     };
     // Loop over number of panels
     for (unsigned i = 0; i <= n_runs; i++) {
-        parametricbem2d::ParametrizedMesh mesh(curve.split(numpanels[i]));
-        Eigen::VectorXcd Tn_dfk = parametricbem2d::tsp::direct_second_kind::solve(
+        ParametrizedMesh mesh(curve.split(numpanels[i]));
+        Eigen::VectorXcd Tn_dfk = tsp::direct_second_kind::solve(
                 mesh, u_i_dir, u_i_neu, u_t_dir, u_t_neu, order, k, c_o, c_i);
     }
 return 0;

@@ -20,7 +20,6 @@
 
 #define _USE_MATH_DEFINES //for Pi
 
-namespace parametricbem2d {
   ParametrizedSemiCircle::ParametrizedSemiCircle(double r) : radius_(r) {}
 
   Eigen::Vector2d ParametrizedSemiCircle::operator() (double t) const {
@@ -60,4 +59,3 @@ namespace parametricbem2d {
     }
     return parametrization_parts;
   }
-} // namespace parametricbem2d

@@ -14,7 +14,6 @@
 #define EPS std::numeric_limits<double>::epsilon()
 
 
-namespace parametricbem2d {
     using namespace std;
     // Using Brent’s method, find the root of a function func known to lie between x1 and x2.
     // The root, returned as zbrent , will be refined until its accuracy is tol .
@@ -91,10 +90,11 @@ namespace parametricbem2d {
         return 0.0; //Never get here.
     }
 
-    double rtsafe( const std::function<Eigen::MatrixXd(double)> fct,
+    double rtsafe( std::function<Eigen::MatrixXd(double)> fct,
                    double x1,
                    double x2,
-                   double tol){
+                   double tol,
+                   bool root_found){
         int j;
         double df,dx,dxold,f,fh,fl;
         double temp,xh,xl,rts;
@@ -106,10 +106,20 @@ namespace parametricbem2d {
         df = tempM(0,1);
         if ((fl > 0.0 && fh > 0.0) || (fl < 0.0 && fh < 0.0)) {
             std::cout << "Root must be bracketed in rtsafe" << std::endl;
-            return 0.;
+            if (fl > fh){
+                return x1;
+            }else{
+                return x2;
+            };
         }
-        if (fl == 0.0) return x1;
-        if (fh == 0.0) return x2;
+        if (fl == 0.0) {
+            root_found = true;
+            return x1;
+        }
+        if (fh == 0.0) {
+            root_found = true;
+            return x2;
+        }
         if (fl < 0.0) {
             //Orient the search so that f (xl) < 0.
             xl=x1;
@@ -132,16 +142,25 @@ namespace parametricbem2d {
                 dx=0.5*(xh-xl);
                 rts=xl+dx;
                 //Change in root is negligible.
-                if (xl == rts) return rts;
+                if (xl == rts) {
+                    root_found = true;
+                    return rts;
+                }
             } else {
                 //Newton step acceptable. Take it.
                 dxold=dx;
                 dx=f/df;
                 temp=rts;
                 rts -= dx;
-                if (temp == rts) return rts;
+                if (temp == rts) {
+                    root_found = true;
+                    return rts;
+                }
             }
-            if (fabs(dx) < tol) return rts;
+            if (fabs(dx) < tol) {
+                root_found = true;
+                return rts;
+            }
             //Convergence criterion.
             tempM = fct(rts);
             f = tempM(0,0);
@@ -157,6 +176,47 @@ namespace parametricbem2d {
         return 0.0;
         //Never get here.
     };
+    Eigen::Vector2d parabolic_approximation(const std::function<Eigen::VectorXd(double)> f,
+                                            const std::function<Eigen::VectorXd(double)> f_der,
+                                            const std::function<Eigen::VectorXd(double)> f_der2,
+                                            const double x0,
+                                            double step){
+        Eigen::VectorXd vals = f(x0);
+        Eigen::VectorXd ders = f_der(x0);
+        Eigen::VectorXd ders2 = f_der2(x0);
+        unsigned numsvs = vals.size();
+        Eigen::VectorXd exts(numsvs);
+        bool adjust_step = false;
+        step = step/pow(ders2.cwiseAbs().maxCoeff(),2);
+        std::cout << ders2.cwiseAbs().maxCoeff() << std::endl;
+        std::cout << step << std::endl;
+        Eigen::Vector2d res;
+        do {
+            adjust_step = false;
+            for (unsigned i = 0; i < numsvs; i++) {
+                exts[i] = ders2[i] / (ders[i] + ders2[i]) * x0;
+                if ((exts[i] - x0) < 0 || abs(exts[i] - x0) > step) {
+                    exts[i] = x0 + step;
+                }
+            }
+            res[0] = exts[0];
+            res[1] = f(res[0])[0];
+            double temp = res[0];
+            for (unsigned i = 1; i < numsvs; i++) {
+                temp = f(exts[i])[i];
+                if (temp < res[1]) {
+                    res[0] = exts[i];
+                    res[1] = temp;
+                }
+            }
+            if (res[1] < 0) {
+                adjust_step = true;
+                step *= 0.5;
+            }
+        } while(adjust_step);
+       return res;
+
+    }
 
     double secant_method(const function<double(double)> f,
                          double x1,
@@ -203,4 +263,3 @@ namespace parametricbem2d {
             cout << "There might not be a root in this interval." << endl;
         return x0;
     }
-}

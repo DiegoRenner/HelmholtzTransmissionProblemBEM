@@ -16,7 +16,6 @@
 #include "abstract_parametrized_curve.hpp"
 #include "gauleg.hpp"
 
-namespace parametricbem2d {
 /**
  * This namespace contains all the functions for evaluating the Hypersingular
  * Galerkin Matrix using quadrature and panel oriented assembly
@@ -41,8 +40,8 @@ namespace hypersingular_helmholtz_der {
                                             const AbstractParametrizedCurve &pi_p,
                                             const AbstractBEMSpace &space,
                                             const QuadRule &GaussQR,
-                                             const double c,
-                                             const std::complex<double> k);
+                                             const std::complex<double> k,
+                                             const double c);
 
 /**
  * This function is used to evaluate the Interaction Matrix for the pair
@@ -63,8 +62,8 @@ namespace hypersingular_helmholtz_der {
                                               const AbstractParametrizedCurve &pi_p,
                                               const AbstractBEMSpace &space,
                                               const QuadRule &GaussQR,
-                                               const double c,
-                                               const std::complex<double> k);
+                                               const std::complex<double> k,
+                                               const double c);
 
 /**
  * This function is used to evaluate the Interaction Matrix for the pair
@@ -84,8 +83,8 @@ namespace hypersingular_helmholtz_der {
                                            const AbstractParametrizedCurve &pi_p,
                                            const AbstractBEMSpace &space,
                                            const QuadRule &GaussQR,
-                                            const double c,
-                                            const std::complex<double> k);
+                                            const std::complex<double> k,
+                                            const double c);
 /**
  * This function is used to evaluate the Interaction Matrix defined in
  * \f$\eqref{eq:Al}\f$ for the pair of panels \f$\Pi\f$ and \f$\Pi\f$', for the
@@ -118,8 +117,8 @@ namespace hypersingular_helmholtz_der {
                                       const AbstractBEMSpace &space,
                                       const QuadRule &GaussQR,
                                        const QuadRule &CGaussQR,
-                                       const double c,
-                                       const std::complex<double> k);
+                                       const std::complex<double> k,
+                                       const double c);
 
 /**
  * This function is used to evaluate the full Galerkin matrix based on the
@@ -139,11 +138,10 @@ namespace hypersingular_helmholtz_der {
     Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
                                    const AbstractBEMSpace &space,
                                    const unsigned int &N,
-                                    const double c,
-                                    const std::complex<double> k);
+                                    const std::complex<double> k,
+                                    const double c);
 
 
 } // namespace hypersingular_helmholtz
-} // namespace parametricbem2d
 
 #endif // HYPERSINGULARHPP

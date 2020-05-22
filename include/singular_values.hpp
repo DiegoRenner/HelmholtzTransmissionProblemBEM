@@ -11,17 +11,19 @@
 
 #include "parametrized_mesh.hpp"
 
-namespace parametricbem2d {
-    Eigen::MatrixXd sv_1st_der(const ParametrizedMesh &mesh,
-                               unsigned order,
-                               const std::complex<double> k,
-                               const double c_o,
-                               const double c_i);
-    Eigen::MatrixXd sv_2nd_der(const ParametrizedMesh &mesh,
-                               unsigned order,
-                               const std::complex<double> k,
-                               const double c_o,
-                               const double c_i);
+    Eigen::VectorXd sv(const Eigen::MatrixXcd &T,
+                               const double *list,
+                               const unsigned count);
+
+    Eigen::MatrixXd sv_1st_der(const Eigen::MatrixXcd &T,
+            const Eigen::MatrixXcd &T_der,
+            const double *list,
+            const unsigned count);
+    Eigen::MatrixXd sv_2nd_der(const Eigen::MatrixXcd &T,
+                               const Eigen::MatrixXcd &T_der,
+                               const Eigen::MatrixXcd &T_der_2,
+                               const double *list,
+                               const unsigned count);
 
     // Extrapolation based numerical differentation
     // with a posteriori error control
@@ -35,5 +37,4 @@ namespace parametricbem2d {
                        const double rtol ,
                        const double atol );
 
-} // namespace parametricbem2d
 #endif // DIRICHLETHPP

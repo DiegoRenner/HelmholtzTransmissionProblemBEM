@@ -15,7 +15,6 @@
 
 #include <Eigen/Dense>
 
-namespace parametricbem2d {
 /**
  * \class ParametrizedLine
  * \brief This class represents a Parametrized Line
@@ -75,6 +74,5 @@ private:
   const Point start_;
   const Point end_;
 }; // class ParametrizedLine
-} // namespace parametricbem2d
 
 #endif // PARAMETRIZEDLINEHPP

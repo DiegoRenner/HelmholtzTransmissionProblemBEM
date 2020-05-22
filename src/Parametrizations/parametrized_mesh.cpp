@@ -12,7 +12,6 @@
 
 #include <Eigen/Dense>
 
-namespace parametricbem2d {
 
 ParametrizedMesh::ParametrizedMesh(PanelVector panels) : panels_(panels) {
   // std::cout << "ParametrizedMesh constructor called!" << std::endl;
@@ -45,4 +44,3 @@ Eigen::Vector2d ParametrizedMesh::getVertex(unsigned int i) const {
   return panels_[i]->operator()(-1);
 }
 
-} // namespace parametricbem2d

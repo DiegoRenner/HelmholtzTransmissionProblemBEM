@@ -16,7 +16,6 @@
 
 #include <Eigen/Dense>
 
-namespace parametricbem2d {
 using Point = typename ParametrizedLine::Point;
 
 ParametrizedLine::ParametrizedLine(Point first, Point second)
@@ -77,4 +76,3 @@ double ParametrizedLine::length() const {
   return (this->operator()(tmax) - this->operator()(tmin)).norm();
 }
 
-} // namespace parametricbem2d

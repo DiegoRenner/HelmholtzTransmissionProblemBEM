@@ -1,5 +1,5 @@
 /**
- * \file dirichlet.hpp
+ * \file
  * \brief This file defines lowest order indirect/direct BVP solvers to solve a
  * Dirichlet Boundary Value problem of the form given in \f$\eqref{eq:dirbvp}\f$
  *
@@ -16,16 +16,16 @@
 #include <fstream>
 #include <iostream>
 
-namespace parametricbem2d {
     typedef std::complex<double> complex_t;
     complex_t ii = complex_t(0, 1);
     namespace bvp {
         namespace direct_first_kind {
             Eigen::VectorXcd solve_neumann(const ParametrizedMesh &mesh,
-                                             std::function<complex_t(double, double)> u_dir,
-                                             std::function<complex_t(double, double)> u_neu,
-                                             unsigned int order,
-                                             const double k) {
+                                             const std::function<complex_t(double, double)> u_dir,
+                                             const std::function<complex_t(double, double)> u_neu,
+                                             const unsigned int order,
+                                             const double k,
+                                             const double c) {
                 unsigned int numpanels = mesh.getNumPanels();
                 DiscontinuousSpace<0> discont_space;
                 // Space used for interpolation of Dirichlet data
@@ -40,10 +40,10 @@ namespace parametricbem2d {
                         mass_matrix::GalerkinMatrix(mesh,discont_space,cont_space,order);
                 std::cout << "mass matrix computed" << std::endl;
                 Eigen::MatrixXcd K =
-                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k);
+                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c);
                 std::cout << "double layer helmholtz computed" << std::endl;
                 Eigen::MatrixXcd W =
-                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k);
+                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c);
                 std::cout << "hypersingular helmholtz computed" << std::endl;
                 // Build rhs for solving
                 Eigen::VectorXcd rhs = (0.5*M+K.transpose())*u_neu_N;
@@ -68,10 +68,11 @@ namespace parametricbem2d {
             }
 
             Eigen::VectorXcd solve_dirichlet(const ParametrizedMesh &mesh,
-                                           std::function<complex_t(double, double)> u_dir,
-                                           std::function<complex_t(double, double)> u_neu,
-                                           unsigned order,
-                                           const double k) {
+                                           const std::function<complex_t(double, double)> u_dir,
+                                           const std::function<complex_t(double, double)> u_neu,
+                                           const unsigned order,
+                                           const double k,
+                                           const double c) {
                 unsigned int numpanels = mesh.getNumPanels();
                 DiscontinuousSpace<0> discont_space;
                 // Space used for interpolation of Dirichlet data
@@ -86,10 +87,10 @@ namespace parametricbem2d {
                         mass_matrix::GalerkinMatrix(mesh,discont_space,cont_space,order);
                 std::cout << "mass matrix computed" << std::endl;
                 Eigen::MatrixXcd K =
-                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k);
+                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c);
                 std::cout << "double layer helmholtz computed" << std::endl;
                 Eigen::MatrixXcd V =
-                        single_layer_helmholtz::GalerkinMatrix(mesh,discont_space,order,k);
+                        single_layer_helmholtz::GalerkinMatrix(mesh,discont_space,order,k, c);
                 std::cout << "single layer helmholtz computed" << std::endl;
                 // Build rhs for solving
                 Eigen::VectorXcd rhs = (0.5*M-K)*u_dir_N;
@@ -117,13 +118,14 @@ namespace parametricbem2d {
     namespace tsp {
         namespace direct_second_kind {
             Eigen::VectorXcd solve_debug_3(const ParametrizedMesh &mesh,
-                                   std::function<complex_t(double, double)> u_inc_dir,
-                                   std::function<complex_t(double, double)> u_inc_neu,
-                                   std::function<complex_t(double, double)> sol_dir,
-                                   std::function<complex_t(double, double)> sol_neu,
-                                   unsigned order,
-                                   const double k_o,
-                                   const double k_i) {
+                                   const std::function<complex_t(double, double)> u_inc_dir,
+                                   const std::function<complex_t(double, double)> u_inc_neu,
+                                   const std::function<complex_t(double, double)> sol_dir,
+                                   const std::function<complex_t(double, double)> sol_neu,
+                                   const unsigned order,
+                                   const double k,
+                                   const double c_o,
+                                   const double c_i) {
                 int numpanels = mesh.getNumPanels();
                 // Same trial and test spaces
                 DiscontinuousSpace<0> discont_space;
@@ -133,10 +135,10 @@ namespace parametricbem2d {
                 // Computing V matrix
                 std::cout << "starting computation of operators for " << numpanels << " panels." << std::endl;
                 Eigen::MatrixXcd K_o =
-                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k_o);
+                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_o);
                 std::cout << "double layer helmholtz rhs computed" << std::endl;
                 Eigen::MatrixXcd K_i =
-                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k_i);
+                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_i);
                 std::cout << "double layer helmholtz computed" << std::endl;
                 //std::ifstream fp_data;
                 //double real, imag;
@@ -165,10 +167,10 @@ namespace parametricbem2d {
                 //}
                 //fp_data.close();
                 Eigen::MatrixXcd W_i =
-                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k_i);
+                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i);
                 std::cout << "hypersingular helmholtz computed" << std::endl;
                 Eigen::MatrixXcd W_o =
-                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k_o);
+                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_o);
                 std::cout << "hypersingular helmholtz rhs computed" << std::endl;
                 //i = 0;
                 //Eigen::MatrixXcd W_i(numpanels,numpanels); // =
@@ -194,10 +196,10 @@ namespace parametricbem2d {
                 //}
                 //fp_data.close();
                 Eigen::MatrixXcd V_o =
-                        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k_o);
+                        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_o);
                 std::cout << "single layer helmholtz rhs computed" << std::endl;
                 Eigen::MatrixXcd V_i =
-                        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k_i);
+                        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_i);
                 std::cout << "single layer helmholtz computed" << std::endl;
                 double h = mesh.getPanels()[0]->length()/6.;
                 Eigen::VectorXcd H = Eigen::VectorXcd::Ones(numpanels)*h;
@@ -268,12 +270,13 @@ namespace parametricbem2d {
             }
 
             Eigen::VectorXcd solve_debug_2(const ParametrizedMesh &mesh,
-                                           std::function<complex_t(double, double)> u_inc_dir,
-                                           std::function<complex_t(double, double)> u_inc_neu,
-                                           std::function<complex_t(double, double)> sol_dir,
-                                           std::function<complex_t(double, double)> sol_neu,
-                                           unsigned order,
-                                           const double k) {
+                                           const std::function<complex_t(double, double)> u_inc_dir,
+                                           const std::function<complex_t(double, double)> u_inc_neu,
+                                           const std::function<complex_t(double, double)> sol_dir,
+                                           const std::function<complex_t(double, double)> sol_neu,
+                                           const unsigned order,
+                                           const double k,
+                                           const double c) {
                 int numpanels = mesh.getNumPanels();
                 // Same trial and test spaces
                 DiscontinuousSpace<0> discont_space;
@@ -369,12 +372,13 @@ namespace parametricbem2d {
             }
 
             Eigen::VectorXcd solve_debug_1(const ParametrizedMesh &mesh,
-                                           std::function<complex_t(double, double)> u_inc_dir,
-                                           std::function<complex_t(double, double)> u_inc_neu,
-                                           std::function<complex_t(double, double)> sol_dir,
-                                           std::function<complex_t(double, double)> sol_neu,
-                                           unsigned order,
-                                           const double k) {
+                                           const std::function<complex_t(double, double)> u_inc_dir,
+                                           const std::function<complex_t(double, double)> u_inc_neu,
+                                           const std::function<complex_t(double, double)> sol_dir,
+                                           const std::function<complex_t(double, double)> sol_neu,
+                                           const unsigned order,
+                                           const double k,
+                                           const double c) {
                 int numpanels = mesh.getNumPanels();
                 // Same trial and test spaces
                 DiscontinuousSpace<0> discont_space;
@@ -524,13 +528,14 @@ namespace parametricbem2d {
             }
 
             Eigen::VectorXcd solve(const ParametrizedMesh &mesh,
-                                   std::function<complex_t(double, double)> u_inc_dir,
-                                   std::function<complex_t(double, double)> u_inc_neu,
-                                   std::function<complex_t(double, double)> sol_dir,
-                                   std::function<complex_t(double, double)> sol_neu,
-                                   unsigned order,
-                                   const double k_o,
-                                   const double k_i) {
+                                   const std::function<complex_t(double, double)> u_inc_dir,
+                                   const std::function<complex_t(double, double)> u_inc_neu,
+                                   const std::function<complex_t(double, double)> sol_dir,
+                                   const std::function<complex_t(double, double)> sol_neu,
+                                   const unsigned order,
+                                   const double k,
+                                   const double c_o,
+                                   const double c_i) {
                 int numpanels = mesh.getNumPanels();
                 // Same trial and test spaces
                 DiscontinuousSpace<0> discont_space;
@@ -540,22 +545,22 @@ namespace parametricbem2d {
                 // Computing V matrix
                 std::cout << "starting computation of operators for " << numpanels << " panels." << std::endl;
                 Eigen::MatrixXcd K_o =
-                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k_o);
+                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_o);
                 std::cout << "double layer helmholtz rhs computed" << std::endl;
                 Eigen::MatrixXcd K_i =
-                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k_i);
+                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_i);
                 std::cout << "double layer helmholtz computed" << std::endl;
                 Eigen::MatrixXcd W_i =
-                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k_i);
+                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i);
                 std::cout << "hypersingular helmholtz computed" << std::endl;
                 Eigen::MatrixXcd W_o =
-                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order,k_o);
+                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order,k, c_o);
                 std::cout << "hypersingular helmholtz rhs computed" << std::endl;
                 Eigen::MatrixXcd V_o =
-                        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k_o);
+                        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_o);
                 std::cout << "single layer helmholtz rhs computed" << std::endl;
                 Eigen::MatrixXcd V_i =
-                        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k_i);
+                        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_i);
                 std::cout << "single layer helmholtz computed" << std::endl;
                 Eigen::MatrixXcd M_cont =
                         mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
@@ -589,10 +594,10 @@ namespace parametricbem2d {
                 Eigen::HouseholderQR<Eigen::MatrixXcd> dec(A);
                 Eigen::VectorXcd sol = dec.solve(rhs);
                 std::cout << "-----------------"<< std::endl;
-                //std::cout << sol.segment(0,2*numpanels).transpose() << std::endl;
-                //std::cout << "**************************"<< std::endl;
-                //std::cout << u_sol_N.segment(0,2*numpanels).transpose() << std::endl;
-                //std::cout << "-----------------"<< std::endl;
+                std::cout << sol.segment(0,2*numpanels).transpose() << std::endl;
+                std::cout << "**************************"<< std::endl;
+                std::cout << u_sol_N.segment(0,2*numpanels).transpose() << std::endl;
+                std::cout << "-----------------"<< std::endl;
 
                 std::ofstream filename;
                 filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/transmission_problem_L2norm_dir.dat", std::ios_base::app);
@@ -624,9 +629,10 @@ namespace parametricbem2d {
             }
 
             Eigen::MatrixXcd compute_operator(const ParametrizedMesh &mesh,
-                                   unsigned order,
-                                   complex_t k_o,
-                                   complex_t  k_i) {
+                                   const unsigned order,
+                                   const complex_t k,
+                                   double c_o,
+                                   double c_i) {
                 int numpanels = mesh.getNumPanels();
                 // Same trial and test spaces
                 DiscontinuousSpace<0> discont_space;
@@ -636,22 +642,22 @@ namespace parametricbem2d {
                 // Computing V matrix
                 std::cout << "starting computation of operators for " << numpanels << " panels." << std::endl;
                 Eigen::MatrixXcd K_o =
-                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k_o);
+                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_o);
                 std::cout << "double layer helmholtz rhs computed" << std::endl;
                 Eigen::MatrixXcd K_i =
-                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k_i);
+                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_i);
                 std::cout << "double layer helmholtz computed" << std::endl;
                 Eigen::MatrixXcd W_i =
-                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k_i);
+                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i);
                 std::cout << "hypersingular helmholtz computed" << std::endl;
                 Eigen::MatrixXcd W_o =
-                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order,k_o);
+                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order,k, c_o);
                 std::cout << "hypersingular helmholtz rhs computed" << std::endl;
                 Eigen::MatrixXcd V_o =
-                        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k_o);
+                        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_o);
                 std::cout << "single layer helmholtz rhs computed" << std::endl;
                 Eigen::MatrixXcd V_i =
-                        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k_i);
+                        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_i);
                 std::cout << "single layer helmholtz computed" << std::endl;
 
                 Eigen::MatrixXcd M_cont= mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
@@ -685,4 +691,3 @@ namespace parametricbem2d {
 
         } // namespace direct_second_kind
     } // namespace tsp
-} // namespace parametricbem2d

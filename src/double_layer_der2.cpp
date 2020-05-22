@@ -14,7 +14,6 @@
 #include "/usr/include/complex_bessel.h"
 #include <boost/math/special_functions/bessel.hpp>
 
-namespace parametricbem2d {
     namespace double_layer_helmholtz_der2 {
 
         typedef std::complex<double> complex_t;
@@ -27,16 +26,16 @@ namespace parametricbem2d {
                                            const AbstractBEMSpace &test_space,
                                            const QuadRule &GaussQR,
                                            const QuadRule &CGaussQR,
-                                           const double c,
-                                           const complex_t k) {
+                                           const complex_t k,
+                                           const double c){
             if (&pi == &pi_p) { // Same Panels case
-                return ComputeIntegralCoinciding(pi, pi_p, trial_space, test_space, CGaussQR, c, k);
+                return ComputeIntegralCoinciding(pi, pi_p, trial_space, test_space, CGaussQR, k, c);
             }
             else if ((pi(1) - pi_p(-1)).norm() / 100. < epsilon ||
                      (pi(-1) - pi_p(1)).norm() / 100. < epsilon) {// Adjacent Panels case
-                return ComputeIntegralAdjacent(pi, pi_p, trial_space, test_space, CGaussQR, c, k);
+                return ComputeIntegralAdjacent(pi, pi_p, trial_space, test_space, CGaussQR, k, c);
             } else { //Disjoint panels case
-                return ComputeIntegralGeneral(pi, pi_p, trial_space, test_space, GaussQR, c, k);
+                return ComputeIntegralGeneral(pi, pi_p, trial_space, test_space, GaussQR, k, c);
             }
         }
 
@@ -45,8 +44,8 @@ namespace parametricbem2d {
                                                    const AbstractBEMSpace &trial_space,
                                                    const AbstractBEMSpace &test_space,
                                                    const QuadRule &GaussQR,
-                                                   const double c,
-                                                   const complex_t k){
+                                                   const complex_t k,
+                                                   const double c){
             unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
             int Qtrial = trial_space.getQ();
@@ -74,9 +73,9 @@ namespace parametricbem2d {
                         normal << tangent(1), -tangent(0);
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
-                        if ( abs(k)*(pi[s]-pi_p[t]).norm() > epsilon ) { // Away from singularity
-                        result = (sp_bessel::hankelH1p(1,k*(pi[s]-pi_p[t]).norm(),2)*(pi[s]-pi_p[t]).norm()*k
-                                  + 2.*sp_bessel::hankelH1p(1,k*(pi[s]-pi_p[t]).norm()))
+                        if ( abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon ) { // Away from singularity
+                        result = (sp_bessel::hankelH1p(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm(),2)*(pi[s]-pi_p[t]).norm()*k*sqrt(c)
+                                  + 2.*sp_bessel::hankelH1p(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm()))
                                  *(pi[s]-pi_p[t]).dot(normal);
                         }
                         return result*F(t)*G(s);
@@ -93,7 +92,7 @@ namespace parametricbem2d {
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = ii*c*c*integral/4.;
+                    interaction_matrix(i, j) = ii*c*integral/4.;
                 }
             }
             return interaction_matrix;
@@ -104,8 +103,8 @@ namespace parametricbem2d {
                                                  const AbstractBEMSpace &trial_space,
                                                  const AbstractBEMSpace &test_space,
                                                  const QuadRule &GaussQR,
-                                                 const double c,
-                                                 const complex_t k){
+                                                 const complex_t k,
+                                                 const double c){
             unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
             int Qtrial = trial_space.getQ();
@@ -147,15 +146,15 @@ namespace parametricbem2d {
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
                         if (swap) {
-                            if ( abs(k)*(pi[s]-pi_p.swapped_op(t)).norm() > epsilon ) { // Away from singularity
-                                result = (sp_bessel::hankelH1p(1,k*(pi[s]-pi_p.swapped_op(t)).norm(),2)*(pi[s]-pi_p.swapped_op(t)).norm()*k
-                                         +2.*sp_bessel::hankelH1p(1,k*(pi[s]-pi_p.swapped_op(t)).norm()))
+                            if ( abs(k*sqrt(c))*(pi[s]-pi_p.swapped_op(t)).norm() > epsilon ) { // Away from singularity
+                                result = (sp_bessel::hankelH1p(1,k*sqrt(c)*(pi[s]-pi_p.swapped_op(t)).norm(),2)*(pi[s]-pi_p.swapped_op(t)).norm()*k*sqrt(c)
+                                         +2.*sp_bessel::hankelH1p(1,k*sqrt(c)*(pi[s]-pi_p.swapped_op(t)).norm()))
                                          *(pi[s]-pi_p.swapped_op(t)).dot(normal);
                             }
                         } else {
-                            if ( abs(k)*(pi.swapped_op(s)-pi_p[t]).norm() > epsilon ) { // Away from singularity
-                                result = (sp_bessel::hankelH1p(1,k*(pi.swapped_op(s)-pi_p[t]).norm(),2)*(pi.swapped_op(s)-pi_p[t]).norm()*k
-                                             +2.*sp_bessel::hankelH1p(1,k*(pi.swapped_op(s)-pi_p[t]).norm()))
+                            if ( abs(k*sqrt(c))*(pi.swapped_op(s)-pi_p[t]).norm() > epsilon ) { // Away from singularity
+                                result = (sp_bessel::hankelH1p(1,k*sqrt(c)*(pi.swapped_op(s)-pi_p[t]).norm(),2)*(pi.swapped_op(s)-pi_p[t]).norm()*k*sqrt(c)
+                                             +2.*sp_bessel::hankelH1p(1,k*sqrt(c)*(pi.swapped_op(s)-pi_p[t]).norm()))
                                          *(pi.swapped_op(s)-pi_p[t]).dot(normal);
                             }
                         }
@@ -173,7 +172,7 @@ namespace parametricbem2d {
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = ii*c*c*integral/4.;
+                    interaction_matrix(i, j) = ii*c*integral/4.;
                 }
             }
             return interaction_matrix;
@@ -184,8 +183,8 @@ namespace parametricbem2d {
                                                 const AbstractBEMSpace &trial_space,
                                                 const AbstractBEMSpace &test_space,
                                                 const QuadRule &GaussQR,
-                                                const double c,
-                                                const complex_t k){
+                                                const complex_t k,
+                                                const double c){
             unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in space
             int Qtrial = trial_space.getQ();
@@ -217,9 +216,9 @@ namespace parametricbem2d {
                         normal << tangent(1), -tangent(0);
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
-                        if ( abs(k)*(pi[s]-pi_p[t]).norm() > epsilon ) { // Away from singularity
-                            result = (sp_bessel::hankelH1p(1,k*(pi[s]-pi_p[t]).norm(),2)*(pi[s]-pi_p[t]).norm()*k
-                                      + 2.*sp_bessel::hankelH1p(1,k*(pi[s]-pi_p[t]).norm()))
+                        if ( abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon ) { // Away from singularity
+                            result = (sp_bessel::hankelH1p(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm(),2)*(pi[s]-pi_p[t]).norm()*k*sqrt(c)
+                                      + 2.*sp_bessel::hankelH1p(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm()))
                                      *(pi[s]-pi_p[t]).dot(normal);
                         }
                         return result*F(t)*G(s);
@@ -235,7 +234,7 @@ namespace parametricbem2d {
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = ii*c*c*integral/4.;
+                    interaction_matrix(i, j) = ii*c*integral/4.;
                 }
             }
             return interaction_matrix;
@@ -245,8 +244,8 @@ namespace parametricbem2d {
                                         const AbstractBEMSpace &trial_space,
                                         const AbstractBEMSpace &test_space,
                                         const unsigned int &N,
-                                        const double c,
-                                        const complex_t k){
+                                        const complex_t k,
+                                        const double c){
             // Getting number of panels in the mesh
             unsigned int numpanels = mesh.getNumPanels();
             // Getting dimensions for trial and test spaces
@@ -267,7 +266,7 @@ namespace parametricbem2d {
                 for (unsigned int j = 0; j < numpanels; ++j) {
                     // Getting the interaction matrix for the pair of panels i and j
                     Eigen::MatrixXcd interaction_matrix = InteractionMatrix(
-                            *panels[i], *panels[j], trial_space, test_space, GaussQR, CGaussQR, c, k);
+                            *panels[i], *panels[j], trial_space, test_space, GaussQR, CGaussQR, k, c);
                     // Local to global mapping of the elements in interaction matrix
                     for (unsigned int I = 0; I < Qtest; ++I) {
                         for (unsigned int J = 0; J < Qtrial; ++J) {
@@ -285,5 +284,3 @@ namespace parametricbem2d {
         }
 
     } // namespace double_layer_helmholtz
-} // namespace parametricbem2d
-

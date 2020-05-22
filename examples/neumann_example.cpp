@@ -15,7 +15,7 @@ int main() {
     double eps = 0.25;
     Eigen::Vector2d ipt(0.125,0.0);
     double k = 0.63;
-    parametricbem2d::ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
+    ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
     unsigned order = 11;
     unsigned n_runs = 20;
     double numpanels[n_runs];
@@ -29,12 +29,12 @@ int main() {
     auto fund_sol_N = [&] (double x1, double x2){
         return sol::fund_sol_N(k,x1,x2,ipt[0],ipt[1]);
     };
-    parametricbem2d::DiscontinuousSpace<0> discont_space;
-    parametricbem2d::ContinuousSpace<1> cont_space;
+    DiscontinuousSpace<0> discont_space;
+    ContinuousSpace<1> cont_space;
     // Loop over number of panels
     for (unsigned i = 0; i <= n_runs; i++) {
-        parametricbem2d::ParametrizedMesh mesh(curve.split(numpanels[i]));
-        Eigen::VectorXcd Tn_dfk = parametricbem2d::bvp::direct_first_kind::solve_neumann(
+        ParametrizedMesh mesh(curve.split(numpanels[i]));
+        Eigen::VectorXcd Tn_dfk = bvp::direct_first_kind::solve_neumann(
                 mesh, fund_sol, fund_sol_N, order, k);
     }
 

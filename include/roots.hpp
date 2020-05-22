@@ -2,12 +2,11 @@
 // Created by diegorenner on 4/29/20.
 //
 
-#ifndef HELMHOLTZTRANSMISSIONPROBLEM_FIND_ZEROS_HPP
-#define HELMHOLTZTRANSMISSIONPROBLEM_FIND_ZEROS_HPP
+#ifndef HELMHOLTZTRANSMISSIONPROBLEM_ROOTS_HPP
+#define HELMHOLTZTRANSMISSIONPROBLEM_ROOTS_HPP
 
 #include <Eigen/Dense>
 
-namespace parametricbem2d {
     double zbrent( const std::function<double(double)> f,
                    double x1,
                    double x2,
@@ -16,13 +15,19 @@ namespace parametricbem2d {
     double rtsafe( const std::function<Eigen::MatrixXd(double)> f,
                    double x1,
                    double x2,
-                   double tol);
+                   double tol,
+                   bool root_found);
 
-    double secant_method( const std::function<double(double)> f,
+    Eigen::Vector2d parabolic_approximation(const std::function<Eigen::VectorXd(double)> f,
+                                            const std::function<Eigen::VectorXd(double)> f_der,
+                                            const std::function<Eigen::VectorXd(double)> f_der2,
+                                            const double x0,
+                                            double step);
+
+    double secant_method( std::function<double(double)> f,
             double x0,
             double x1,
             const double tol,
             const unsigned maxIter);
 
-}
-#endif //HELMHOLTZTRANSMISSIONPROBLEM_FIND_ZEROS_HPP
+#endif //HELMHOLTZTRANSMISSIONPROBLEM_ROOTS_HPP

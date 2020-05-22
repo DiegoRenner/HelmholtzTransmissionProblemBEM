@@ -16,7 +16,6 @@
 #include "abstract_parametrized_curve.hpp"
 #include "gauleg.hpp"
 
-namespace parametricbem2d {
 /**
  * This namespace contains all the functions for evaluating the Double Layer
  * Galerkin Matrix using quadrature and panel oriented assembly
@@ -44,8 +43,8 @@ namespace parametricbem2d {
                                                  const AbstractBEMSpace &trial_space,
                                                  const AbstractBEMSpace &test_space,
                                                  const QuadRule &GaussQR,
-                                                 const double c,
-                                                 const std::complex<double> k);
+                                                 const std::complex<double> k,
+                                                 const double c);
 
 /**
  * This function is used to evaluate the Interaction Matrix for a pair of
@@ -68,8 +67,8 @@ namespace parametricbem2d {
                                                    const AbstractBEMSpace &trial_space,
                                                    const AbstractBEMSpace &test_space,
                                                    const QuadRule &GaussQR,
-                                                   const double c,
-                                                   const std::complex<double> k);
+                                                   const std::complex<double> k,
+                                                   const double c);
 
 /**
  * This function is used to evaluate the Interaction Matrix for a pair of
@@ -91,8 +90,8 @@ namespace parametricbem2d {
                                                 const AbstractBEMSpace &trial_space,
                                                 const AbstractBEMSpace &test_space,
                                                 const QuadRule &GaussQR,
-                                                const double c,
-                                                const std::complex<double> k);
+                                                const std::complex<double> k,
+                                                const double c);
 
 /**
  * This function is used to evaluate the Interaction Matrix defined in
@@ -132,9 +131,8 @@ namespace parametricbem2d {
                                            const AbstractBEMSpace &test_space,
                                            const QuadRule &GaussQR,
                                            const QuadRule &CGaussQR,
-                                           const double c,
-                                           const std::complex<double> k);
-
+                                           const std::complex<double> k,
+                                           const double c);
 /**
  * This function is used to evaluate the full Galerkin matrix based on the
  * Bilinear form for Double Layer BIO. It uses the trial and test spaces
@@ -154,10 +152,9 @@ namespace parametricbem2d {
                                         const AbstractBEMSpace &trial_space,
                                         const AbstractBEMSpace &test_space,
                                         const unsigned int &N,
-                                        const double c,
-                                        const std::complex<double> k);
+                                        const std::complex<double> k,
+                                        const double c);
 
     }
-} // namespace parametricbem2d
 
 #endif // DOUBLELAYERHPP

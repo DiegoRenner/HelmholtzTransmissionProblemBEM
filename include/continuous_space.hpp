@@ -12,7 +12,6 @@
 
 #include "abstract_bem_space.hpp"
 
-namespace parametricbem2d {
 /**
  * \class ContinuousSpace
  * \brief This templated class inherits from the class AbstractBEMSpace
@@ -224,6 +223,5 @@ namespace parametricbem2d {
             referenceshapefunctiondots_.push_back(b3dot);
         }
     };
-} // namespace parametricbem2d
 
 #endif // CONTSPACEHPP

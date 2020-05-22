@@ -11,7 +11,6 @@
 
 #include "abstract_parametrized_curve.hpp"
 
-namespace parametricbem2d {
 /**
  * \class ParametrizedFourierSum
  * \brief This class represents Fourier Sum based parametrization
@@ -94,6 +93,5 @@ private:
    */
   Eigen::Vector2d center_;
 }; // class ParametrizedFourierSum
-} // namespace parametricbem2d
 
 #endif // PARAMETRIZEDFOURIERSUMHPP

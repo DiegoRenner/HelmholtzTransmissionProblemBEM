@@ -12,7 +12,6 @@
 #include <iostream>
 #include "mass_matrix.hpp"
 
-namespace parametricbem2d {
     namespace mass_matrix {
 
         typedef std::complex<double> complex_t;
@@ -110,4 +109,3 @@ namespace parametricbem2d {
             return output;
         }
     } //namespace single_layer_helmholtz
-} // namespace parametricbem2d

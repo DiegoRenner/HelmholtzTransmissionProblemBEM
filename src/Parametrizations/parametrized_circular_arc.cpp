@@ -14,8 +14,6 @@
 #include <Eigen/Dense>
 #define _USE_MATH_DEFINES // for Pi
 
-namespace parametricbem2d {
-
     ParametrizedCircularArc::ParametrizedCircularArc(Eigen::Vector2d center,
                                                      double r, double phi_start,
                                                      double phi_end)
@@ -108,5 +106,3 @@ namespace parametricbem2d {
     double ParametrizedCircularArc::length() const {
         return radius_ * (phi_end_ - phi_start_);
     }
-
-} // namespace parametricbem2d

@@ -18,7 +18,6 @@
  * \brief This namespace contains all the classes and functions for
  *        the 2D-Parametric BEM package.
  */
-namespace parametricbem2d {
 // Forward declaration of the class for using it in the typedef for PanelVector
 class AbstractParametrizedCurve;
 
@@ -205,7 +204,5 @@ inline double rho(const AbstractParametrizedCurve &pi,
   // Admissibility formula
   return num / denom;
 }
-
-} // namespace parametricbem2d
 
 #endif // PARAMETRIZEDCURVEHPP

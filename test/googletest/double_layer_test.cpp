@@ -1,7 +1,6 @@
 //
 // Created by diegorenner on 2/20/20.
 //
-#include "double_layer_test.hpp"
 #include <complex>
 #include <Eigen/Dense>
 #include <gtest/gtest.h>
@@ -17,26 +16,26 @@
 typedef std::complex<double> complex_t;
 double sqrt_epsilon = std::sqrt(std::numeric_limits<double>::epsilon());
 
-parametricbem2d::DiscontinuousSpace<0> discont_space;
-parametricbem2d::ContinuousSpace<1> cont_space;
+DiscontinuousSpace<0> discont_space;
+ContinuousSpace<1> cont_space;
 
 double k = 1.0;
 double n_i = 23.0;
 double eps = 0.25;
-parametricbem2d::ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
+ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
 unsigned order = 11;
 double c_o = k;
 double c_i = k*sqrt(n_i);
 int numpanels = 50;
-parametricbem2d::ParametrizedMesh mesh(curve.split(numpanels));
-Eigen::VectorXcd K = parametricbem2d::double_layer_helmholtz::GalerkinMatrix(mesh,cont_space,discont_space,order,c_o)
+ParametrizedMesh mesh(curve.split(numpanels));
+Eigen::VectorXcd K = double_layer_helmholtz::GalerkinMatrix(mesh,cont_space,discont_space,order,k,n_i)
         .block(0,0,1,numpanels).transpose();
 Eigen::VectorXcd K_expected(numpanels);
 std::ifstream fp_data;
 double real, imag;
 char sign;
 int i = 0;
-std::string path = "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/double_layer_o_" + std::to_string(numpanels) + ".dat";
+std::string path = "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/double_layer_i_" + std::to_string(numpanels) + ".dat";
 
 TEST(DoubleLayerTest, disjoint_fair) {
     fp_data.open(path);

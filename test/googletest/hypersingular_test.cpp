@@ -1,14 +1,10 @@
 //
 // Created by diegorenner on 2/20/20.
 //
-#include "hypersingular_test.hpp"
 #include <complex>
 #include <Eigen/Dense>
 #include <gtest/gtest.h>
 #include "hypersingular.hpp"
-#include "single_layer.hpp"
-#include "hypersingular_cont.hpp"
-#include "hypersingular_discont.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
@@ -20,23 +16,19 @@
 typedef std::complex<double> complex_t;
 double sqrt_epsilon = std::sqrt(std::numeric_limits<double>::epsilon());
 
-parametricbem2d::DiscontinuousSpace<0> discont_space;
-parametricbem2d::ContinuousSpace<1> cont_space;
+DiscontinuousSpace<0> discont_space;
+ContinuousSpace<1> cont_space;
 
 double k = 1.0;
 double n_i = 23.0;
 double eps = 0.25;
-parametricbem2d::ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
+ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
 unsigned order = 11;
 double c_o = k;
 double c_i = k*sqrt(n_i);
 int numpanels = 50;
-parametricbem2d::ParametrizedMesh mesh(curve.split(numpanels));
-//Eigen::VectorXcd W_cont =
-//        parametricbem2d::hypersingular_helmholtz_cont::GalerkinMatrix(mesh, cont_space, order, c_i).block(0,0,1,numpanels).transpose();
-//Eigen::VectorXcd W_discont =
-//        parametricbem2d::hypersingular_helmholtz_discont::GalerkinMatrix(mesh, discont_space, order, c_i).block(0,0,1,numpanels).transpose();
-Eigen::VectorXcd W = parametricbem2d::hypersingular_helmholtz::GalerkinMatrix(mesh,cont_space, order, c_i).block(0,0,1,numpanels).transpose();
+ParametrizedMesh mesh(curve.split(numpanels));
+Eigen::VectorXcd W = hypersingular_helmholtz::GalerkinMatrix(mesh,cont_space, order, k,n_i).block(0,0,1,numpanels).transpose();
 Eigen::VectorXcd W_expected(numpanels);
 std::ifstream fp_data;
 double real, imag;

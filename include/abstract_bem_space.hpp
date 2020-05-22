@@ -10,7 +10,6 @@
 
 #include "parametrized_mesh.hpp"
 
-namespace parametricbem2d {
 /**
  * \class AbstractBEMSpace
  * \brief This abstract class declares the interface for a BEM Space
@@ -228,6 +227,5 @@ namespace parametricbem2d {
          */
         int q_;
     }; // class AbstractBEMSpace
-} // namespace parametricbem2d
 
 #endif // ABSTRACTBEMSPACEHPP

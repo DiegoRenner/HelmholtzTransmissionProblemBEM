@@ -16,7 +16,6 @@
 #include "abstract_parametrized_curve.hpp"
 #include "gauleg.hpp"
 
-namespace parametricbem2d {
     namespace mass_matrix{
 /**
  * This function is used to evaluate the Interaction Matrix for the pair
@@ -91,6 +90,5 @@ namespace parametricbem2d {
                                         const AbstractBEMSpace &test_space,
                                         const unsigned int &N);
     } //namespace mass_matrix
-} // namespace parametricbem2d
 
 #endif // SINGLELAYERHPP

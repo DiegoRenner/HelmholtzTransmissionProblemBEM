@@ -11,7 +11,6 @@
 
 #include "abstract_parametrized_curve.hpp"
 
-namespace parametricbem2d {
 /**
  * \class ParametrizedMesh
  * \brief This class represents a mesh which is comprised of panels in the
@@ -77,6 +76,5 @@ private:
    */
   unsigned split_;
 }; // class ParametrizedMesh
-} // namespace parametricbem2d
 
 #endif // PARAMETRIZEDMESHHPP

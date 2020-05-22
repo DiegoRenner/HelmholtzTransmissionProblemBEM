@@ -12,7 +12,6 @@
 #include "abstract_parametrized_curve.hpp"
 
 
-namespace parametricbem2d {
 /**
  * \class ParametrizedCircularArc
  * \brief This class represents the parametrization
@@ -81,6 +80,5 @@ private:
    */
   const double phi_end_;
 }; // class ParametrizedCircularArc
-} // namespace parametricbem2d
 
 #endif // PARAMETRIZEDCIRCULARARCHPP

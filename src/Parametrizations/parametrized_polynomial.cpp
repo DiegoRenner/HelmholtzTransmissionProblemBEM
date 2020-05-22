@@ -17,7 +17,6 @@
 
 #include <Eigen/Dense>
 
-namespace parametricbem2d {
 using CoefficientsList = typename ParametrizedPolynomial::CoefficientsList;
 
 ParametrizedPolynomial::ParametrizedPolynomial(CoefficientsList coeffs,
@@ -87,4 +86,3 @@ PanelVector ParametrizedPolynomial::split(unsigned int N) const {
   }
   return parametrization_parts;
 }
-} // namespace parametricbem2d

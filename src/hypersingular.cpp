@@ -13,7 +13,6 @@
 #include "discontinuous_space.hpp"
 #include "/usr/include/complex_bessel.h"
 
-namespace parametricbem2d {
     namespace hypersingular_helmholtz {
 
         typedef std::complex<double> complex_t;
@@ -25,24 +24,26 @@ namespace parametricbem2d {
                                            const AbstractBEMSpace &space,
                                            const QuadRule &GaussQR,
                                            const QuadRule &CGaussQR,
-                                           complex_t k){
-            if (&pi == &pi_p) { // Same Panels case
-                return ComputeIntegralCoinciding(pi, pi_p, space, CGaussQR, k);
+                                           const complex_t k,
+                                           const double c) {
+                if (&pi == &pi_p) { // Same Panels case
+                    return ComputeIntegralCoinciding(pi, pi_p, space, CGaussQR, k, c);
+                }
+                else if ((pi(1) - pi_p(-1)).norm() / 100. < epsilon ||
+                         (pi(-1) - pi_p(1)).norm() / 100. < epsilon) {// Adjacent Panels case
+                    return ComputeIntegralAdjacent(pi, pi_p, space, CGaussQR, k, c);
+                }
+                else {// Disjoint panels case*/
+                    return ComputeIntegralGeneral(pi, pi_p, space, GaussQR, k, c);
+                }
             }
-            else if ((pi(1) - pi_p(-1)).norm() / 100. < epsilon ||
-                     (pi(-1) - pi_p(1)).norm() / 100. < epsilon) {// Adjacent Panels case
-                return ComputeIntegralAdjacent(pi, pi_p, space, CGaussQR, k);
-            }
-            else {// Disjoint panels case*/
-                return ComputeIntegralGeneral(pi, pi_p, space, GaussQR, k);
-            }
-        }
 
         Eigen::MatrixXcd ComputeIntegralCoinciding(const AbstractParametrizedCurve &pi,
                                                    const AbstractParametrizedCurve &pi_p,
                                                    const AbstractBEMSpace &space,
                                                    const QuadRule &GaussQR,
-                                                   complex_t k) {
+                                                   const complex_t k,
+                                                   const double c) {
             unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
             int Q = space.getQ();
@@ -80,12 +81,11 @@ namespace parametricbem2d {
                         normal << tangent(1), -tangent(0);
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
-                        if (abs(k)*(pi[s]-pi_p[t]).norm() > epsilon ) {
-                            result = ii*sp_bessel::hankelH1(0,k * (pi[s] - pi_p[t]).norm())/4.;
+                        if (abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon ) {
+                            result = ii*sp_bessel::hankelH1(0,k*sqrt(c)* (pi[s] - pi_p[t]).norm())/4.;
                         } else if ((pi[s]-pi_p[t]).norm() > epsilon ){
-                            result = -1/(2*M_PI)*log((pi[s]-pi_p[t]).norm());
-                        }
-                        return result * (F_arc(t) * G_arc(s) - k * k * F(t) * G(s) * normal.dot(normal_p));
+                            result -1/(2*M_PI)*log((pi[s]-pi_p[t]).norm());                        }
+                        return result * (F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p));
                     };
                     complex_t integral = 0;
                     // Tensor product quadrature for double integral in \f$\eqref{eq:Kidp}\f$
@@ -109,7 +109,8 @@ namespace parametricbem2d {
                                                  const AbstractParametrizedCurve &pi_p,
                                                  const AbstractBEMSpace &space,
                                                  const QuadRule &GaussQR,
-                                                 complex_t k) {
+                                                 const complex_t k,
+                                                 const double c) {
             unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
             int Qtrial = space.getQ();
@@ -155,32 +156,32 @@ namespace parametricbem2d {
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.,0.);
                         // Finding the tangent of pi_p to get its normal
-                        Eigen::Vector2d tangent_p = swap ? pi_p.Derivative_01_swapped(t) : pi_p.Derivative_01_swapped(t);
+                        Eigen::Vector2d tangent_p = swap ? -pi_p.Derivative_01_swapped(t) : pi_p.Derivative_01(t);
                         Eigen::Vector2d normal_p;
                         // Outward normal vector
                         normal_p << tangent_p(1), -tangent_p(0);
                         // Normalizing the normal vector
                         normal_p = normal_p / normal_p.norm();
-                        Eigen::Vector2d tangent = swap ? pi.Derivative_01(s) : pi.Derivative_01_swapped(s);
+                        Eigen::Vector2d tangent = swap ? pi.Derivative_01(s) : -pi.Derivative_01_swapped(s);
                         Eigen::Vector2d normal;
                         // Outward normal vector
                         normal << tangent(1), -tangent(0);
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
                         if (swap){
-                            if (abs(k)*(pi[s]-pi_p.swapped_op(t)).norm() > epsilon ) {
-                                result = ii*sp_bessel::hankelH1(0, k*(pi[s]-pi_p.swapped_op(t)).norm())/4.;
+                            if (abs(k*sqrt(c))*(pi[s]-pi_p.swapped_op(t)).norm() > epsilon ) {
+                                result = ii*sp_bessel::hankelH1(0, k*sqrt(c)*(pi[s]-pi_p.swapped_op(t)).norm())/4.;
                             } else if ((pi[s]-pi_p.swapped_op(t)).norm() > epsilon ){
                                 result = -1/(2*M_PI)*log((pi[s]-pi_p.swapped_op(t)).norm());
                             }
                         }else {
-                            if (abs(k)*(pi.swapped_op(s)-pi_p[t]).norm() > epsilon ) {
-                                result = ii*sp_bessel::hankelH1(0, k*(pi.swapped_op(s)-pi_p[t]).norm())/4.;
+                            if (abs(k*sqrt(c))*(pi.swapped_op(s)-pi_p[t]).norm() > epsilon ) {
+                                result = ii*sp_bessel::hankelH1(0, k*sqrt(c)*(pi.swapped_op(s)-pi_p[t]).norm())/4.;
                             } else if ((pi.swapped_op(s)-pi_p[t]).norm() > epsilon ){
                                 result = -1/(2*M_PI)*log((pi.swapped_op(s)-pi_p[t]).norm());
                             }
                         }
-                        return result * (F_arc(t) * G_arc(s) - k * k * F(t) * G(s) * normal.dot(normal_p));
+                        return result * (F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p));
                     };
                     complex_t integral = complex_t(0.,0.);
                     // Tensor product quadrature for double integral in \f$\eqref{eq:Kidp}\f$
@@ -204,7 +205,8 @@ namespace parametricbem2d {
                                                 const AbstractParametrizedCurve &pi_p,
                                                 const AbstractBEMSpace &space,
                                                 const QuadRule &GaussQR,
-                                                complex_t k) {
+                                                const complex_t k,
+                                                const double c){
             unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in space
             int Q = space.getQ();
@@ -246,12 +248,12 @@ namespace parametricbem2d {
                         normal << tangent(1), -tangent(0);
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
-                        if (abs(k)*(pi[s]-pi_p[t]).norm() > epsilon ) {
-                            result = ii*sp_bessel::hankelH1(0,k * (pi[s] - pi_p[t]).norm())/4.;
+                        if (abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon ) {
+                            result = ii*sp_bessel::hankelH1(0,k*sqrt(c)* (pi[s] - pi_p[t]).norm())/4.;
                         } else if ((pi[s]-pi_p[t]).norm() > epsilon ){
                             result = -1/(2*M_PI)*log((pi[s]-pi_p[t]).norm());
                         }
-                        return result * (F_arc(t) * G_arc(s) - k * k * F(t) * G(s) * normal.dot(normal_p));
+                        return result * (F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p));
                     };
                     complex_t integral = complex_t(0.,0.);
                     // Tensor product quadrature for double integral
@@ -273,7 +275,8 @@ namespace parametricbem2d {
         Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
                                         const AbstractBEMSpace &space,
                                         const unsigned int &N,
-                                        complex_t k){
+                                        const complex_t k,
+                                        const double c) {
             // Getting the number of panels in the mesh
             unsigned int numpanels = mesh.getNumPanels();
             // Getting dimensions of trial/test space
@@ -292,7 +295,7 @@ namespace parametricbem2d {
                 for (unsigned int j = 0; j < numpanels; ++j) {
                     // Getting the interaction matrix for the pair of panels i and j
                     Eigen::MatrixXcd interaction_matrix =
-                            InteractionMatrix(*panels[i], *panels[j], space, GaussQR, CGaussQR, k);
+                            InteractionMatrix(*panels[i], *panels[j], space, GaussQR, CGaussQR, k, c);
                     // Local to global mapping of the elements in interaction matrix
                     for (unsigned int I = 0; I < Q; ++I) {
                         for (unsigned int J = 0; J < Q; ++J) {
@@ -308,4 +311,3 @@ namespace parametricbem2d {
         }
 
     }// namespace hypersingular_helmholtz
-} // namespace parametricbem2d

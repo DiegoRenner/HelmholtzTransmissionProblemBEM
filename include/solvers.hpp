@@ -1,5 +1,5 @@
 /**
- * \file dirichlet.hpp
+ * \file
  * \brief This file defines lowest order indirect/direct BVP solvers to solve a
  * Dirichlet Boundary Value problem of the form given in \f$\eqref{eq:dirbvp}\f$
  *
@@ -11,7 +11,6 @@
 
 #include "parametrized_mesh.hpp"
 
-namespace parametricbem2d {
     namespace bvp {
 /**
  * This namespace contains the solver using the direct first kind method which
@@ -20,56 +19,63 @@ namespace parametricbem2d {
  */
         namespace direct_first_kind {
             Eigen::VectorXcd solve_dirichlet(const ParametrizedMesh &mesh,
-                                             std::function<std::complex<double>(double, double)> u_dir,
-                                             std::function<std::complex<double>(double, double)> u_neu,
-                                             unsigned order,
-                                             const double k);
+                                             const std::function<std::complex<double>(double, double)> u_dir,
+                                             const std::function<std::complex<double>(double, double)> u_neu,
+                                             const unsigned order,
+                                             const double k,
+                                             const double c);
 
             Eigen::VectorXcd solve_neumann(const ParametrizedMesh &mesh,
-                                           std::function<std::complex<double>(double, double)> u_dir,
-                                           std::function<std::complex<double>(double, double)> u_neu,
-                                           unsigned order,
-                                           const double k);
+                                           const std::function<std::complex<double>(double, double)> u_dir,
+                                           const std::function<std::complex<double>(double, double)> u_neu,
+                                           const unsigned order,
+                                           const double k,
+                                           const double c);
         } // namespace direct_first_kind
     } // namespace bvp
     namespace tsp {
         namespace direct_second_kind {
             Eigen::VectorXcd solve_debug_3(const ParametrizedMesh &mesh,
-                                           std::function<std::complex<double>(double, double)> u_inc_dir,
-                                           std::function<std::complex<double>(double, double)> u_inc_neu,
-                                           std::function<std::complex<double>(double, double)> sol_dir,
-                                           std::function<std::complex<double>(double, double)> sol_neu,
-                                           unsigned order,
-                                           const double k_o,
-                                           const double k_i);
+                                           const std::function<std::complex<double>(double, double)> u_inc_dir,
+                                           const std::function<std::complex<double>(double, double)> u_inc_neu,
+                                           const std::function<std::complex<double>(double, double)> sol_dir,
+                                           const std::function<std::complex<double>(double, double)> sol_neu,
+                                           const unsigned order,
+                                           const double k,
+                                           const double c_o,
+                                           const double c_i);
             Eigen::VectorXcd solve_debug_2(const ParametrizedMesh &mesh,
-                                           std::function<std::complex<double>(double, double)> u_inc_dir,
-                                           std::function<std::complex<double>(double, double)> u_inc_neu,
-                                           std::function<std::complex<double>(double, double)> sol_dir,
-                                           std::function<std::complex<double>(double, double)> sol_neu,
-                                           unsigned order,
-                                           const double k);
+                                           const std::function<std::complex<double>(double, double)> u_inc_dir,
+                                           const std::function<std::complex<double>(double, double)> u_inc_neu,
+                                           const std::function<std::complex<double>(double, double)> sol_dir,
+                                           const std::function<std::complex<double>(double, double)> sol_neu,
+                                           const unsigned order,
+                                           const double k,
+                                           const double c);
 
             Eigen::VectorXcd solve_debug_1(const ParametrizedMesh &mesh,
-                                           std::function<std::complex<double>(double, double)> u_inc_dir,
-                                           std::function<std::complex<double>(double, double)> u_inc_neu,
-                                           std::function<std::complex<double>(double, double)> sol_dir,
-                                           std::function<std::complex<double>(double, double)> sol_neu,
-                                           unsigned order,
-                                           const double k);
+                                           const std::function<std::complex<double>(double, double)> u_inc_dir,
+                                           const std::function<std::complex<double>(double, double)> u_inc_neu,
+                                           const std::function<std::complex<double>(double, double)> sol_dir,
+                                           const std::function<std::complex<double>(double, double)> sol_neu,
+                                           const unsigned order,
+                                           const double k,
+                                           const double c);
 
             Eigen::VectorXcd solve(const ParametrizedMesh &mesh,
-                                   std::function<std::complex<double>(double, double)> u_inc_dir,
-                                   std::function<std::complex<double>(double, double)> u_inc_neu,
-                                   std::function<std::complex<double>(double, double)> sol_dir,
-                                   std::function<std::complex<double>(double, double)> sol_neu,
-                                   unsigned order,
-                                   const double k_o,
-                                   const double k_i);
+                                   const std::function<std::complex<double>(double, double)> u_inc_dir,
+                                   const std::function<std::complex<double>(double, double)> u_inc_neu,
+                                   const std::function<std::complex<double>(double, double)> sol_dir,
+                                   const std::function<std::complex<double>(double, double)> sol_neu,
+                                   const unsigned order,
+                                   const double k,
+                                   const double c_o,
+                                   const double c_i);
             Eigen::MatrixXcd compute_operator(const ParametrizedMesh &mesh,
-                                   unsigned order,
-                                   std::complex<double> k_o,
-                                   std::complex<double> k_i);
+                                   const unsigned order,
+                                   const std::complex<double> k,
+                                   const double c_o,
+                                   const double c_i);
         } // namespace direct_second_kind
 /**
  * This function is used to solve the Dirichlet boundary value problem given
@@ -91,5 +97,4 @@ namespace parametricbem2d {
  * has the variational formulation as given in \f$\eqref{eq:iddirVv}\f$. The
  * Solver uses the lowest order BEM spaces for computation.
  */
-} // namespace parametricbem2d
 #endif // DIRICHLETHPP
