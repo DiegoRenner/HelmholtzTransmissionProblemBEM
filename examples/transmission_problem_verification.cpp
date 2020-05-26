@@ -7,6 +7,8 @@
 #include "continuous_space.hpp"
 #include "discontinuous_space.hpp"
 #include "mass_matrix.hpp"
+#include <chrono>
+using namespace std::chrono;
 
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
@@ -52,8 +54,12 @@ int main(int argc, char** argv) {
     // Loop over number of panels
     for (unsigned i = 0; i <= n_runs; i++) {
         ParametrizedMesh mesh(curve.split(numpanels[i]));
+        auto start = high_resolution_clock::now();
         Eigen::VectorXcd sol = tsp::direct_second_kind::solve(
                 mesh, u_i_dir, u_i_neu, u_t_dir, u_t_neu, order, k, c_o, c_i);
+        auto end = high_resolution_clock::now();
+        auto duration = duration_cast<milligiseconds>(end - start);
+
         Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
         Eigen::MatrixXcd M_discont = mass_matrix::GalerkinMatrix(mesh,discont_space,discont_space,order);
         Eigen::MatrixXcd M(2*numpanels[i],2*numpanels[i]);
@@ -65,7 +71,7 @@ int main(int argc, char** argv) {
         Eigen::VectorXcd u_t_N(2*numpanels[i]);
         u_t_N << u_t_dir_N, u_t_neu_N;
         filename.open(argv[7], std::ios_base::app);
-        filename << mesh.getPanels()[0]->length() << " " << sqrt(abs((sol-u_t_N).dot(M*(sol-u_t_N)))) << std::endl;
+        filename << mesh.getPanels()[0]->length() << " " << sqrt(abs((sol-u_t_N).dot(M*(sol-u_t_N)))) << " " << duration.count() << std::endl;
         filename.close();
 
     }
