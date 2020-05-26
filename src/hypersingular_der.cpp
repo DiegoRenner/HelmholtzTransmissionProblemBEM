@@ -54,10 +54,10 @@
                 for (int j = 0; j < Q; ++j) {
                     // Lambda expression for functions F and G in \f$\eqref{eq:Vidp}\f$
                     auto F = [&](double t) { // Function associated with panel pi_p
-                        return space.evaluateShapeFunction_01(j, t)*pi_p.Derivative_01(t).norm();
+                        return space.evaluateShapeFunction(j, t) * pi_p.Derivative_01(t).norm();
                     };
                     auto G = [&](double s) { // Function associated with panel pi
-                        return space.evaluateShapeFunction_01(i, s)*pi.Derivative_01(s).norm();
+                        return space.evaluateShapeFunction(i, s) * pi.Derivative_01(s).norm();
                     };
                     auto F_arc = [&](double t) { // Function associated with panel pi_p
                         return space.evaluateShapeFunctionDot_01(j, t);
@@ -127,12 +127,12 @@
                         if (swap) {
                             return space.evaluateShapeFunction_01_swapped(j, t) * pi_p.Derivative_01_swapped(t).norm();
                         } else {
-                            return space.evaluateShapeFunction_01(j, t) * pi_p.Derivative_01(t).norm();
+                            return space.evaluateShapeFunction(j, t) * pi_p.Derivative_01(t).norm();
                         }
                     };
                     auto G = [&](double s) {
                         if (swap) {
-                            return space.evaluateShapeFunction_01(i, s) * pi.Derivative_01(s).norm();
+                            return space.evaluateShapeFunction(i, s) * pi.Derivative_01(s).norm();
                         } else {
                             return space.evaluateShapeFunction_01_swapped(i, s) * pi.Derivative_01_swapped(s).norm();
                         }
@@ -218,10 +218,10 @@
                     // Lambda expression for functions F and G in \f$\eqref{eq:titg}\f$ for
                     // Double Layer BIO
                     auto F = [&](double t) { // Function associated with panel pi_p
-                        return space.evaluateShapeFunction_01(j, t)*pi_p.Derivative_01(t).norm();
+                        return space.evaluateShapeFunction(j, t) * pi_p.Derivative_01(t).norm();
                     };
                     auto G = [&](double s) { // Function associated with panel pi
-                        return space.evaluateShapeFunction_01(i, s)*pi.Derivative_01(s).norm();
+                        return space.evaluateShapeFunction(i, s) * pi.Derivative_01(s).norm();
                     };
                     auto F_arc = [&](double t) { // Function associated with panel pi_p
                         return space.evaluateShapeFunctionDot_01(j, t);

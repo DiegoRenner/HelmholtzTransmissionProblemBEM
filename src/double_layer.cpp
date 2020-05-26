@@ -57,10 +57,10 @@
                 for (int j = 0; j < Qtrial; ++j) {
                     // Lambda expression for functions F and G in \f$\eqref{eq:Kidp}\f$
                     auto F = [&](double t) {
-                        return trial_space.evaluateShapeFunction_01(j, t) * pi_p.Derivative_01(t).norm();
+                        return trial_space.evaluateShapeFunction(j, t) * pi_p.Derivative_01(t).norm();
                     };
                     auto G = [&](double s) {
-                        return test_space.evaluateShapeFunction_01(i, s) * pi.Derivative_01(s).norm();
+                        return test_space.evaluateShapeFunction(i, s) * pi.Derivative_01(s).norm();
                     };
                     // Lambda expression for the integrand in \f$\eqref{eq:Kidp}\f$
                     auto integrand = [&](double s, double t) {
@@ -121,12 +121,12 @@
                         if (swap) {
                             return trial_space.evaluateShapeFunction_01_swapped(j, t) * pi_p.Derivative_01_swapped(t).norm();
                         } else {
-                            return trial_space.evaluateShapeFunction_01(j, t) * pi_p.Derivative_01(t).norm();
+                            return trial_space.evaluateShapeFunction(j, t) * pi_p.Derivative_01(t).norm();
                         }
                     };
                     auto G = [&](double s) {
                         if (swap) {
-                            return test_space.evaluateShapeFunction_01(i, s) * pi.Derivative_01(s).norm();
+                            return test_space.evaluateShapeFunction(i, s) * pi.Derivative_01(s).norm();
                         } else {
                             return test_space.evaluateShapeFunction_01_swapped(i, s) * pi.Derivative_01_swapped(s).norm();
                         }
@@ -201,11 +201,11 @@
                     // Lambda expression for functions F and G in \f$\eqref{eq:titg}\f$ for
                     // Double Layer BIO
                     auto F = [&](double t) { // Function associated with panel pi_p
-                        return trial_space.evaluateShapeFunction_01(j, t) *
+                        return trial_space.evaluateShapeFunction(j, t) *
                                pi_p.Derivative_01(t).norm();
                     };
                     auto G = [&](double s) { // Function associated with panel pi
-                        return test_space.evaluateShapeFunction_01(i, s) *
+                        return test_space.evaluateShapeFunction(i, s) *
                                pi.Derivative_01(s).norm();
                     };
                     // Lambda expression for \f$\hat{K}\f$ in \f$\eqref{eq:titg}\f$ for double

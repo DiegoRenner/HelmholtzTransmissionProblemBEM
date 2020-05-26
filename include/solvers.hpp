@@ -35,33 +35,6 @@
     } // namespace bvp
     namespace tsp {
         namespace direct_second_kind {
-            Eigen::VectorXcd solve_debug_3(const ParametrizedMesh &mesh,
-                                           const std::function<std::complex<double>(double, double)> u_inc_dir,
-                                           const std::function<std::complex<double>(double, double)> u_inc_neu,
-                                           const std::function<std::complex<double>(double, double)> sol_dir,
-                                           const std::function<std::complex<double>(double, double)> sol_neu,
-                                           const unsigned order,
-                                           const double k,
-                                           const double c_o,
-                                           const double c_i);
-            Eigen::VectorXcd solve_debug_2(const ParametrizedMesh &mesh,
-                                           const std::function<std::complex<double>(double, double)> u_inc_dir,
-                                           const std::function<std::complex<double>(double, double)> u_inc_neu,
-                                           const std::function<std::complex<double>(double, double)> sol_dir,
-                                           const std::function<std::complex<double>(double, double)> sol_neu,
-                                           const unsigned order,
-                                           const double k,
-                                           const double c);
-
-            Eigen::VectorXcd solve_debug_1(const ParametrizedMesh &mesh,
-                                           const std::function<std::complex<double>(double, double)> u_inc_dir,
-                                           const std::function<std::complex<double>(double, double)> u_inc_neu,
-                                           const std::function<std::complex<double>(double, double)> sol_dir,
-                                           const std::function<std::complex<double>(double, double)> sol_neu,
-                                           const unsigned order,
-                                           const double k,
-                                           const double c);
-
             Eigen::VectorXcd solve(const ParametrizedMesh &mesh,
                                    const std::function<std::complex<double>(double, double)> u_inc_dir,
                                    const std::function<std::complex<double>(double, double)> u_inc_neu,
@@ -69,11 +42,6 @@
                                    const std::function<std::complex<double>(double, double)> sol_neu,
                                    const unsigned order,
                                    const double k,
-                                   const double c_o,
-                                   const double c_i);
-            Eigen::MatrixXcd compute_operator(const ParametrizedMesh &mesh,
-                                   const unsigned order,
-                                   const std::complex<double> k,
                                    const double c_o,
                                    const double c_i);
         } // namespace direct_second_kind

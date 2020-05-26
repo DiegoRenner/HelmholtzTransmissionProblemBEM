@@ -53,10 +53,10 @@
                     // Lambda expression for functions F and G in \f$\eqref{eq:titg}\f$ for
                     // Single Layer BIO
                     auto F = [&](double t) { // Function associated with panel pi_p
-                        return trial_space.evaluateShapeFunction_01(j, t) * pi_p.Derivative_01(t).norm();
+                        return trial_space.evaluateShapeFunction(j, t) * pi_p.Derivative_01(t).norm();
                     };
                     auto G = [&](double s) { // Function associated with panel pi
-                        return test_space.evaluateShapeFunction_01(i, s);
+                        return test_space.evaluateShapeFunction(i, s);
                     };
                     complex_t integral = complex_t(0.,0.);
                     for (unsigned int k = 0; k < N; ++k) {

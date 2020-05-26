@@ -44,21 +44,7 @@
             return n;
         }
 
-        // Local to Global Map
-        unsigned int LocGlobMap2(unsigned int q, unsigned int n,
-                                 const ParametrizedMesh &mesh) const {
-            // Getting the mesh information
-            unsigned split = mesh.getSplit();
-            unsigned N = mesh.getNumPanels();
-            // Asserting the index of local shape function and the panel number are
-            // within limits
-            if (!(q <= q_ && n <= N)) {
-                throw std::out_of_range("Panel/RSF index out of range!");
-            }
-            return n;
-        }
-
-        // Space Dimensions as defined in \f$\ref{T:thm:dimbe}\f$
+    // Space Dimensions as defined in \f$\ref{T:thm:dimbe}\f$
         unsigned int getSpaceDim(unsigned int numpanels) const {
             return numpanels * q_;
         }
@@ -143,25 +129,7 @@
                 return N + n;
         }
 
-        // Local to Global Map 2 for annular domain
-        unsigned int LocGlobMap2(unsigned int q, unsigned int n,
-                                 const ParametrizedMesh &mesh) const {
-            // Getting the mesh information
-            unsigned split = mesh.getSplit();
-            unsigned N = mesh.getNumPanels();
-            // Asserting the index of local shape function and the panel number are
-            // within limits
-            if (!(q <= q_ && n <= N)) {
-                throw std::out_of_range("Panel/RSF index out of range!");
-            }
-
-            if (q == 1)
-                return n;
-            else
-                return N + n;
-        }
-
-        // Space Dimensions as defined in \f$\ref{T:thm:dimbe}\f$
+    // Space Dimensions as defined in \f$\ref{T:thm:dimbe}\f$
         unsigned int getSpaceDim(unsigned int numpanels) const {
             return numpanels * q_;
         }

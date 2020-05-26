@@ -1,12 +1,11 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wextra")
-
 add_executable(dirichlet_example dirichlet_example.cpp)
 add_executable(neumann_example neumann_example.cpp)
 add_executable(transmission_example transmission_problem_verification.cpp)
-add_executable(sv_derivative_verification_new sv_derivative_verification_new.cpp)
+add_executable(sv_derivative_verification sv_derivative_verification.cpp)
 add_executable(sv_derivative_verification_debug sv_derivative_verification_debug.cpp)
+add_executable(sv_derivative_full sv_derivative_full.cpp)
 add_executable(parabolic_approximation parabolic_approximation.cpp)
 
 add_library(generate_solution STATIC ../src/Utilities/generate_solution.cpp)
@@ -14,8 +13,9 @@ add_library(generate_solution STATIC ../src/Utilities/generate_solution.cpp)
 target_link_libraries(dirichlet_example parametrizations quadrature generate_solution solvers)
 target_link_libraries(neumann_example parametrizations generate_solution solvers)
 target_link_libraries(transmission_example parametrizations generate_solution solvers complex_bessel)
-target_link_libraries(sv_derivative_verification_new parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
+target_link_libraries(sv_derivative_verification parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
 target_link_libraries(sv_derivative_verification_debug parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
+target_link_libraries(sv_derivative_full parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
 target_link_libraries(parabolic_approximation parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
 
 

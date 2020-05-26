@@ -16,9 +16,9 @@
                    double x1,
                    double x2,
                    double tol,
-                   bool root_found);
+                   bool &root_found);
 
-    Eigen::Vector2d parabolic_approximation(const std::function<Eigen::VectorXd(double)> f,
+    Eigen::VectorXd parabolic_approximation(const std::function<Eigen::VectorXd(double)> f,
                                             const std::function<Eigen::VectorXd(double)> f_der,
                                             const std::function<Eigen::VectorXd(double)> f_der2,
                                             const double x0,

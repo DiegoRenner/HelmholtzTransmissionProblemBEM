@@ -48,7 +48,7 @@ int main() {
 
     // clear existing file
     std::ofstream filename;
-    filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/sv_analysis.dat", std::ofstream::out | std::ofstream::trunc);
+    filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/sv_derivative_verification_debug.dat", std::ofstream::out | std::ofstream::trunc);
     filename.close();
     DiscontinuousSpace<0> discont_space;
     ContinuousSpace<1> cont_space;
@@ -118,7 +118,7 @@ int main() {
                 double root =  rtsafe(sv_eval_both,k_temp.real(), k_temp.real()+h_x,epsilon,root_found);
                 std::cout << root << std::endl;
                 // write results to file for plotting later on
-                filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/sv_analysis.dat", std::ios_base::app);
+                filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/sv_derivative_verification_debug.dat", std::ios_base::app);
                 filename << k_temp.real() << " "<< res(m,0) << " " << res(m,1)  << " " << sv_ext_der1 << " " << res(m,2) << " " << sv_ext_der2;
                 double val_at_root = sv_eval_der(root);
                 if ( abs(val_at_root) > epsilon) {

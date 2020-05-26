@@ -2,7 +2,8 @@
  * \file abstract_bem_space.hpp
  * \brief This file declares an abstract class representing a BEM Space
  *
- * This File is a part of the 2D-Parametric BEM package
+ * This File is a part of the HelmholtzTransmissionProblem Library
+ * It was adapted from the 2D-Parametric BEM package
  */
 
 #ifndef ABSTRACTBEMSPACEHPP
@@ -18,8 +19,7 @@
     public:
         /**
          * This function maps a local shape function to the corresponding global shape
-         * function for a BEM space on the given number of panels, defined in
-         * \f$\eqref{eq:lgm}\f$. This is a pure virtual function and has to be
+         * function for a BEM space on the given number of panels. This is a pure virtual function and has to be
          * implemented in the derived classes.
          *
          * @param q Index of the local/reference shape function (>=1)
@@ -32,36 +32,19 @@
                                         unsigned int N) const = 0;
 
         /**
-         * This function maps a local shape function to the corresponding global shape
-         * function for a BEM space on the given number of panels, defined in
-         * \f$\eqref{eq:lgm}\f$. This is a pure virtual function and has to be
-         * implemented in the derived classes.
-         *
-         * @param q Index of the local/reference shape function (>=1)
-         * @param n Index of the panel for which this map is applied (>=1)
-         * @param mesh The mesh object for which the mapping is to be done
-         * @return Integer denoting the global shape function number corresponding
-         *         to the local shape function indexed by q for the panel no. n
-         */
-        virtual unsigned int LocGlobMap2(unsigned int q, unsigned int n,
-                                         const ParametrizedMesh &mesh) const {
-            return 0;
-        }
-
-        /**
          * This function is used for querying the parameter interval.
-         * The interval is fixed to be [-1,1] by declaring it as a non
+         * The interval is fixed to be [0,1] by declaring it as a non
          * virtual function, preventing overriding of this function.
          * The function is declared static as it is independent
          * of the concrete object.
          *
          * @return A std::pair<double,double> object containing
          *          the valid parameter range for parametrization
-         *          that is [-1,1]
+         *          that is [0,1]
          */
         static std::pair<double, double> ParameterRange(void) {
-            // Parameter range : [-1,1]
-            return std::make_pair(-1., 1.);
+            // Parameter range : [0,1]
+            return std::make_pair(0, 1.);
         }
 
         /**
@@ -76,20 +59,11 @@
          * This function is used to evaluate a particular reference shape function of
          * the BEM space at a given point.
          *
+         * @param q Index of the local/reference shape function (>=1)
+         * @param t Parameter value at which to evaluate
          * @return Value of the local shape function at the given point
          */
         double evaluateShapeFunction(unsigned int q, double t) const {
-            // Asserting that the requested shape function index is valid
-            if (!(q < q_))
-                throw std::out_of_range("Shape function index out of range!");
-            // Asserting that the evaluation point is within parameter domain
-            if (!(IsWithinParameterRange(t)))
-                throw std::out_of_range("Parameter for parametric curve not in range!");
-            // Evaluating the requested reference shape function which is stored in a
-            // vector with others
-            return referenceshapefunctions_[q](t);
-        }
-        double evaluateShapeFunction_01(unsigned int q, double t) const {
             // Asserting that the requested shape function index is valid
             if (!(q < q_))
                 throw std::out_of_range("Shape function index out of range!");

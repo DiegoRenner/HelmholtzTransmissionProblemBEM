@@ -47,24 +47,7 @@
                 return (n % N == 0) ? 1 : (n + 1);
         }
 
-        // Local to Global Map
-        unsigned int LocGlobMap2(unsigned int q, unsigned int n,
-                                 const ParametrizedMesh &mesh) const {
-            // Getting the mesh information
-            unsigned split = mesh.getSplit();
-            unsigned N = mesh.getNumPanels();
-            // Mapping depends whether domain is annular or not
-            if (split != 0) {
-                if (n <= split) // we are within the first boundary in the mesh
-                    return LocGlobMap(q, n, split);
-                else // for the second boundary in the mesh
-                    return LocGlobMap(q, n - split, N - split) + split;
-            } else { // simply connected domain
-                return LocGlobMap(q, n, N);
-            }
-        }
-
-        // Space Dimensions as defined in \f$\ref{T:thm:dimbe}\f$
+    // Space Dimensions as defined in \f$\ref{T:thm:dimbe}\f$
         unsigned int getSpaceDim(unsigned int numpanels) const {
             return numpanels * (q_ - 1);
         }

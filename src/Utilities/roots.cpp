@@ -94,7 +94,7 @@
                    double x1,
                    double x2,
                    double tol,
-                   bool root_found){
+                   bool &root_found){
         int j;
         double df,dx,dxold,f,fh,fl;
         double temp,xh,xl,rts;
@@ -176,7 +176,7 @@
         return 0.0;
         //Never get here.
     };
-    Eigen::Vector2d parabolic_approximation(const std::function<Eigen::VectorXd(double)> f,
+    Eigen::VectorXd parabolic_approximation(const std::function<Eigen::VectorXd(double)> f,
                                             const std::function<Eigen::VectorXd(double)> f_der,
                                             const std::function<Eigen::VectorXd(double)> f_der2,
                                             const double x0,
@@ -186,29 +186,38 @@
         Eigen::VectorXd ders2 = f_der2(x0);
         unsigned numsvs = vals.size();
         Eigen::VectorXd exts(numsvs);
-        bool adjust_step = false;
-        step = step/pow(ders2.cwiseAbs().maxCoeff(),2);
-        std::cout << ders2.cwiseAbs().maxCoeff() << std::endl;
-        std::cout << step << std::endl;
-        Eigen::Vector2d res;
+        bool adjust_step;
+        step = step/(1+ders2.cwiseAbs().maxCoeff());
+        Eigen::VectorXd res(4);
         do {
             adjust_step = false;
             for (unsigned i = 0; i < numsvs; i++) {
-                exts[i] = ders2[i] / (ders[i] + ders2[i]) * x0;
-                if ((exts[i] - x0) < 0 || abs(exts[i] - x0) > step) {
+                exts[i] = (-ders[i]/ders2[i] + x0);
+                if ( exts[i] - x0 > step) {
                     exts[i] = x0 + step;
+                } else if( exts[i] - x0 < 0 ){
+                    if (ders2[i]<0){
+                        exts[i] = x0+step;
+                    } else if (exts[i] -x0 < -step){
+                        exts[i] = x0 - 0.5 * step;
+                    }
                 }
             }
             res[0] = exts[0];
             res[1] = f(res[0])[0];
-            double temp = res[0];
+            double temp;
+            unsigned index = 0;
             for (unsigned i = 1; i < numsvs; i++) {
                 temp = f(exts[i])[i];
                 if (temp < res[1]) {
-                    res[0] = exts[i];
                     res[1] = temp;
+                    index = i;
                 }
             }
+            res[0] = exts[index];
+            res[1] = vals[index];
+            res[2] = ders[index];
+            res[3] = ders2[index];
             if (res[1] < 0) {
                 adjust_step = true;
                 step *= 0.5;

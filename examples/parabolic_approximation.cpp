@@ -17,7 +17,7 @@ int main() {
     double eps = 0.25;
     double c_i = 23.;
     double c_o = 1.;
-    complex_t k_0 = complex_t(1.9,0.0);
+    complex_t k_0 = complex_t(0.75,0.0);
 
     // define mesh in space and on wavenumber on which to perform verification
     unsigned n_points_x = 250;
@@ -36,9 +36,10 @@ int main() {
     unsigned order = 11;
     unsigned m = 0;
     std::ofstream filename;
-    filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/parapp.dat", std::ofstream::out | std::ofstream::trunc);
+    filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/parabolic_approximation.dat", std::ofstream::out | std::ofstream::trunc);
     filename.close();
 
+    double step = 0.25;
     // clear existing file
 
     // loop over mesh size and wavenumbers
@@ -76,16 +77,13 @@ int main() {
                 };
 
                 // compute derivatives by extrapolation
-
-                Eigen::Vector2d res = parabolic_approximation(sv_eval,sv_eval_der,sv_eval_der2,k_temp.real(),0.1);
+            Eigen::VectorXd res =  parabolic_approximation(sv_eval,sv_eval_der,sv_eval_der2,k_temp.real(),step);
+                    filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/parabolic_approximation.dat", std::ios_base::app);
+            filename << k_temp.real() << " " << res.segment(1,3).transpose() << std::endl;
+                filename.close();
                 k_temp = res(0);
-                std::cout << res << std::endl;
-                Eigen::VectorXd der_val = sv_eval_der(res[0]);
-                std::cout << der_val << std::endl;
-                if (abs(der_val(0)) < epsilon){
-                    k_temp+=0.1;
-                    filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/parapp.dat", std::ios_base::app);
-                    filename << res.transpose() << std::endl;
+                if (abs(res(2)) < epsilon){
+                    k_temp+=2*step;
                 }
             std::cout << "**********************" << std::endl;
 
