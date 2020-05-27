@@ -31,9 +31,10 @@ typedef std::complex<double> complex_t;
 
         // compute mass matrix
         Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, order);
+        Eigen::MatrixXcd M_discont = mass_matrix::GalerkinMatrix(mesh, discont_space, discont_space, order);
         Eigen::MatrixXcd M = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
         M.block(0,0,numpanels,numpanels) = M_cont;
-        M.block(numpanels,numpanels,numpanels,numpanels) = M_cont;
+        M.block(numpanels,numpanels,numpanels,numpanels) = M_discont;
 
         // compute matrix for projection onto ortogonal FEM-sapces
         Eigen::MatrixXcd lt(2*numpanels,2*numpanels);
@@ -50,13 +51,13 @@ typedef std::complex<double> complex_t;
 
         // compute operator matrices and their derivatives on inner and outer domain
         Eigen::MatrixXcd K_o =
-                double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_o);
+                double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_o);
         Eigen::MatrixXcd K_i =
-                double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_i);
+                double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_i);
         Eigen::MatrixXcd W_i =
-                hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i);
+                hypersingular_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_i);
         Eigen::MatrixXcd W_o =
-                hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order,k, c_o);
+                hypersingular_helmholtz::GalerkinMatrix(mesh, discont_space, order,k, c_o);
         Eigen::MatrixXcd V_o =
                 single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_o);
         Eigen::MatrixXcd V_i =
@@ -86,9 +87,10 @@ typedef std::complex<double> complex_t;
 
         // compute mass matrix
         Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, order);
+        Eigen::MatrixXcd M_discont = mass_matrix::GalerkinMatrix(mesh, discont_space, discont_space, order);
         Eigen::MatrixXcd M = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
         M.block(0,0,numpanels,numpanels) = M_cont;
-        M.block(numpanels,numpanels,numpanels,numpanels) = M_cont;
+        M.block(numpanels,numpanels,numpanels,numpanels) = M_discont;
 
         // compute matrix for projection onto ortogonal FEM-sapces
         Eigen::MatrixXcd lt(2*numpanels,2*numpanels);
@@ -105,17 +107,17 @@ typedef std::complex<double> complex_t;
 
         // compute operator matrices and their derivatives on inner and outer domain
         Eigen::MatrixXcd K_o_der =
-                double_layer_helmholtz_der::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_o);
+                double_layer_helmholtz_der::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_o);
         Eigen::MatrixXcd K_i_der =
-                double_layer_helmholtz_der::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_i);
+                double_layer_helmholtz_der::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_i);
         Eigen::MatrixXcd W_i_der =
                 hypersingular_helmholtz_der::GalerkinMatrix(mesh, cont_space, order, k, c_i);
         Eigen::MatrixXcd W_o_der =
                 hypersingular_helmholtz_der::GalerkinMatrix(mesh, cont_space, order, k, c_o);
         Eigen::MatrixXcd V_o_der =
-                single_layer_helmholtz_der::GalerkinMatrix(mesh, cont_space, order, k, c_o);
+                single_layer_helmholtz_der::GalerkinMatrix(mesh, discont_space, order, k, c_o);
         Eigen::MatrixXcd V_i_der =
-                single_layer_helmholtz_der::GalerkinMatrix(mesh, cont_space, order, k, c_i);
+                single_layer_helmholtz_der::GalerkinMatrix(mesh, discont_space, order, k, c_i);
 
         // build solutions operator and it's derivative, project them
         Eigen::MatrixXcd T_der = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
@@ -141,9 +143,10 @@ typedef std::complex<double> complex_t;
 
         // compute mass matrix
         Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, order);
+        Eigen::MatrixXcd M_discont = mass_matrix::GalerkinMatrix(mesh, discont_space, discont_space, order);
         Eigen::MatrixXcd M = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
         M.block(0,0,numpanels,numpanels) = M_cont;
-        M.block(numpanels,numpanels,numpanels,numpanels) = M_cont;
+        M.block(numpanels,numpanels,numpanels,numpanels) = M_discont;
 
         // compute matrix for projection onto ortogonal FEM-sapces
         Eigen::MatrixXcd lt(2*numpanels,2*numpanels);
@@ -160,17 +163,17 @@ typedef std::complex<double> complex_t;
 
         // compute operator matrices and their derivatives on inner and outer domain
         Eigen::MatrixXcd K_o_der2 =
-                double_layer_helmholtz_der2::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_o);
+                double_layer_helmholtz_der2::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_o);
         Eigen::MatrixXcd K_i_der2 =
-                double_layer_helmholtz_der2::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_i);
+                double_layer_helmholtz_der2::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_i);
         Eigen::MatrixXcd W_i_der2 =
                 hypersingular_helmholtz_der2::GalerkinMatrix(mesh, cont_space, order, k, c_i);
         Eigen::MatrixXcd W_o_der2 =
                 hypersingular_helmholtz_der2::GalerkinMatrix(mesh, cont_space, order, k, c_o);
         Eigen::MatrixXcd V_o_der2 =
-                single_layer_helmholtz_der2::GalerkinMatrix(mesh, cont_space, order, k, c_o);
+                single_layer_helmholtz_der2::GalerkinMatrix(mesh, discont_space, order, k, c_o);
         Eigen::MatrixXcd V_i_der2 =
-                single_layer_helmholtz_der2::GalerkinMatrix(mesh, cont_space, order, k, c_i);
+                single_layer_helmholtz_der2::GalerkinMatrix(mesh, discont_space, order, k, c_i);
 
         // build solutions operator and it's derivative, project them
         Eigen::MatrixXcd T_der2 = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
