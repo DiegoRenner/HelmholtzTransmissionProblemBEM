@@ -29,6 +29,22 @@ Point ParametrizedLine::operator()(double t) const {
                         t * (y2 - y1) / 2 + (y2 + y1) / 2);
   return point;
 }
+Point ParametrizedLine::operator[](double t) const {
+    assert(IsWithinParameterRange(t));
+    double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
+    // Linear interpolation of x & y coordinates based on parameter t
+    Eigen::Vector2d point(t * (x2 - x1) + x1,
+                          t * (y2 - y1) + y1);
+    return point;
+}
+Point ParametrizedLine::swapped_op(double t) const {
+    assert(IsWithinParameterRange(t));
+    double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
+    // Linear interpolation of x & y coordinates based on parameter t
+    Eigen::Vector2d point(-t * (x2 - x1) + x2,
+                          -t * (y2 - y1) + y2);
+    return point;
+}
 
 Eigen::Vector2d ParametrizedLine::Derivative(double t) const {
   assert(IsWithinParameterRange(t));
@@ -36,6 +52,20 @@ Eigen::Vector2d ParametrizedLine::Derivative(double t) const {
   // Derivative of the linear interpolation used in the function operator()
   Eigen::Vector2d derivative((x2 - x1) / 2, (y2 - y1) / 2);
   return derivative;
+}
+Eigen::Vector2d ParametrizedLine::Derivative_01(double t) const {
+    assert(IsWithinParameterRange(t));
+    double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
+    // Derivative of the linear interpolation used in the function operator()
+    Eigen::Vector2d derivative((x2-x1), (y2 - y1));
+    return derivative;
+}
+Eigen::Vector2d ParametrizedLine::Derivative_01_swapped(double t) const {
+    assert(IsWithinParameterRange(t));
+    double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
+    // Derivative of the linear interpolation used in the function operator()
+    Eigen::Vector2d derivative(-(x2-x1), -(y2 - y1));
+    return derivative;
 }
 
 Eigen::Vector2d ParametrizedLine::DoubleDerivative(double t) const {

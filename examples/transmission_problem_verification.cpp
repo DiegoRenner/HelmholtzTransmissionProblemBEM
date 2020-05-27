@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
         Eigen::VectorXcd sol = tsp::direct_second_kind::solve(
                 mesh, u_i_dir, u_i_neu, u_t_dir, u_t_neu, order, k, c_o, c_i);
         auto end = high_resolution_clock::now();
-        auto duration = duration_cast<milligiseconds>(end - start);
+        auto duration = duration_cast<milliseconds>(end - start);
 
         Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
         Eigen::MatrixXcd M_discont = mass_matrix::GalerkinMatrix(mesh,discont_space,discont_space,order);

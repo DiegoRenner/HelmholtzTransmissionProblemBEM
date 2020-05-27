@@ -7,6 +7,8 @@ add_executable(transmission_example transmission_problem_verification.cpp)
 add_executable(sv_derivative_verification sv_derivative_verification.cpp)
 add_executable(sv_derivative_verification_debug sv_derivative_verification_debug.cpp)
 add_executable(sv_derivative_full sv_derivative_full.cpp)
+add_executable(sv_circle sv_circle.cpp)
+add_executable(sv_square sv_square.cpp)
 add_executable(parabolic_approximation parabolic_approximation.cpp)
 
 add_library(generate_solution STATIC ../src/Utilities/generate_solution.cpp)
@@ -17,6 +19,8 @@ target_link_libraries(transmission_example parametrizations generate_solution so
 target_link_libraries(sv_derivative_verification parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
 target_link_libraries(sv_derivative_verification_debug parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
 target_link_libraries(sv_derivative_full parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
+target_link_libraries(sv_circle parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
+target_link_libraries(sv_square parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
 target_link_libraries(parabolic_approximation parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
 
 
