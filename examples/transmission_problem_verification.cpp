@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
     DiscontinuousSpace<0> discont_space;
     ContinuousSpace<1> cont_space;
     // Loop over number of panels
-    for (unsigned i = 0; i <= n_runs; i++) {
+    for (unsigned i = 0; i < n_runs; i++) {
         ParametrizedMesh mesh(curve.split(numpanels[i]));
         auto start = high_resolution_clock::now();
         Eigen::VectorXcd sol = tsp::direct_second_kind::solve(

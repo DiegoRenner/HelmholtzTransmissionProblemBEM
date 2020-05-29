@@ -135,9 +135,34 @@
                 std::cout << "starting computation of operators for " << numpanels << " panels." << std::endl;
                 Eigen::MatrixXcd K_o =
                         double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_o);
-                std::cout << "double layer helmholtz rhs computed" << std::endl;
+                //double real, imag;
+                //char sign;
+                //int i = 0;
+                //std::ifstream fp_data;
+                //Eigen::MatrixXcd K_o(numpanels,numpanels);
+                //std::string path = "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/double_layer_o_" + std::to_string(numpanels) + ".dat";
+                //fp_data.open(path);
+                //sign='+';
+                //while(fp_data >> real >> imag ) {
+                //    K_o(i/numpanels,i%numpanels) = complex_t((sign=='-')?-real:real,imag);
+                //    i++;
+                //    fp_data >> sign >> sign;
+                //}
+                //fp_data.close();
+                //std::cout << "double layer helmholtz rhs computed" << std::endl;
                 Eigen::MatrixXcd K_i =
                         double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_i);
+                //Eigen::MatrixXcd K_i(numpanels,numpanels);
+                //path = "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/double_layer_i_" + std::to_string(numpanels) + ".dat";
+                //fp_data.open(path);
+                //sign='+';
+                //i = 0;
+                //while(fp_data >> real >> imag) {
+                //    K_i(i/numpanels,i%numpanels) = complex_t((sign=='-')?-real:real,imag);
+                //    i++;
+                //    fp_data >> sign >> sign;
+                //}
+                //fp_data.close();
                 std::cout << "double layer helmholtz computed" << std::endl;
                 Eigen::MatrixXcd W_i =
                         hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i);
@@ -150,6 +175,7 @@
                 std::cout << "single layer helmholtz rhs computed" << std::endl;
                 Eigen::MatrixXcd V_i =
                         single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_i);
+
                 std::cout << "single layer helmholtz computed" << std::endl;
                 Eigen::MatrixXcd M_cont =
                         mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
@@ -178,6 +204,11 @@
                 // Solving for coefficients
                 Eigen::HouseholderQR<Eigen::MatrixXcd> dec(A);
                 Eigen::VectorXcd sol = dec.solve(rhs);
+                Eigen::MatrixXcd M(2*numpanels,2*numpanels);
+                M.block(0,0,numpanels,numpanels) = M_cont;
+                M.block(numpanels,numpanels,numpanels,numpanels) = M_discont;
+                Eigen::BDCSVD<Eigen::MatrixXcd> test(M.inverse()*A);
+                std::cout << test.singularValues() << std::endl;
                 //std::cout << "-----------------"<< std::endl;
                 //std::cout << sol.segment(0,2*numpanels).transpose() << std::endl;
                 //std::cout << "**************************"<< std::endl;

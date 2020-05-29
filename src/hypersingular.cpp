@@ -119,7 +119,7 @@
             // Interaction matrix with size Qtest x Qtrial
             Eigen::MatrixXcd interaction_matrix(Qtest, Qtrial);
             // Computing the (i,j)th matrix entry
-            bool swap = ((pi(1) - pi_p(-1)).norm() / 100. > epsilon);
+            bool swap = 1;//((pi(1) - pi_p(-1)).norm() / 100. > epsilon);
             for (int i = 0; i < Qtest; ++i) {
                 for (int j = 0; j < Qtrial; ++j) {
                     // Lambda expression for functions F and G in \f$\eqref{eq:Kidp}\f$

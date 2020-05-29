@@ -10,9 +10,7 @@
 #define PARAMETRIZEDLINEHPP
 
 #include "abstract_parametrized_curve.hpp"
-
 #include <utility>
-
 #include <Eigen/Dense>
 
 /**

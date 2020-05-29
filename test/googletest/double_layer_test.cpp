@@ -20,7 +20,7 @@ DiscontinuousSpace<0> discont_space;
 ContinuousSpace<1> cont_space;
 
 double k = 1.0;
-double n_i = 23.0;
+double n_i = 5.0;
 double eps = 0.25;
 ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
 unsigned order = 11;

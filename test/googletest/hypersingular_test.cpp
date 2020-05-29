@@ -20,7 +20,7 @@ DiscontinuousSpace<0> discont_space;
 ContinuousSpace<1> cont_space;
 
 double k = 1.0;
-double n_i = 23.0;
+double n_i = 5.0;
 double eps = 0.25;
 ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
 unsigned order = 11;
@@ -28,7 +28,7 @@ double c_o = k;
 double c_i = k*sqrt(n_i);
 int numpanels = 50;
 ParametrizedMesh mesh(curve.split(numpanels));
-Eigen::VectorXcd W = hypersingular_helmholtz::GalerkinMatrix(mesh,cont_space, order, k,n_i).block(0,0,1,numpanels).transpose();
+Eigen::VectorXcd W = hypersingular_helmholtz::GalerkinMatrix(mesh,cont_space, order, k,5).block(0,0,1,numpanels).transpose();
 Eigen::VectorXcd W_expected(numpanels);
 std::ifstream fp_data;
 double real, imag;

@@ -337,7 +337,7 @@ add_executable(mass_matrix_test mass_matrix_test.cpp)
 add_executable(solutions_test solutions_test.cpp ../../src/Utilities/generate_solution.cpp ../../include/generate_solution.hpp )
 target_link_libraries(double_layer_test double_layer parametrizations gtest_main quadrature complex_bessel)
 target_link_libraries(single_layer_test single_layer single_layer_new parametrizations gtest_main quadrature complex_bessel)
-target_link_libraries(hypersingular_test hypersingular hypersingular_cont single_layer hypersingular_discont parametrizations gtest_main quadrature complex_bessel)
+target_link_libraries(hypersingular_test hypersingular  single_layer  parametrizations gtest_main quadrature complex_bessel)
 target_link_libraries(solutions_test single_layer parametrizations gtest_main quadrature complex_bessel)
 target_link_libraries(mass_matrix_test mass_matrix parametrizations gtest_main quadrature)
 
