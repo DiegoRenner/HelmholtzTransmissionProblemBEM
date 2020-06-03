@@ -94,7 +94,8 @@
                    double x1,
                    double x2,
                    double tol,
-                   bool &root_found){
+                   bool &root_found,
+                   unsigned &num_iter){
         int j;
         double df,dx,dxold,f,fh,fl;
         double temp,xh,xl,rts;
@@ -144,6 +145,7 @@
                 //Change in root is negligible.
                 if (xl == rts) {
                     root_found = true;
+                    num_iter = j;
                     return rts;
                 }
             } else {
@@ -154,11 +156,13 @@
                 rts -= dx;
                 if (temp == rts) {
                     root_found = true;
+                    num_iter = j;
                     return rts;
                 }
             }
             if (fabs(dx) < tol) {
                 root_found = true;
+                num_iter = true;
                 return rts;
             }
             //Convergence criterion.
@@ -231,7 +235,9 @@
                          double x1,
                          double x2,
                          const double tol,
-                         const unsigned maxIter) {
+                         const unsigned maxIter,
+                         bool &root_found,
+                         unsigned &num_iter) {
         unsigned n = 0;
         double xm = 0.0;
         double x0 = 0.0;
@@ -261,14 +267,13 @@
             if (abs(c) < tol) {
                 cout << "Root of the given equation = " << x0 << endl;
                 cout << "No. of iterations = " << n << endl;
-                std::ofstream filename;
-                filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/SV_analysis_roots.dat", std::ios::app);
-                filename << 0.0 << " " << x0 << std::endl;
-                filename.close();
+                root_found = true;
+                num_iter = n;
+                return x0;
             } else {
                 cout << "No root found after " << n << " iterations." << endl;
             }
         } else
             cout << "There might not be a root in this interval." << endl;
-        return x0;
+        return 0.0;
     }

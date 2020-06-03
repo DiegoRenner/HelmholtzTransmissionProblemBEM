@@ -16,7 +16,8 @@
                    double x1,
                    double x2,
                    double tol,
-                   bool &root_found);
+                   bool &root_found,
+                   unsigned &num_iter);
 
     Eigen::VectorXd parabolic_approximation(const std::function<Eigen::VectorXd(double)> f,
                                             const std::function<Eigen::VectorXd(double)> f_der,
@@ -28,6 +29,8 @@
             double x0,
             double x1,
             const double tol,
-            const unsigned maxIter);
+            const unsigned maxIter,
+            bool &root_found,
+            unsigned &num_iter);
 
 #endif //HELMHOLTZTRANSMISSIONPROBLEM_ROOTS_HPP
