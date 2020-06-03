@@ -10,7 +10,7 @@
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
 double epsilon = 1e-6;//numeric_limits<double>::epsilon();
-int main(int argc, char** argv) {
+int main(int argc, char** argv){
 
     // define radius of circle refraction index and initial wavenumber
     double eps = atof(argv[1]);
@@ -79,11 +79,15 @@ int main(int argc, char** argv) {
                 std::cout << root << std::endl;
                 filename.open(argv[8], std::ios_base::app);
                 filename << k_temp.real();
-                double val_at_root = sv_eval_der(root);
-                if ( root_found && abs(sv_eval_der(root)) < epsilon) {
-                    filename <<  " " << root << " " << val_at_root << " " << num_iter << std::endl;
-                } else {
-                    filename <<  " " << NAN << " " << NAN << " " << NAN << std::endl;
+                if (root_found) {
+                    double val_at_root = sv_eval_der(root);
+                    if (abs(val_at_root) < epsilon) {
+                        filename << " " << root << " " << val_at_root << " " << num_iter << std::endl;
+                    } else {
+                        filename << " " << NAN << " " << NAN << " " << NAN << std::endl;
+                    }
+                } else{
+                    filename << " " << NAN << " " << NAN << " " << NAN << std::endl;
                 }
                 filename.close();
                 std::cout << "**********************" << std::endl;

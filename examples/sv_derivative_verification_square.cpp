@@ -37,6 +37,7 @@ int main(int argc, char** argv) {
     filename.open(argv[7], std::ofstream::out | std::ofstream::trunc);
     filename.close();
 
+    std::cout << order << std::endl;
     // loop over mesh size and wavenumbers
         // compute mesh for numpanels
     using PanelVector = PanelVector;

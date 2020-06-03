@@ -10,8 +10,7 @@
 
 #include "gauleg.hpp"
 #include "genLaguerreRule.hpp"
-#include "logweight_quadrature.hpp"
-
+#include <Eigen/Dense>
 namespace parametricbem2d {
 /* This function computes an integral numerically using Gauss Legendre
  * Quadrature Rule of the given order
@@ -96,18 +95,6 @@ double ComputeLogIntegral(T integrand, double a, unsigned int N) {
  * @param N Order for the quadrature rule
  * @return Integral value
  */
-template <typename T> double ComputeLoogIntegral(T integrand, unsigned int N) {
-  // Getting the log weighted quadrature rule
-  std::vector<double> wts, pts;
-  std::tie(pts, wts) = getLogWeightQR(N);
-  double integral = 0.;
-  // Computing the integral
-  for (unsigned int i = 0; i < N; ++i) {
-    double x = pts[i];
-    integral += wts[i] * integrand(x);
-  }
-  return integral;
-}
 
 /* This function computes a log weighted integral numerically using a Log
  * weighted Quadrature Rule of the given order. The integration domain [0.a] is
@@ -121,22 +108,6 @@ template <typename T> double ComputeLoogIntegral(T integrand, unsigned int N) {
  * @param QR Gaussian Quadrature in form of a QuadRule object
  * @return Integral value
  */
-template <typename T>
-double ComputeLoogIntegral(T integrand, double a, const QuadRule &QR) {
-  if (a < 0) {
-    throw std::invalid_argument("Integration domain should be non-negative!");
-  }
-  unsigned N = QR.n;
-  // Transformed integrand
-  auto F = [&](double x) { return integrand(a * x); };
-  // Variables for storing two parts of the integral
-  double integral_g = 0.; // Non-weighted integral
-  double integral_l = 0.; // Log weighted integral from 0 to 1
-  // Computing the integral parts
-  integral_l = ComputeLoogIntegral(F, N);
-  integral_g = ComputeIntegral(F, 0, 1, QR);
-  return a * integral_l + a * log(a) * integral_g;
-}
 
 /* This function computes a Gauss Lguerre integral using the respective
  * Quadrature Rule.

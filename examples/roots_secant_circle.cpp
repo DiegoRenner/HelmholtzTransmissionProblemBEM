@@ -75,15 +75,19 @@ int main(int argc, char** argv) {
                 // compute derivatives by extrapolation
                 bool root_found = false;
                 unsigned num_iter;
-                double root =  rtsafe(sv_eval_both,k_temp.real(), k_temp.real()+h_x,epsilon,root_found,num_iter);
+                double root = zbrent(sv_eval_der,k_temp.real(), k_temp.real()+h_x,epsilon,root_found,num_iter);
                 std::cout << root << std::endl;
                 filename.open(argv[8], std::ios_base::app);
                 filename << k_temp.real();
-                double val_at_root = sv_eval_der(root);
-                if ( root_found && abs(sv_eval_der(root)) < epsilon) {
-                    filename <<  " " << root << " " << val_at_root << " " << num_iter << std::endl;
-                } else {
-                    filename <<  " " << NAN << " " << NAN << " " << NAN << std::endl;
+                if (root_found) {
+                    double val_at_root = sv_eval_der(root);
+                    if (abs(val_at_root) < epsilon) {
+                        filename << " " << root << " " << val_at_root << " " << num_iter << std::endl;
+                    } else {
+                        filename << " " << NAN << " " << NAN << " " << NAN << std::endl;
+                    }
+                } else{
+                    filename << " " << NAN << " " << NAN << " " << NAN << std::endl;
                 }
                 filename.close();
                 std::cout << "**********************" << std::endl;

@@ -9,10 +9,19 @@
                                const double *list,
                                const unsigned count){
         unsigned N = T.cols();
-        Eigen::BDCSVD<Eigen::MatrixXcd> sol(T);
+        Eigen::MatrixXcd W = Eigen::MatrixXcd::Zero(2*N,2*N);
+        W.block(0,N,N,N) = T;
+        W.block(N,0,N,N) = T.transpose().conjugate();
+        Eigen::ComplexEigenSolver<Eigen::MatrixXcd> sol(W);
         Eigen::VectorXd res(count);
+        unsigned j;
         for (unsigned i = 0; i < count; i++){
-            res(i) = sol.singularValues()(N-1-list[i]);
+                j = list[i];
+            if ( sol.eigenvalues()[2*j].real() > 0 ){
+                res(i) = sol.eigenvalues()[2*j].real();
+            } else{
+                res(i) = -sol.eigenvalues()[2*j].real();
+            }
         }
         return res;
     }
@@ -41,25 +50,17 @@
         unsigned j;
         for ( unsigned i = 0; i < count; i++ ) {
             j = list[i];
+            x = sol.eigenvectors().block(0, 2*j, 2*N, 1);
+            normal = (x).dot(x);
+            x = x/sqrt(normal);
             if ( sol.eigenvalues()[2*j].real() > 0 ){
-                x = sol.eigenvectors().block(0, 2*j, 2*N, 1);
-                normal = (x).dot(x);
-                x = x/sqrt(normal);
-                res(j,0) = sol.eigenvalues()[2*j].real();
-                res(j,1) = (x.dot(W_der*x)).real();
-            } else{
-                x = sol.eigenvectors().block(0, 2*j+1, 2*N, 1);
-                normal = (x).dot(x);
-                x = x/sqrt(normal);
-                if ( sol.eigenvalues()[2*j+1].real() > 0) {
-                    res(j, 0) = sol.eigenvalues()[2 * j + 1].real();
-                    res(j, 1) = (x.dot(W_der * x)).real();
+                res(i,0) = sol.eigenvalues()[2*j].real();
+                res(i,1) = (x.dot(W_der*x)).real();
                 } else {
-                    res(j, 0) = -sol.eigenvalues()[2 * j + 1].real();
-                    res(j, 1) = -(x.dot(W_der * x)).real();
+                    res(i, 0) = -sol.eigenvalues()[2 * j].real();
+                    res(i, 1) = -(x.dot(W_der * x)).real();
                 }
             }
-        }
         return res;
     }
 
@@ -122,13 +123,13 @@
                 u_der2 = B.inverse() * s;
                 complex_t ev_der2 = u_der2[2*N - 1];
             if (sol.eigenvalues()[2 * j].real() > 0) {
-                res(j, 0) = sol.eigenvalues()[2 * j].real();
-                res(j, 1) = ev_der.real();
-                res(j, 2) = ev_der2.real();
+                res(i, 0) = sol.eigenvalues()[2 * j].real();
+                res(i, 1) = ev_der.real();
+                res(i, 2) = ev_der2.real();
             } else {
-                res(j, 0) = -sol.eigenvalues()[2 * j].real();
-                res(j, 1) = -ev_der.real();
-                res(j, 2) = -ev_der2.real();
+                res(i, 0) = -sol.eigenvalues()[2 * j].real();
+                res(i, 1) = -ev_der.real();
+                res(i, 2) = -ev_der2.real();
             }
         }
         return res;
@@ -139,7 +140,7 @@
                        const double h0 ,
                        const double rtol ,
                        const double atol ) {
-        const unsigned nit = 10; // Maximum depth of extrapolation
+        const unsigned nit = 2; // Maximum depth of extrapolation
         Eigen::VectorXd h(nit);
         h[0] = h0 ; // Widths of difference quotients
         Eigen::VectorXd y(nit); // Approximations returned by difference quotients

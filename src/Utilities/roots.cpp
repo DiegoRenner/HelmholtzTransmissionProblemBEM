@@ -20,7 +20,9 @@
     double zbrent( const function<double(double)> f,
                     double x1,
                     double x2,
-                    double tol){
+                    double tol,
+                    bool &root_found,
+                    unsigned &num_iter){
         int iter;
         double a=x1, b=x2, c=x2, d, e, min1, min2;
         double fa=f(a), fb=f(b), fc, p, q, r, s, tol1, xm;
@@ -50,6 +52,8 @@
                 filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/SV_analysis_roots.dat", std::ios::app);
                 filename << 0.0 << " " << b << " " << f(b) << std::endl;
                 filename.close();
+                root_found = true;
+                num_iter = iter;
                 return b;
             }
             if (fabs(e) >= tol1 && fabs(fa) > fabs(fb)) {
@@ -162,7 +166,7 @@
             }
             if (fabs(dx) < tol) {
                 root_found = true;
-                num_iter = true;
+                num_iter = j;
                 return rts;
             }
             //Convergence criterion.
@@ -242,25 +246,29 @@
         double xm = 0.0;
         double x0 = 0.0;
         double c = 0.0;
-        if (f(x1) * f(x2) < 0) {
+        double f2 = f(x2);
+        double f1 = f(x1);
+        if (f1 * f2 < 0) {
             do {
                 // calculate the intermediate value
-                x0 = (x1 * f(x2) - x2 * f(x1)) / (f(x2) - f(x1));
+                x0 = (x1 * f2 - x2 * f1) / (f2 - f1);
+                double f0 = f(x0);
 
                 // check if x0 is root of equation or not
-                c = f(x1) * f(x0);
+                c = f1 * f0;
 
                 // update the value of interval
                 x1 = x2;
                 x2 = x0;
-
+                f1 = f(x1);
+                f2 = f(x2);
                 // update number of iteration
                 n++;
-
-                // if x0 is the root of equation then break the loop
                 if (abs(c) < tol)
                     break;
-                xm = (x1 * f(x2) - x2 * f(x1)) / (f(x2) - f(x1));
+
+                // if x0 is the root of equation then break the loop
+                xm = (x1 * f2 - x2 * f1) / (f2 - f1);
             } while (abs(xm - x0) >= tol); // repeat the loop
             // until the convergence
 

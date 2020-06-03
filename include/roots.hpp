@@ -10,9 +10,11 @@
     double zbrent( const std::function<double(double)> f,
                    double x1,
                    double x2,
-                   double tol);
+                   double tol,
+                   bool &root_found,
+                   unsigned &num_iter);
 
-    double rtsafe( const std::function<Eigen::MatrixXd(double)> f,
+double rtsafe( const std::function<Eigen::MatrixXd(double)> f,
                    double x1,
                    double x2,
                    double tol,
