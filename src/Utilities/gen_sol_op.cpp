@@ -55,13 +55,13 @@ typedef std::complex<double> complex_t;
         Eigen::MatrixXcd K_i =
                 double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_i);
         Eigen::MatrixXcd W_i =
-                hypersingular_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_i);
+                hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i);
         Eigen::MatrixXcd W_o =
-                hypersingular_helmholtz::GalerkinMatrix(mesh, discont_space, order,k, c_o);
+                hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order,k, c_o);
         Eigen::MatrixXcd V_o =
-                single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_o);
+                single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_o);
         Eigen::MatrixXcd V_i =
-                single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i);
+                single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_i);
 
         // build solutions operator and it's derivative, project them
         Eigen::MatrixXcd T = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
@@ -75,6 +75,7 @@ typedef std::complex<double> complex_t;
 
         return T;
     }
+
     Eigen::MatrixXcd gen_sol_op_1st_der(const ParametrizedMesh &mesh,
                                 unsigned order,
                                 const complex_t k,

@@ -9,7 +9,7 @@
 
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
-double epsilon = 1e-6;//numeric_limits<double>::epsilon();
+double epsilon = 1e-3;//numeric_limits<double>::epsilon();
 int main(int argc, char** argv) {
 
     // define radius of circle refraction index and initial wavenumber
@@ -34,13 +34,14 @@ int main(int argc, char** argv) {
 
     // clear existing file
     std::ofstream filename;
-    std::cout << argv[7] << std::endl;
+    std::cout << argv[1] << " " << argv[2] << " " << argv[3] << " "
+    << argv[4] << " " << argv[5] << " " << argv[6] << " " << argv[7] << " " << std::endl;
     filename.open(argv[7], std::ofstream::out | std::ofstream::trunc);
     filename.close();
 
     // loop over mesh size and wavenumbers
-        // compute mesh for numpanels
-        ParametrizedMesh mesh(curve.split(numpanels));
+    // compute mesh for numpanels
+    ParametrizedMesh mesh(curve.split(numpanels));
     Eigen::MatrixXcd T_next = gen_sol_op(mesh, order, k_0 , c_o, c_i);
     Eigen::MatrixXcd T_der_next = gen_sol_op_1st_der(mesh, order, k_0 , c_o, c_i);
     Eigen::MatrixXcd T_der2_next = gen_sol_op_2nd_der(mesh, order, k_0 , c_o, c_i);
@@ -55,8 +56,8 @@ int main(int argc, char** argv) {
                 Eigen::MatrixXcd T_der = T_der_next;
                 Eigen::MatrixXcd T_der2 = T_der2_next;
                 T_next = gen_sol_op(mesh, order, k_temp_next , c_o, c_i);
-                T_der_next = gen_sol_op_1st_der(mesh, order, k_temp_next , c_o, c_i);
-                T_der2_next = gen_sol_op_2nd_der(mesh, order, k_temp_next , c_o, c_i);
+                T_der_next = gen_sol_op_1st_der(mesh, order, k_temp_next, c_o, c_i);
+                T_der2_next = gen_sol_op_2nd_der(mesh, order, k_temp_next, c_o, c_i);
 
                 unsigned count = 1;
                 double list[count];
@@ -125,6 +126,7 @@ int main(int argc, char** argv) {
                 // write results to file for plotting later on
                 filename.open(argv[7], std::ios_base::app);
                 filename << k_temp.real() << " "<< res(m,0) << " " << res(m,1)  << " " << sv_ext_der1 << " " << res(m,2) << " " << sv_ext_der2 << std::endl;
+                std::cout << res(m,1) << " " << sv_eval(k_temp.real()) << std::endl;
                 //double val_at_root = sv_eval_der(root);
                 //if ( abs(val_at_root) > epsilon) {
                 //    filename <<  " " << NAN << " " << NAN << std::endl;

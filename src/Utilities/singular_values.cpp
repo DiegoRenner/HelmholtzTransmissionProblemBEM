@@ -54,8 +54,8 @@
             normal = (x).dot(x);
             x = x/sqrt(normal);
             if ( sol.eigenvalues()[2*j].real() > 0 ){
-                res(i,0) = sol.eigenvalues()[2*j].real();
-                res(i,1) = (x.dot(W_der*x)).real();
+                    res(i,0) = sol.eigenvalues()[2*j].real();
+                    res(i,1) = (x.dot(W_der*x)).real();
                 } else {
                     res(i, 0) = -sol.eigenvalues()[2 * j].real();
                     res(i, 1) = -(x.dot(W_der * x)).real();
@@ -94,23 +94,23 @@
         unsigned j;
         for ( unsigned i = 0; i < count; i++ ) {
             j = list[i];
-            double temp = 0;
-            int m = 5;
-            for(unsigned i = 0; i< 2*N; i++){
-                if (abs(sol.eigenvectors().col(2*j)[i])>temp){
-                    temp =abs(sol.eigenvectors().col(0)[i]);
-                    m = i;
+                double temp = 0;
+                int m = 5;
+                for(unsigned l = 0; l< 2*N; l++){
+                    if (abs(sol.eigenvectors().col(2*j)[l])>temp){
+                        temp =abs(sol.eigenvectors().col(0)[l]);
+                        m = l;
+                    }
                 }
-            }
-            m += 1;
+                m += 1;
                 complex_t rescale = sol.eigenvectors().coeff(m - 1, 2 * j);
                 Eigen::MatrixXcd u = sol.eigenvectors().block(0, 2 * j, 2*N, 1) / rescale;
                 B.block(0, 0, 2*N, m - 1)
                         = (W - sol.eigenvalues()[2 * j] * Eigen::MatrixXcd::Identity(2*N, 2*N))
-                                .block(0, 0, 2*N, m - 1);
+                        .block(0, 0, 2*N, m - 1);
                 B.block(0, m - 1, 2*N, 2*N - m)
                         = (W - sol.eigenvalues()[2 * j] * Eigen::MatrixXcd::Identity(2*N, 2*N))
-                                .block(0, m, 2*N, 2*N - m);
+                        .block(0, m, 2*N, 2*N - m);
                 B.block(0, 2*N - 1, 2*N, 1) = -u;
                 r = -W_der * u;
                 u_der_temp = B.inverse() * r;
