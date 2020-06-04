@@ -7,7 +7,7 @@
 #include <iostream>
 #include <cmath>
 #include <fstream>
-#include "roots.hpp"
+#include "find_roots.hpp"
 
 #define ITMAX 100
 #define MAXIT 100

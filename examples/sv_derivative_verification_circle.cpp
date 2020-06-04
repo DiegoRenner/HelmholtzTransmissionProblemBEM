@@ -4,12 +4,12 @@
 #include <fstream>
 #include "parametrized_circular_arc.hpp"
 #include "singular_values.hpp"
-#include "roots.hpp"
+#include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
-double epsilon = 1e-3;//numeric_limits<double>::epsilon();
+double epsilon = 1e-6;//numeric_limits<double>::epsilon();
 int main(int argc, char** argv) {
 
     // define radius of circle refraction index and initial wavenumber

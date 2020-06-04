@@ -39,7 +39,7 @@
                                                 const AbstractBEMSpace &trial_space,
                                                 const AbstractBEMSpace &test_space,
                                                 const QuadRule &GaussQR){
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // Calculating the quadrature order for stable evaluation of integrands for
             // disjoint panels as mentioned in \f$\ref{par:distpan}\f$
             // No. of Reference Shape Functions in trial/test space

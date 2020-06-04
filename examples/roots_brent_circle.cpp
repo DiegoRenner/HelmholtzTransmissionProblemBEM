@@ -10,7 +10,7 @@
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
 double epsilon = 1e-6;//numeric_limits<double>::epsilon();
-int main(int argc, char** argv){
+int main(int argc, char** argv) {
 
     // define radius of circle refraction index and initial wavenumber
     double eps = atof(argv[1]);
@@ -55,7 +55,7 @@ int main(int argc, char** argv){
 
                 auto sv_eval = [&] (double k_in) {
                     Eigen::MatrixXcd T_in;
-                        T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
+                    T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
                     return sv(T_in, list, count)(m);
                 };
                 auto sv_eval_both = [&] (double k_in) {
@@ -80,7 +80,7 @@ int main(int argc, char** argv){
                 // compute derivatives by extrapolation
                 bool root_found = false;
                 unsigned num_iter;
-                double root =  rtsafe(sv_eval_both,k_temp.real(), k_temp.real()+h_x,epsilon,root_found,num_iter);
+                double root = zbrent(sv_eval_der,k_temp.real(), k_temp.real()+h_x,epsilon,root_found,num_iter);
                 std::cout << root << std::endl;
                 filename.open(argv[8], std::ios_base::app);
                 filename << k_temp.real();

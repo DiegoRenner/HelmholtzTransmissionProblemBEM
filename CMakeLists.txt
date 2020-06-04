@@ -58,5 +58,5 @@ add_definitions(-DEIGEN3_ACTIVATED)
 
 add_subdirectory(doxygen)
 add_subdirectory(examples)
-add_subdirectory(src)
+add_subdirectory(source)
 add_subdirectory(test)

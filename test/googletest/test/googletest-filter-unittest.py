@@ -163,7 +163,7 @@ ACTIVE_TESTS = [
 
 param_tests_present = None
 
-# Utilities.
+# utilities.
 
 environ = os.environ.copy()
 
@@ -227,7 +227,7 @@ def RunWithSharding(total_shards, shard_index, command):
 class GTestFilterUnitTest(gtest_test_utils.TestCase):
   """Tests the env variable or the command line flag to filter tests."""
 
-  # Utilities.
+  # utilities.
 
   def AssertSetEqual(self, lhs, rhs):
     """Asserts that two sets are equal."""

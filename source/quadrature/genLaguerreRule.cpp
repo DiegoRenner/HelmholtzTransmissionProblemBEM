@@ -221,7 +221,7 @@ void cdgqf ( int nt, int kind, double alpha, double beta, double t[],
 //
 //    Sylvan Elhay, Jaroslav Kautsky,
 //    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of 
-//    Interpolatory Quadrature,
+//    Interpolatory quadrature,
 //    ACM Transactions on Mathematical Software,
 //    Volume 13, Number 4, December 1987, pages 399-415.
 //
@@ -306,7 +306,7 @@ void cgqf ( int nt, int kind, double alpha, double beta, double a, double b,
 //
 //    Sylvan Elhay, Jaroslav Kautsky,
 //    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of 
-//    Interpolatory Quadrature,
+//    Interpolatory quadrature,
 //    ACM Transactions on Mathematical Software,
 //    Volume 13, Number 4, December 1987, pages 399-415.
 //
@@ -406,7 +406,7 @@ double class_matrix ( int kind, int m, double alpha, double beta, double aj[],
 //
 //    Sylvan Elhay, Jaroslav Kautsky,
 //    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of 
-//    Interpolatory Quadrature,
+//    Interpolatory quadrature,
 //    ACM Transactions on Mathematical Software,
 //    Volume 13, Number 4, December 1987, pages 399-415.
 //
@@ -643,7 +643,7 @@ void imtqlx ( int n, double d[], double e[], double z[] )
 //
 //    Sylvan Elhay, Jaroslav Kautsky,
 //    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of 
-//    Interpolatory Quadrature,
+//    Interpolatory quadrature,
 //    ACM Transactions on Mathematical Software,
 //    Volume 13, Number 4, December 1987, pages 399-415.
 //
@@ -824,7 +824,7 @@ void parchk ( int kind, int m, double alpha, double beta )
 //
 //    Sylvan Elhay, Jaroslav Kautsky,
 //    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of 
-//    Interpolatory Quadrature,
+//    Interpolatory quadrature,
 //    ACM Transactions on Mathematical Software,
 //    Volume 13, Number 4, December 1987, pages 399-415.
 //
@@ -1174,7 +1174,7 @@ void scqf ( int nt, double t[], int mlt[], double wts[], int nwts, int ndx[],
 //
 //    Sylvan Elhay, Jaroslav Kautsky,
 //    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of 
-//    Interpolatory Quadrature,
+//    Interpolatory quadrature,
 //    ACM Transactions on Mathematical Software,
 //    Volume 13, Number 4, December 1987, pages 399-415.
 //
@@ -1386,7 +1386,7 @@ void sgqf ( int nt, double aj[], double bj[], double zemu, double t[],
 //
 //  Purpose:
 //
-//    SGQF computes knots and weights of a Gauss Quadrature formula.
+//    SGQF computes knots and weights of a Gauss quadrature formula.
 //
 //  Discussion:
 //
@@ -1411,7 +1411,7 @@ void sgqf ( int nt, double aj[], double bj[], double zemu, double t[],
 //
 //    Sylvan Elhay, Jaroslav Kautsky,
 //    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of 
-//    Interpolatory Quadrature,
+//    Interpolatory quadrature,
 //    ACM Transactions on Mathematical Software,
 //    Volume 13, Number 4, December 1987, pages 399-415.
 //

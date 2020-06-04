@@ -9,22 +9,21 @@
  * This File is a part of the 2D-Parametric BEM package
  */
 
-#include "single_layer_der2.hpp"
+#include "single_layer.hpp"
 #include "/usr/include/complex_bessel.h"
 
-    namespace single_layer_helmholtz_der2 {
+    namespace single_layer_helmholtz {
 
         typedef std::complex<double> complex_t;
-        complex_t ii = complex_t(0.0,1.0);
+        complex_t ii = complex_t (0.0,1.0);
         double epsilon = std::numeric_limits<double>::epsilon();
-
         Eigen::MatrixXcd InteractionMatrix(const AbstractParametrizedCurve &pi,
                                            const AbstractParametrizedCurve &pi_p,
                                            const AbstractBEMSpace &space,
                                            const QuadRule &GaussQR,
                                            const QuadRule &CGaussQR,
                                            const complex_t k,
-                                           const double c){
+                                           const double c) {
             if (&pi == &pi_p) { // Same Panels case
                 return ComputeIntegralCoinciding(pi, pi_p, space, CGaussQR, k, c);
             }
@@ -42,8 +41,8 @@
                                                  const AbstractBEMSpace &space,
                                                  const QuadRule &GaussQR,
                                                  const complex_t k,
-                                                 const double c){
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+                                                 const double c) {
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
             int Qtrial = space.getQ();
             // The number of Reference Shape Functions in test space
@@ -74,14 +73,16 @@
                         complex_t result = complex_t(0.,0.);
                         if (swap) {
                             if ( abs(k*sqrt(c))*(pi[s]-pi_p.swapped_op(t)).norm() > epsilon) {
-                                result = sp_bessel::hankelH1p(0,k*sqrt(c)*(pi[s]-pi_p.swapped_op(t)).norm(),2)
-                                                           *(pi[s]-pi_p.swapped_op(t)).squaredNorm();
-                            };
+                                result = ii*sp_bessel::hankelH1(0,k*sqrt(c)*(pi[s]-pi_p.swapped_op(t)).norm())/4.;
+                            } else if ((pi[s]-pi_p.swapped_op(t)).norm() > epsilon){
+                                result = -1/(2*M_PI)*log((pi[s]-pi_p.swapped_op(t)).norm());
+                            }
                         } else {
                             if ( abs(k*sqrt(c))*(pi.swapped_op(s)-pi_p[t]).norm() > epsilon) {
-                                result = sp_bessel::hankelH1p(0,k*sqrt(c)*(pi.swapped_op(s)-pi_p[t]).norm(),2)
-                                         *(pi.swapped_op(s)-pi_p[t]).squaredNorm();
-                            };
+                                result = ii*sp_bessel::hankelH1(0,k*sqrt(c)*(pi.swapped_op(s)-pi_p[t]).norm())/4.;
+                            } else if ((pi.swapped_op(s)-pi_p[t]).norm() > epsilon){
+                                result = -1/(2*M_PI)*log((pi.swapped_op(s)-pi_p[t]).norm());
+                            }
                         }
                         return result * F(t) * G(s);
                     };
@@ -97,7 +98,7 @@
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = ii*c*integral/4.;
+                    interaction_matrix(i, j) = integral;
                 }
             }
             return interaction_matrix;
@@ -108,8 +109,8 @@
                                                    const AbstractBEMSpace &space,
                                                    const QuadRule &GaussQR,
                                                    const complex_t k,
-                                                   const double c){
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+                                                   const double c) {
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // Calculating the quadrature order for stable evaluation of integrands for
             // disjoint panels as mentioned in \f$\ref{par:distpan}\f$
             // No. of Reference Shape Functions in trial/test space
@@ -130,8 +131,9 @@
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.0,0.0);
                         if ( abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon) {
-                            result = sp_bessel::hankelH1p(0,k*sqrt(c)*(pi[s]-pi_p[t]).norm(),2)
-                                     *(pi[s]-pi_p[t]).squaredNorm();
+                            result = ii*sp_bessel::hankelH1(0,k*sqrt(c)* (pi[s] - pi_p[t]).norm())/4.;
+                        } else if ((pi[s]-pi_p[t]).norm() > epsilon){
+                            result = -1/(2*M_PI)*log((pi[s]-pi_p[t]).norm());
                         }
                         return result*F(t)*G(s);
                     };
@@ -147,7 +149,7 @@
                         }
                     }
                     // Filling up the matrix entry
-                    interaction_matrix(i, j) = ii*c*integral/4.;
+                    interaction_matrix(i, j) = integral;
                 }
             }
             return interaction_matrix;
@@ -158,8 +160,8 @@
                                                 const AbstractBEMSpace &space,
                                                 const QuadRule &GaussQR,
                                                 const complex_t k,
-                                                const double c){
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+                                                const double c) {
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // Calculating the quadrature order for stable evaluation of integrands for
             // disjoint panels as mentioned in \f$\ref{par:distpan}\f$
             // No. of Reference Shape Functions in trial/test space
@@ -180,8 +182,9 @@
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.0,0.0);
                         if ( abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon) {
-                            result = sp_bessel::hankelH1p(0,k*sqrt(c)*(pi[s]-pi_p[t]).norm(),2)
-                                     *(pi[s]-pi_p[t]).squaredNorm();
+                            result = ii*sp_bessel::hankelH1(0,k*sqrt(c)*(pi[s]-pi_p[t]).norm())/4.;
+                        } else if ((pi[s]-pi_p[t]).norm() > epsilon){
+                            result = -1/(2*M_PI)*log((pi[s]-pi_p[t]).norm());
                         }
                         return result*F(t)*G(s);
                     };
@@ -196,7 +199,7 @@
                         }
                     }
                     // Filling up the matrix entry
-                    interaction_matrix(i, j) = ii*c*integral/4.;
+                    interaction_matrix(i, j) = integral;
                 }
             }
             return interaction_matrix;
@@ -206,7 +209,7 @@
                                         const AbstractBEMSpace &space,
                                         const unsigned int &N,
                                         const complex_t k,
-                                        const double c){
+                                        const double c) {
             // Getting the number of panels in the mesh
             unsigned int numpanels = mesh.getNumPanels();
             // Getting dimensions of trial/test space
@@ -224,7 +227,7 @@
                 for (unsigned int j = 0; j < numpanels; ++j) {
                     // Getting the interaction matrix for the pair of panels i and j
                     Eigen::MatrixXcd interaction_matrix =
-                            InteractionMatrix(*panels[i], *panels[j], space, GaussQR, CGaussQR, k,c);
+                            InteractionMatrix(*panels[i], *panels[j], space, GaussQR, CGaussQR, k, c);
                     // Local to global mapping of the elements in interaction matrix
                     for (unsigned int I = 0; I < Q; ++I) {
                         for (unsigned int J = 0; J < Q; ++J) {

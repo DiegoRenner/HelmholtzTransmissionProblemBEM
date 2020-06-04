@@ -2388,7 +2388,7 @@ typedef __int64 BiggestInt;
 typedef long long BiggestInt;  // NOLINT
 #endif  // GTEST_OS_WINDOWS
 
-// Utilities for char.
+// utilities for char.
 
 // isspace(int ch) and friends accept an unsigned char or EOF.  char
 // may be signed, depending on the compiler (or compiler flags).
@@ -2644,7 +2644,7 @@ typedef TypeWithSize<8>::Int Int64;
 typedef TypeWithSize<8>::UInt UInt64;
 typedef TypeWithSize<8>::Int TimeInMillis;  // Represents time in milliseconds.
 
-// Utilities for command line flags and environment variables.
+// utilities for command line flags and environment variables.
 
 // Macro for referencing flags.
 #if !defined(GTEST_FLAG)

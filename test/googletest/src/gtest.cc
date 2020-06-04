@@ -892,7 +892,7 @@ TimeInMillis GetTimeInMillis() {
 #endif
 }
 
-// Utilities
+// utilities
 
 // class String.
 

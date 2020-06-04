@@ -10,7 +10,7 @@
 
 
 /**
- * This Struct object is used to store a Quadrature Rule.
+ * This Struct object is used to store a quadrature Rule.
  */
 struct QuadRule {
     std::size_t dim;   // dimension of space
@@ -117,15 +117,15 @@ inline std::pair<Eigen::RowVectorXd, Eigen::RowVectorXd>
 }
 
 /**
- * This function is evaluates a standard Gaussian Quadrature rule for the domain
+ * This function is evaluates a standard Gaussian quadrature rule for the domain
  * [-1,1] for the given order. The quadrature rule is returned in the form of a
  * QuadRule object
  *
- * @param N Order for Gaussian Quadrature
+ * @param N Order for Gaussian quadrature
  * @return QuadRule object containing the quadrature rule
  */
 inline QuadRule getGaussQR(unsigned N, double a, double b) {
-  // Getting standard Gauss Legendre Quadrature weights and nodes
+  // Getting standard Gauss Legendre quadrature weights and nodes
   Eigen::RowVectorXd weights, points;
   std::tie(points, weights) =
       gauleg(a, b, N, std::numeric_limits<double>::epsilon());
@@ -138,7 +138,7 @@ inline QuadRule getGaussQR(unsigned N, double a, double b) {
 }
 
 inline QuadRule getCGaussQR(unsigned N) {
-    // Getting standard Gauss Legendre Quadrature weights and nodes
+    // Getting standard Gauss Legendre quadrature weights and nodes
     Eigen::RowVectorXd weights, points;
     std::tie(points, weights) =
             cgauleg_redux(N, std::numeric_limits<double>::epsilon());

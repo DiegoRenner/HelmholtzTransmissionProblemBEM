@@ -16,7 +16,7 @@
 //
 //    Sylvan Elhay, Jaroslav Kautsky,
 //    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of 
-//    Interpolatory Quadrature,
+//    Interpolatory quadrature,
 //    ACM Transactions on Mathematical Software,
 //    Volume 13, Number 4, December 1987, pages 399-415.
 //

@@ -4,7 +4,7 @@
 #include "parametrized_circular_arc.hpp"
 #include "parametrized_mesh.hpp"
 #include "solvers.hpp"
-#include "generate_solution.hpp"
+#include "gen_sol.hpp"
 
 #define _USE_MATH_DEFINES // for Pi
 typedef std::complex<double> complex_t;

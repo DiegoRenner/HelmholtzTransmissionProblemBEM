@@ -4,7 +4,7 @@
 #include "parametrized_circular_arc.hpp"
 #include "parametrized_mesh.hpp"
 #include "solvers.hpp"
-#include "generate_solution.hpp"
+#include "gen_sol.hpp"
 
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);

@@ -10,7 +10,7 @@
 #include "abstract_bem_space.hpp"
 #include "continuous_space.hpp"
 #include "discontinuous_space.hpp"
-#include "generate_solution.hpp"
+#include "gen_sol.hpp"
 #include "math.h"
 #include <boost/math/special_functions.hpp>
 #include </usr/include/complex_bessel.h>

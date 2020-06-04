@@ -4,7 +4,7 @@
 #include <fstream>
 #include "parametrized_line.hpp"
 #include "singular_values.hpp"
-#include "roots.hpp"
+#include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 
 typedef std::complex<double> complex_t;

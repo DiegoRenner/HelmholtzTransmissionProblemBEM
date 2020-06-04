@@ -9,11 +9,11 @@
  * This File is a part of the 2D-Parametric BEM package
  */
 
-#include "hypersingular_der2.hpp"
+#include "hypersingular_der.hpp"
 #include "discontinuous_space.hpp"
 #include "/usr/include/complex_bessel.h"
 
-    namespace hypersingular_helmholtz_der2 {
+    namespace hypersingular_helmholtz_der {
 
         typedef std::complex<double> complex_t;
         complex_t ii = complex_t(0.0,1.0);
@@ -44,7 +44,7 @@
                                                    const QuadRule &GaussQR,
                                                    const complex_t k,
                                                    const double c){
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
             int Q = space.getQ();
             // Interaction matrix with size Qtest x Qtrial
@@ -82,9 +82,8 @@
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
                         if ( abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon ) {
-                            result = (sp_bessel::hankelH1p(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(pi[s]-pi_p[t]).squaredNorm()*(F_arc(t) * G_arc(s) - k*k*c* F(t) * G(s) * normal.dot(normal_p))
-                                      - sp_bessel::hankelH1(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(pi[s]-pi_p[t]).norm()*(4.*k*sqrt(c)*F(t)*G(s)*normal.dot(normal_p))
-                                    + sp_bessel::hankelH1(0,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(2.0*F(t)*G(s)*normal.dot(normal_p)));
+                            result = (sp_bessel::hankelH1(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(pi[s]-pi_p[t]).norm()*(F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p))
+                                    + sp_bessel::hankelH1(0,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(2.0*k*sqrt(c)*F(t)*G(s)*normal.dot(normal_p)));
                         }
                         return result;
                     };
@@ -100,7 +99,7 @@
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = -ii*c*integral/4.;
+                    interaction_matrix(i, j) = -ii*sqrt(c)*integral/4.;
                 }
             }
             return interaction_matrix;
@@ -112,7 +111,7 @@
                                                  const QuadRule &GaussQR,
                                                  const complex_t k,
                                                  const double c){
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
             int Qtrial = space.getQ();
             // The number of Reference Shape Functions in test space
@@ -171,15 +170,13 @@
                         normal = normal / normal.norm();
                         if (swap){
                             if ( abs(k*sqrt(c))*(pi[s]-pi_p.swapped_op(t)).norm() > epsilon ) {
-                                result = (sp_bessel::hankelH1p(1,k*sqrt(c)*(pi[s]-pi_p.swapped_op(t)).norm())*(pi[s]-pi_p.swapped_op(t)).squaredNorm()*(F_arc(t) * G_arc(s) - k*k*c* F(t) * G(s) * normal.dot(normal_p))
-                                          - sp_bessel::hankelH1(1,k*sqrt(c)*(pi[s]-pi_p.swapped_op(t)).norm())*(pi[s]-pi_p.swapped_op(t)).norm()*(4.*k*sqrt(c)*F(t)*G(s)*normal.dot(normal_p))
-                                + sp_bessel::hankelH1(0,k*sqrt(c)*(pi[s]-pi_p.swapped_op(t)).norm())*(2.*F(t)*G(s)*normal.dot(normal_p)));
+                                result = (sp_bessel::hankelH1(1,k*sqrt(c)*(pi[s]-pi_p.swapped_op(t)).norm())*(pi[s]-pi_p.swapped_op(t)).norm()*(F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p))
+                                             + sp_bessel::hankelH1(0,k*sqrt(c)*(pi[s]-pi_p.swapped_op(t)).norm())*(2.0*k*sqrt(c)*F(t)*G(s)*normal.dot(normal_p)));
                             }
                         }else {
                             if ( abs(k*sqrt(c))*(pi.swapped_op(s)-pi_p[t]).norm() > epsilon ) {
-                                result = (sp_bessel::hankelH1p(1,k*sqrt(c)*(pi.swapped_op(s)-pi_p[t]).norm())*(pi.swapped_op(s)-pi_p[t]).squaredNorm()*(F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p))
-                                          - sp_bessel::hankelH1(1,k*sqrt(c)*(pi.swapped_op(s)-pi_p[t]).norm())*(pi.swapped_op(s)-pi_p[t]).norm()*(4.*k*sqrt(c)*F(t)*G(s)*normal.dot(normal_p))
-                                + sp_bessel::hankelH1(0,k*sqrt(c)*(pi.swapped_op(s)-pi_p[t]).norm())*(2.*F(t)*G(s)*normal.dot(normal_p)));
+                                result = (sp_bessel::hankelH1(1,k*sqrt(c)*(pi.swapped_op(s)-pi_p[t]).norm())*(pi.swapped_op(s)-pi_p[t]).norm()*(F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p))
+                                             + sp_bessel::hankelH1(0,k*sqrt(c)*(pi.swapped_op(s)-pi_p[t]).norm())*(2.0*k*sqrt(c)*F(t)*G(s)*normal.dot(normal_p)));
                             }
                         }
                         return result;
@@ -196,7 +193,7 @@
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = -ii*c*integral/4.;
+                    interaction_matrix(i, j) = -ii*sqrt(c)*integral/4.;
                 }
             }
             return interaction_matrix;
@@ -208,7 +205,7 @@
                                                 const QuadRule &GaussQR,
                                                 const complex_t k,
                                                 const double c){
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in space
             int Q = space.getQ();
             // The number of Reference Shape Functions in space
@@ -250,9 +247,8 @@
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
                         if ( abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon ) {
-                            result = (sp_bessel::hankelH1p(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(pi[s]-pi_p[t]).squaredNorm()*(F_arc(t) * G_arc(s) - k*k*c* F(t) * G(s) * normal.dot(normal_p))
-                                      - sp_bessel::hankelH1(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(pi[s]-pi_p[t]).norm()*(4.*k*sqrt(c)*F(t)*G(s)*normal.dot(normal_p))
-                                      + sp_bessel::hankelH1(0,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(2.0*F(t)*G(s)*normal.dot(normal_p)));
+                            result = (sp_bessel::hankelH1(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(pi[s]-pi_p[t]).norm()*(F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p))
+                                         + sp_bessel::hankelH1(0,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(2.0*k*sqrt(c)*F(t)*G(s)*normal.dot(normal_p)));
                         }
                         return result;
                     };
@@ -267,7 +263,7 @@
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = -ii*c*integral/4.;
+                    interaction_matrix(i, j) = -ii*sqrt(c)*integral/4.;
                 }
             }
             return interaction_matrix;

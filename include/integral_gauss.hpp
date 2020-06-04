@@ -13,7 +13,7 @@
 #include <Eigen/Dense>
 namespace parametricbem2d {
 /* This function computes an integral numerically using Gauss Legendre
- * Quadrature Rule of the given order
+ * quadrature Rule of the given order
  *
  * @tparam T Template type for integrand. Should support evaluation.
  * @param integrand The integrand to be integrated
@@ -38,13 +38,13 @@ double ComputeIntegral(T integrand, double a, double b, unsigned int N) {
 }
 
 /* This function computes an integral numerically using Gauss Legendre
- * Quadrature Quadrature Rule of the given order
+ * quadrature quadrature Rule of the given order
  *
  * @tparam T Template type for integrand. Should support evaluation.
  * @param integrand The integrand to be integrated
  * @param a Lower end of the integration domain
  * @param b Upper end of the integration domain
- * @param GaussQR Gaussian Quadrature in form of a QuadRule object
+ * @param GaussQR Gaussian quadrature in form of a QuadRule object
  * @return Integral value
  */
 template <typename T>
@@ -66,7 +66,7 @@ double ComputeIntegral(T integrand, double a, double b,
 }
 
 /* This function computes a log weighted integral numerically using a Log
- * weighted Quadrature Rule of the given order, derived from Gauss Laguerre rule
+ * weighted quadrature Rule of the given order, derived from Gauss Laguerre rule
  *
  * @tparam T Template type for integrand. Should support evaluation.
  * @param integrand The integrand to be integrated (without the log weight)
@@ -86,8 +86,8 @@ double ComputeLogIntegral(T integrand, double a, unsigned int N) {
 }*/
 
 /* This function computes a log weighted integral numerically using a Log
- * weighted Quadrature Rule of the given order, derived as Generalized Gauss
- * Quadrature with arbitrary weight function. This function is valid only for
+ * weighted quadrature Rule of the given order, derived as Generalized Gauss
+ * quadrature with arbitrary weight function. This function is valid only for
  * integration in the following range: [0,1]
  *
  * @tparam T Template type for integrand. Should support evaluation.
@@ -97,20 +97,20 @@ double ComputeLogIntegral(T integrand, double a, unsigned int N) {
  */
 
 /* This function computes a log weighted integral numerically using a Log
- * weighted Quadrature Rule of the given order. The integration domain [0.a] is
+ * weighted quadrature Rule of the given order. The integration domain [0.a] is
  * transformed to [0,1] and It is evaluated using Gauss Legendre rule and the
- * Log Weighted Quadrature rule which is derive as a Generalized Gauss
- * Quadrature rule for an arbitrary weight function.
+ * Log Weighted quadrature rule which is derive as a Generalized Gauss
+ * quadrature rule for an arbitrary weight function.
  *
  * @tparam T Template type for integrand. Should support evaluation.
  * @param integrand The integrand to be integrated (without the log weight)
  * @param a Upper end of the integration domain
- * @param QR Gaussian Quadrature in form of a QuadRule object
+ * @param QR Gaussian quadrature in form of a QuadRule object
  * @return Integral value
  */
 
 /* This function computes a Gauss Lguerre integral using the respective
- * Quadrature Rule.
+ * quadrature Rule.
  *
  * @tparam T Template type for integrand. Should support evaluation.
  * @param integrand The integrand to be integrated (without the log weight)
@@ -134,7 +134,7 @@ double ComputeLaguerreIntegral(T integrand, unsigned int n) {
 }
 
 /* This function computes a double integral numerically using Gauss Legendre
- * Quadrature Quadrature Rule of the given order. The integral has to be of the
+ * quadrature quadrature Rule of the given order. The integral has to be of the
  * form \f$ \int_{x=a}^{b} \int_{y=ll(x)}^{ul(x)} f(x,y) dy dx \f$
  *
  * @tparam F Template type for integrand. Should support evaluation of the form
@@ -150,7 +150,7 @@ double ComputeLaguerreIntegral(T integrand, unsigned int n) {
              function of x
  * @param ul Function representing the upper limit of the y integral, as a
              function of x
- * @param GaussQR Gaussian Quadrature in form of a QuadRule object
+ * @param GaussQR Gaussian quadrature in form of a QuadRule object
  * @return Integral value
  */
 template <typename F, typename LL, typename UL>

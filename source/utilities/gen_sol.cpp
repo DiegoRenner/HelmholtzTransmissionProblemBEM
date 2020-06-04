@@ -4,7 +4,7 @@
 
 #include <Eigen/Dense>
 #include <iostream>
-#include "generate_solution.hpp"
+#include "gen_sol.hpp"
 #include "math.h"
 
 namespace sol {

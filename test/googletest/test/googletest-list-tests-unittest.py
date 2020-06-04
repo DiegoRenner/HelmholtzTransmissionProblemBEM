@@ -108,7 +108,7 @@ FooTest\.
   Test3
 """)
 
-# Utilities.
+# utilities.
 
 
 def Run(args):

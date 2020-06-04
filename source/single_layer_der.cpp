@@ -43,7 +43,7 @@
                                                  const QuadRule &GaussQR,
                                                  const complex_t k,
                                                  const double c){
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
             int Qtrial = space.getQ();
             // The number of Reference Shape Functions in test space
@@ -109,7 +109,7 @@
                                                    const QuadRule &GaussQR,
                                                    const complex_t k,
                                                    const double c){
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // Calculating the quadrature order for stable evaluation of integrands for
             // disjoint panels as mentioned in \f$\ref{par:distpan}\f$
             // No. of Reference Shape Functions in trial/test space
@@ -159,7 +159,7 @@
                                                 const QuadRule &GaussQR,
                                                 const complex_t k,
                                                 const double c){
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // Calculating the quadrature order for stable evaluation of integrands for
             // disjoint panels as mentioned in \f$\ref{par:distpan}\f$
             // No. of Reference Shape Functions in trial/test space

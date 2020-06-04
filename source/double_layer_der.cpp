@@ -10,10 +10,11 @@
  */
 
 #include <iostream>
-#include "double_layer.hpp"
-#include </usr/include/complex_bessel.h>
+#include "double_layer_der.hpp"
+#include "/usr/include/complex_bessel.h"
+#include <boost/math/special_functions/bessel.hpp>
 
-    namespace double_layer_helmholtz {
+    namespace double_layer_helmholtz_der {
 
         typedef std::complex<double> complex_t;
         complex_t ii = complex_t(0.0,1.0);
@@ -45,7 +46,7 @@
                                                    const QuadRule &GaussQR,
                                                    const complex_t k,
                                                    const double c) {
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
             int Qtrial = trial_space.getQ();
             // The number of Reference Shape Functions in test space
@@ -73,10 +74,10 @@
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
                         if ( abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon ) { // Away from singularity
-                            result = ii*k*sqrt(c)*sp_bessel::hankelH1(1,k * sqrt(c) * (pi[s] - pi_p[t]).norm())
-                                     *((pi[s] - pi_p[t]).normalized()).dot(normal)/4.;
-                        } else if ((pi[s]-pi_p[t]).norm() > epsilon) {
-                            result = 1/(2*M_PI)*(pi[s] - pi_p[t]).dot(normal) / (pi[s] - pi_p[t]).squaredNorm();
+                            result = (sp_bessel::hankelH1p(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(pi[s]-pi_p[t]).norm()*k*sqrt(c)
+                                         + sp_bessel::hankelH1(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm()))
+                                     *(pi[s]-pi_p[t]).normalized().dot(normal);
+                            //std::cout << sp_bessel::hankelH1p(1,k*sqrt(c)*(pi[s]-pi[t]).norm()) << std::endl;
                         }
                         return result*F(t)*G(s);
                     };
@@ -92,7 +93,7 @@
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = integral;
+                    interaction_matrix(i, j) = ii*sqrt(c)*integral/4.;
                 }
             }
             return interaction_matrix;
@@ -105,7 +106,7 @@
                                                  const QuadRule &GaussQR,
                                                  const complex_t k,
                                                  const double c) {
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
             int Qtrial = trial_space.getQ();
             // The number of Reference Shape Functions in test space
@@ -113,15 +114,15 @@
             // Interaction matrix with size Qtest x Qtrial
             Eigen::MatrixXcd interaction_matrix(Qtest, Qtrial);
             // Computing the (i,j)th matrix entry
-            bool swap = 1;//((pi(1) - pi_p(-1)).norm() / 100. > sqrt(epsilon));
+            bool swap = ((pi(1) - pi_p(-1)).norm() / 100. > sqrt(epsilon));
             for (int i = 0; i < Qtest; ++i) {
                 for (int j = 0; j < Qtrial; ++j) {
                     // Lambda expression for functions F and G in \f$\eqref{eq:Kidp}\f$
                     auto F = [&](double t) {
                         if (swap) {
-                            return trial_space.evaluateShapeFunction_01_swapped((j)%2, t) * pi_p.Derivative_01_swapped(t).norm();
+                            return trial_space.evaluateShapeFunction_01_swapped(j, t) * pi_p.Derivative_01_swapped(t).norm();
                         } else {
-                            return trial_space.evaluateShapeFunction((j)%2, t) * pi_p.Derivative_01(t).norm();
+                            return trial_space.evaluateShapeFunction(j, t) * pi_p.Derivative_01(t).norm();
                         }
                     };
                     auto G = [&](double s) {
@@ -135,30 +136,27 @@
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.,0.);
                         // Finding the tangent of pi_p to get its normal
-                        Eigen::Vector2d tangent = swap ? -pi_p.Derivative_01_swapped(t) : pi_p.Derivative_01(t);
+                        Eigen::Vector2d tangent = swap ? pi_p.Derivative_01_swapped(t) : pi_p.Derivative_01(t);
                         Eigen::Vector2d normal;
-                        normal << tangent(1), -tangent(0);
                         // Outward normal vector
-                        //if (swap) {
-                        //    normal << -tangent(1), tangent(0);
-                        //} else {
-                        //    normal << tangent(1), -tangent(0);
-                        //}
+                        if (swap) {
+                            normal << -tangent(1), tangent(0);
+                        } else {
+                            normal << tangent(1), -tangent(0);
+                        }
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
                         if (swap) {
                             if ( abs(k*sqrt(c))*(pi[s]-pi_p.swapped_op(t)).norm() > epsilon ) { // Away from singularity
-                                result = ii*k*sqrt(c)*sp_bessel::hankelH1(1,k * sqrt(c) * (pi[s] - pi_p.swapped_op(t)).norm())
-                                         * (pi[s] - pi_p.swapped_op(t)).normalized().dot(normal)/4.;
-                            } else if ((pi[s]-pi_p.swapped_op(t)).norm() > epsilon) {
-                                result = 1/(2*M_PI)*(pi[s] - pi_p.swapped_op(t)).dot(normal) / (pi[s] - pi_p.swapped_op(t)).squaredNorm();
-                                }
+                                result = (sp_bessel::hankelH1p(1,k*sqrt(c)*(pi[s]-pi_p.swapped_op(t)).norm())*(pi[s]-pi_p.swapped_op(t)).norm()*k*sqrt(c)
+                                             +sp_bessel::hankelH1(1,k*sqrt(c)*(pi[s]-pi_p.swapped_op(t)).norm()))
+                                         *(pi[s]-pi_p.swapped_op(t)).normalized().dot(normal);
+                            }
                         } else {
                             if ( abs(k*sqrt(c))*(pi.swapped_op(s)-pi_p[t]).norm() > epsilon ) { // Away from singularity
-                                result = ii*k*sqrt(c)*sp_bessel::hankelH1(1,k * sqrt(c) * (pi.swapped_op(s) - pi_p[t]).norm())
-                                         * (pi.swapped_op(s) - pi_p[t]).normalized().dot( normal)/4.;
-                            } else if ((pi.swapped_op(s)-pi_p[t]).norm() > epsilon) {
-                                result = 1/(2*M_PI)*(pi.swapped_op(s) - pi_p[t]).dot(normal) / (pi.swapped_op(s) - pi_p[t]).squaredNorm();
+                                result = (sp_bessel::hankelH1p(1,k*sqrt(c)*(pi.swapped_op(s)-pi_p[t]).norm())*(pi.swapped_op(s)-pi_p[t]).norm()*k*sqrt(c)
+                                             +sp_bessel::hankelH1(1,k*sqrt(c)*(pi.swapped_op(s)-pi_p[t]).norm()))
+                                         *(pi.swapped_op(s)-pi_p[t]).normalized().dot(normal);
                             }
                         }
                         return result * F(t) * G(s);
@@ -175,7 +173,7 @@
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = integral;
+                    interaction_matrix(i, j) = ii*sqrt(c)*integral/4.;
                 }
             }
             return interaction_matrix;
@@ -188,7 +186,7 @@
                                                 const QuadRule &GaussQR,
                                                 const complex_t k,
                                                 const double c) {
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in space
             int Qtrial = trial_space.getQ();
             // The number of Reference Shape Functions in space
@@ -220,10 +218,9 @@
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
                         if ( abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon ) { // Away from singularity
-                            result = ii*k*sqrt(c)*sp_bessel::hankelH1(1,k * sqrt(c) * (pi[s] - pi_p[t]).norm())
-                                     * (pi[s] - pi_p[t]).normalized().dot(normal)/4.;
-                        } else if ((pi[s]-pi_p[t]).norm() > epsilon) {
-                            result = 1/(2*M_PI)*(pi[s] - pi_p[t]).dot(normal) / (pi[s] - pi_p[t]).squaredNorm();
+                            result = (sp_bessel::hankelH1p(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(pi[s]-pi_p[t]).norm()*k*sqrt(c)
+                                        +sp_bessel::hankelH1(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm()))
+                                                *(pi[s]-pi_p[t]).normalized().dot(normal);
                         }
                         return result*F(t)*G(s);
                     };
@@ -238,7 +235,7 @@
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = integral;
+                    interaction_matrix(i, j) = ii*sqrt(c)*integral/4.;
                 }
             }
             return interaction_matrix;
@@ -270,7 +267,7 @@
                 for (unsigned int j = 0; j < numpanels; ++j) {
                     // Getting the interaction matrix for the pair of panels i and j
                     Eigen::MatrixXcd interaction_matrix = InteractionMatrix(
-                            *panels[i], *panels[j], trial_space, test_space, GaussQR, CGaussQR, k, c);
+                            *panels[i], *panels[j], trial_space, test_space, GaussQR, CGaussQR, k,c);
                     // Local to global mapping of the elements in interaction matrix
                     for (unsigned int I = 0; I < Qtest; ++I) {
                         for (unsigned int J = 0; J < Qtrial; ++J) {
@@ -288,3 +285,4 @@
         }
 
     } // namespace double_layer_helmholtz
+

@@ -50,7 +50,7 @@ EXE_PATH = gtest_test_utils.GetTestExecutablePath(
     'googletest-throw-on-failure-test_')
 
 
-# Utilities.
+# utilities.
 
 
 def SetEnvVar(env_var, value):

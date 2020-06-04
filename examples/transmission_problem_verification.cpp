@@ -3,7 +3,7 @@
 #include <fstream>
 #include "parametrized_circular_arc.hpp"
 #include "solvers.hpp"
-#include "generate_solution.hpp"
+#include "gen_sol.hpp"
 #include "continuous_space.hpp"
 #include "discontinuous_space.hpp"
 #include "mass_matrix.hpp"

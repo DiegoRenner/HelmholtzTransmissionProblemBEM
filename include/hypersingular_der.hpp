@@ -31,7 +31,7 @@ namespace hypersingular_helmholtz_der {
  * @param pi Parametrization for the first panel \f$\Pi\f$.
  * @param pi_p Parametrization for the second panel \f$\Pi\f$'.
  * @param space The BEM space to be used for calculations
- * @param GaussQR QuadRule object containing the Gaussian Quadrature to be
+ * @param GaussQR QuadRule object containing the Gaussian quadrature to be
  * applied.
  * @return An Eigen::MatrixXd type Interaction Matrix (QXQ)
  *         where Q is number of local shape functions in BEM space
@@ -53,7 +53,7 @@ namespace hypersingular_helmholtz_der {
  * @param pi Parametrization for the first panel \f$\Pi\f$.
  * @param pi_p Parametrization for the second panel \f$\Pi\f$'.
  * @param space The BEM space to be used for calculations
- * @param GaussQR QuadRule object containing the Gaussian Quadrature to be
+ * @param GaussQR QuadRule object containing the Gaussian quadrature to be
  * applied.
  * @return An Eigen::MatrixXd type Interaction Matrix (QXQ)
  *         where Q is number of local shape functions in BEM space
@@ -74,7 +74,7 @@ namespace hypersingular_helmholtz_der {
  * @param pi Parametrization for the first panel \f$\Pi\f$.
  * @param pi_p Parametrization for the second panel \f$\Pi\f$'.
  * @param space The BEM space to be used for calculations
- * @param GaussQR QuadRule object containing the Gaussian Quadrature to be
+ * @param GaussQR QuadRule object containing the Gaussian quadrature to be
  * applied.
  * @return An Eigen::MatrixXd type Interaction Matrix (QXQ)
  *         where Q is number of local shape functions in BEM space
@@ -107,7 +107,7 @@ namespace hypersingular_helmholtz_der {
  * @param pi Parametrization for the first panel \f$\Pi\f$.
  * @param pi_p Parametrization for the second panel \f$\Pi\f$'.
  * @param space The BEM space to be used for calculations
- * @param GaussQR QuadRule object containing the Gaussian Quadrature to be
+ * @param GaussQR QuadRule object containing the Gaussian quadrature to be
  * applied.
  * @return An Eigen::MatrixXd type Interaction Matrix (QXQ)
  *         where Q is number of local shape functions in BEM space
@@ -132,7 +132,7 @@ namespace hypersingular_helmholtz_der {
  *             panels in the mesh
  * @param space The trial and test BEM space to be used for evaluating
  *              the Galerkin matrix
- * @param N Order for Gauss Quadrature
+ * @param N Order for Gauss quadrature
  * @return An Eigen::MatrixXd type Galerkin Matrix for the given mesh and space
  */
     Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,

@@ -189,7 +189,7 @@ bool KilledBySignal::operator()(int exit_status) const {
 
 namespace internal {
 
-// Utilities needed for death tests.
+// utilities needed for death tests.
 
 // Generates a textual description of a given exit code, in the format
 // specified by wait(2).

@@ -1039,7 +1039,7 @@ struct IsRecursiveContainer : public IsRecursiveContainerImpl<C>::type {};
 template<bool> struct EnableIf;
 template<> struct EnableIf<true> { typedef void type; };  // NOLINT
 
-// Utilities for native arrays.
+// utilities for native arrays.
 
 // ArrayEq() compares two k-dimensional native arrays using the
 // elements' operator==, where k can be any integer >= 0.  When k is

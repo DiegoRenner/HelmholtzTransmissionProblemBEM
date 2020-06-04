@@ -2,8 +2,8 @@
 // Created by diegorenner on 4/29/20.
 //
 
-#ifndef HELMHOLTZTRANSMISSIONPROBLEM_ROOTS_HPP
-#define HELMHOLTZTRANSMISSIONPROBLEM_ROOTS_HPP
+#ifndef HELMHOLTZTRANSMISSIONPROBLEM_FIND_ROOTS_HPP
+#define HELMHOLTZTRANSMISSIONPROBLEM_FIND_ROOTS_HPP
 
 #include <Eigen/Dense>
 
@@ -35,4 +35,4 @@ double rtsafe( const std::function<Eigen::MatrixXd(double)> f,
             bool &root_found,
             unsigned &num_iter);
 
-#endif //HELMHOLTZTRANSMISSIONPROBLEM_ROOTS_HPP
+#endif //HELMHOLTZTRANSMISSIONPROBLEM_FIND_ROOTS_HPP

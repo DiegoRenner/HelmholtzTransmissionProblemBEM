@@ -1,10 +1,10 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-add_subdirectory(Parametrizations)
+add_subdirectory(parametrizations)
 
-add_subdirectory(Quadrature)
+add_subdirectory(quadrature)
 
-add_subdirectory(Utilities)
+add_subdirectory(utilities)
 
 add_library(single_layer STATIC single_layer.cpp)
 target_link_libraries(single_layer parametrizations)

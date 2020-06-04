@@ -34,7 +34,7 @@
  * @param pi_p Parametrization for the second panel \f$\Pi\f$'.
  * @param trial_space The trial space for evaluating the matrix.
  * @param test_space The test space for evaluating the matrix.
- * @param GaussQR QuadRule object containing the Gaussian Quadrature to be
+ * @param GaussQR QuadRule object containing the Gaussian quadrature to be
  * applied.
  * @return The matrix K for Double Layer BIO bilinear form.
  */
@@ -58,7 +58,7 @@
  * @param pi_p Parametrization for the second panel \f$\Pi\f$'.
  * @param trial_space The trial space for evaluating the matrix.
  * @param test_space The test space for evaluating the matrix.
- * @param GaussQR QuadRule object containing the Gaussian Quadrature to be
+ * @param GaussQR QuadRule object containing the Gaussian quadrature to be
  * applied.
  * @return The matrix K for Double Layer BIO bilinear form.
  */
@@ -81,7 +81,7 @@
  * @param pi_p Parametrization for the second panel \f$\Pi\f$'.
  * @param trial_space The trial space for evaluating the matrix.
  * @param test_space The test space for evaluating the matrix.
- * @param GaussQR QuadRule object containing the Gaussian Quadrature to be
+ * @param GaussQR QuadRule object containing the Gaussian quadrature to be
  * applied.
  * @return The matrix K for Double Layer BIO bilinear form.
  */
@@ -120,7 +120,7 @@
  * @param pi_p Parametrization for the second panel \f$\Pi\f$'.
  * @param trial_space The trial space for evaluating the matrix.
  * @param test_space The test space for evaluating the matrix.
- * @param GaussQR QuadRule object containing the Gaussian Quadrature to be
+ * @param GaussQR QuadRule object containing the Gaussian quadrature to be
  * applied.
  * @return An Eigen::MatrixXd type Interaction Matrix
  * (\f$Q_{test}\f$X\f$Q_{trial}\f$)

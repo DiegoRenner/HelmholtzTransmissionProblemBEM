@@ -4,7 +4,7 @@
 #include <fstream>
 #include "parametrized_line.hpp"
 #include "singular_values.hpp"
-#include "roots.hpp"
+#include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 
 typedef std::complex<double> complex_t;
@@ -37,7 +37,6 @@ int main(int argc, char** argv) {
     filename.open(argv[7], std::ofstream::out | std::ofstream::trunc);
     filename.close();
 
-    std::cout << order << std::endl;
     // loop over mesh size and wavenumbers
         // compute mesh for numpanels
     using PanelVector = PanelVector;

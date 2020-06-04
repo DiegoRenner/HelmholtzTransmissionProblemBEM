@@ -9,11 +9,11 @@
  * This File is a part of the 2D-Parametric BEM package
  */
 
-#include "hypersingular_der.hpp"
+#include "hypersingular.hpp"
 #include "discontinuous_space.hpp"
 #include "/usr/include/complex_bessel.h"
 
-    namespace hypersingular_helmholtz_der {
+    namespace hypersingular_helmholtz {
 
         typedef std::complex<double> complex_t;
         complex_t ii = complex_t(0.0,1.0);
@@ -25,26 +25,26 @@
                                            const QuadRule &GaussQR,
                                            const QuadRule &CGaussQR,
                                            const complex_t k,
-                                           const double c){
-            if (&pi == &pi_p) { // Same Panels case
-                return ComputeIntegralCoinciding(pi, pi_p, space, CGaussQR, k, c);
+                                           const double c) {
+                if (&pi == &pi_p) { // Same Panels case
+                    return ComputeIntegralCoinciding(pi, pi_p, space, CGaussQR, k, c);
+                }
+                else if ((pi(1) - pi_p(-1)).norm() / 100. < epsilon ||
+                         (pi(-1) - pi_p(1)).norm() / 100. < epsilon) {// Adjacent Panels case
+                    return ComputeIntegralAdjacent(pi, pi_p, space, CGaussQR, k, c);
+                }
+                else {// Disjoint panels case*/
+                    return ComputeIntegralGeneral(pi, pi_p, space, GaussQR, k, c);
+                }
             }
-            else if ((pi(1) - pi_p(-1)).norm() / 100. < epsilon ||
-                     (pi(-1) - pi_p(1)).norm() / 100. < epsilon) {// Adjacent Panels case
-                return ComputeIntegralAdjacent(pi, pi_p, space, CGaussQR, k, c);
-            }
-            else {// Disjoint panels case*/
-                return ComputeIntegralGeneral(pi, pi_p, space, GaussQR, k, c);
-            }
-        }
 
         Eigen::MatrixXcd ComputeIntegralCoinciding(const AbstractParametrizedCurve &pi,
                                                    const AbstractParametrizedCurve &pi_p,
                                                    const AbstractBEMSpace &space,
                                                    const QuadRule &GaussQR,
                                                    const complex_t k,
-                                                   const double c){
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+                                                   const double c) {
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
             int Q = space.getQ();
             // Interaction matrix with size Qtest x Qtrial
@@ -81,11 +81,11 @@
                         normal << tangent(1), -tangent(0);
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
-                        if ( abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon ) {
-                            result = (sp_bessel::hankelH1(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(pi[s]-pi_p[t]).norm()*(F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p))
-                                    + sp_bessel::hankelH1(0,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(2.0*k*sqrt(c)*F(t)*G(s)*normal.dot(normal_p)));
-                        }
-                        return result;
+                        if (abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon ) {
+                            result = ii*sp_bessel::hankelH1(0,k*sqrt(c)* (pi[s] - pi_p[t]).norm())/4.;
+                        } else if ((pi[s]-pi_p[t]).norm() > epsilon ){
+                            result -1/(2*M_PI)*log((pi[s]-pi_p[t]).norm());                        }
+                        return result * (F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p));
                     };
                     complex_t integral = 0;
                     // Tensor product quadrature for double integral in \f$\eqref{eq:Kidp}\f$
@@ -99,7 +99,7 @@
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = -ii*sqrt(c)*integral/4.;
+                    interaction_matrix(i, j) = integral;
                 }
             }
             return interaction_matrix;
@@ -110,8 +110,8 @@
                                                  const AbstractBEMSpace &space,
                                                  const QuadRule &GaussQR,
                                                  const complex_t k,
-                                                 const double c){
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+                                                 const double c) {
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
             int Qtrial = space.getQ();
             // The number of Reference Shape Functions in test space
@@ -119,7 +119,7 @@
             // Interaction matrix with size Qtest x Qtrial
             Eigen::MatrixXcd interaction_matrix(Qtest, Qtrial);
             // Computing the (i,j)th matrix entry
-            bool swap = ((pi(1) - pi_p(-1)).norm() / 100. > epsilon);
+            bool swap = 1;//((pi(1) - pi_p(-1)).norm() / 100. > epsilon);
             for (int i = 0; i < Qtest; ++i) {
                 for (int j = 0; j < Qtrial; ++j) {
                     // Lambda expression for functions F and G in \f$\eqref{eq:Kidp}\f$
@@ -169,17 +169,19 @@
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
                         if (swap){
-                            if ( abs(k*sqrt(c))*(pi[s]-pi_p.swapped_op(t)).norm() > epsilon ) {
-                                result = (sp_bessel::hankelH1(1,k*sqrt(c)*(pi[s]-pi_p.swapped_op(t)).norm())*(pi[s]-pi_p.swapped_op(t)).norm()*(F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p))
-                                             + sp_bessel::hankelH1(0,k*sqrt(c)*(pi[s]-pi_p.swapped_op(t)).norm())*(2.0*k*sqrt(c)*F(t)*G(s)*normal.dot(normal_p)));
+                            if (abs(k*sqrt(c))*(pi[s]-pi_p.swapped_op(t)).norm() > epsilon ) {
+                                result = ii*sp_bessel::hankelH1(0, k*sqrt(c)*(pi[s]-pi_p.swapped_op(t)).norm())/4.;
+                            } else if ((pi[s]-pi_p.swapped_op(t)).norm() > epsilon ){
+                                result = -1/(2*M_PI)*log((pi[s]-pi_p.swapped_op(t)).norm());
                             }
                         }else {
-                            if ( abs(k*sqrt(c))*(pi.swapped_op(s)-pi_p[t]).norm() > epsilon ) {
-                                result = (sp_bessel::hankelH1(1,k*sqrt(c)*(pi.swapped_op(s)-pi_p[t]).norm())*(pi.swapped_op(s)-pi_p[t]).norm()*(F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p))
-                                             + sp_bessel::hankelH1(0,k*sqrt(c)*(pi.swapped_op(s)-pi_p[t]).norm())*(2.0*k*sqrt(c)*F(t)*G(s)*normal.dot(normal_p)));
+                            if (abs(k*sqrt(c))*(pi.swapped_op(s)-pi_p[t]).norm() > epsilon ) {
+                                result = ii*sp_bessel::hankelH1(0, k*sqrt(c)*(pi.swapped_op(s)-pi_p[t]).norm())/4.;
+                            } else if ((pi.swapped_op(s)-pi_p[t]).norm() > epsilon ){
+                                result = -1/(2*M_PI)*log((pi.swapped_op(s)-pi_p[t]).norm());
                             }
                         }
-                        return result;
+                        return result * (F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p));
                     };
                     complex_t integral = complex_t(0.,0.);
                     // Tensor product quadrature for double integral in \f$\eqref{eq:Kidp}\f$
@@ -193,7 +195,7 @@
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = -ii*sqrt(c)*integral/4.;
+                    interaction_matrix(i, j) = integral;
                 }
             }
             return interaction_matrix;
@@ -205,7 +207,7 @@
                                                 const QuadRule &GaussQR,
                                                 const complex_t k,
                                                 const double c){
-            unsigned N = GaussQR.n; // Quadrature order for the GaussQR object.
+            unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in space
             int Q = space.getQ();
             // The number of Reference Shape Functions in space
@@ -246,11 +248,12 @@
                         normal << tangent(1), -tangent(0);
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
-                        if ( abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon ) {
-                            result = (sp_bessel::hankelH1(1,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(pi[s]-pi_p[t]).norm()*(F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p))
-                                         + sp_bessel::hankelH1(0,k*sqrt(c)*(pi[s]-pi_p[t]).norm())*(2.0*k*sqrt(c)*F(t)*G(s)*normal.dot(normal_p)));
+                        if (abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon ) {
+                            result = ii*sp_bessel::hankelH1(0,k*sqrt(c)* (pi[s] - pi_p[t]).norm())/4.;
+                        } else if ((pi[s]-pi_p[t]).norm() > epsilon ){
+                            result = -1/(2*M_PI)*log((pi[s]-pi_p[t]).norm());
                         }
-                        return result;
+                        return result * (F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p));
                     };
                     complex_t integral = complex_t(0.,0.);
                     // Tensor product quadrature for double integral
@@ -263,7 +266,7 @@
                         }
                     }
                     // Filling the matrix entry
-                    interaction_matrix(i, j) = -ii*sqrt(c)*integral/4.;
+                    interaction_matrix(i, j) = integral;
                 }
             }
             return interaction_matrix;
@@ -273,7 +276,7 @@
                                         const AbstractBEMSpace &space,
                                         const unsigned int &N,
                                         const complex_t k,
-                                        const double c){
+                                        const double c) {
             // Getting the number of panels in the mesh
             unsigned int numpanels = mesh.getNumPanels();
             // Getting dimensions of trial/test space
