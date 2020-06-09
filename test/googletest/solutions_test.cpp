@@ -109,15 +109,15 @@ TEST(SolutionsTest, neumann) {
     a_n[2] = 1.0;
 
     auto u_i_N = [&] (double x1, double x2) {
-        return sol::u_i_N(x1, x2, l, eps, a_n, k, n_i);
+        return sol::u_i_neu(x1, x2, l, eps, a_n, k, n_i);
     };
 
     auto u_s_N = [&] (double x1, double x2) {
-        return sol::u_s_N(x1, x2, l, eps, a_n, k, n_i);
+        return sol::u_s_neu(x1, x2, l, eps, a_n, k, n_i);
     };
 
     auto u_t_N = [&] (double x1, double x2) {
-        return sol::u_t_N(x1, x2, l, eps, a_n, k, n_i);
+        return sol::u_t_neu(x1, x2, l, eps, a_n, k, n_i);
     };
     Eigen::VectorXcd outer = discont_space.Interpolate_helmholtz(u_s_N, mesh);
     Eigen::VectorXcd inner = discont_space.Interpolate_helmholtz(u_t_N, mesh);

@@ -6,7 +6,9 @@
 #include "singular_values.hpp"
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
+#include <chrono>
 
+using namespace std::chrono;
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
 double epsilon = 1e-6;//numeric_limits<double>::epsilon();
@@ -41,6 +43,8 @@ int main(int argc, char** argv){
     // loop over mesh size and wavenumbers
         // compute mesh for numpanels
         ParametrizedMesh mesh(curve.split(numpanels));
+    auto duration_ops = seconds::zero();
+    auto duration = seconds::zero();
     for (unsigned j = 0; j < n_points_x; j++) {
             for (unsigned k = 0; k < n_points_y; k++) {
                 // define wavenumber for current loop
@@ -54,11 +58,15 @@ int main(int argc, char** argv){
                 }
 
                 auto sv_eval = [&] (double k_in) {
+                    auto start = high_resolution_clock::now();
                     Eigen::MatrixXcd T_in;
                         T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
+                    auto end = high_resolution_clock::now();
+                    duration_ops += duration_cast<seconds>(end-start);
                     return sv(T_in, list, count)(m);
                 };
                 auto sv_eval_both = [&] (double k_in) {
+                    auto start = high_resolution_clock::now();
                     Eigen::MatrixXcd T_in;
                     Eigen::MatrixXcd T_der_in;
                     Eigen::MatrixXcd T_der2_in;
@@ -67,13 +75,18 @@ int main(int argc, char** argv){
                         T_der2_in = gen_sol_op_2nd_der(mesh, order, k_in , c_o, c_i);
                     //??????????????????????????
                     Eigen::MatrixXd res = sv_2nd_der(T_in, T_der_in, T_der2_in, list, count).block(m,1,1,2);
+                    auto end = high_resolution_clock::now();
+                    duration_ops += duration_cast<seconds>(end-start);
                     return res;
                 };
                 auto sv_eval_der = [&] (double k_in) {
+                    auto start = high_resolution_clock::now();
                     Eigen::MatrixXcd T_in;
                     Eigen::MatrixXcd T_der_in;
                         T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
                         T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
+                    auto end = high_resolution_clock::now();
+                    duration_ops += duration_cast<seconds>(end-start);
                     return sv_1st_der(T_in, T_der_in, list, count)(m,1);
                 };
 

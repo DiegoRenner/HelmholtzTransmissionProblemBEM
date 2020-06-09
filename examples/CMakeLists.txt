@@ -18,8 +18,8 @@ add_executable(parabolic_approximation parabolic_approximation.cpp)
 
 add_library(generate_solution STATIC ../source/utilities/gen_sol.cpp)
 
-target_link_libraries(dirichlet_example parametrizations quadrature generate_solution solvers)
-target_link_libraries(neumann_example parametrizations generate_solution solvers)
+target_link_libraries(dirichlet_example parametrizations generate_solution solvers complex_bessel)
+target_link_libraries(neumann_example parametrizations generate_solution solvers complex_bessel)
 target_link_libraries(transmission_example parametrizations generate_solution solvers complex_bessel)
 target_link_libraries(sv_derivative_verification_circle parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
 target_link_libraries(roots_newton_circle parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)

@@ -2,3 +2,4 @@
 /workspace.xml
 bin
 cmake-build-debug
+doxygen/generated_doc

@@ -44,10 +44,10 @@ int main(int argc, char** argv) {
         return sol::u_t(x1, x2, l, eps, a_n, k, c_i);
     };
     auto u_i_neu = [&] (double x1, double x2) {
-        return sol::u_i_N(x1, x2, l, eps, a_n, k, c_i);
+        return sol::u_i_neu(x1, x2, l, eps, a_n, k, c_i);
     };
     auto u_t_neu = [&] (double x1, double x2) {
-        return sol::u_t_N(x1, x2, l, eps, a_n, k, c_i);
+        return sol::u_t_neu(x1, x2, l, eps, a_n, k, c_i);
     };
     DiscontinuousSpace<0> discont_space;
     ContinuousSpace<1> cont_space;
@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
     for (unsigned i = 0; i < n_runs; i++) {
         ParametrizedMesh mesh(curve.split(numpanels[i]));
         auto start = high_resolution_clock::now();
-        Eigen::VectorXcd sol = tsp::direct_second_kind::solve(
+        Eigen::VectorXcd sol = tp::direct_second_kind::solve(
                 mesh, u_i_dir, u_i_neu, u_t_dir, u_t_neu, order, k, c_o, c_i);
         auto end = high_resolution_clock::now();
         auto duration = duration_cast<milliseconds>(end - start);
