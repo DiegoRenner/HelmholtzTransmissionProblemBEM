@@ -2,11 +2,10 @@
  * \file single_layer.hpp
  * \brief This file declares the functions to evaluate the entries of
  *        Galerkin matrices based on the bilinear form induced by the
- *        Single Layer BIO, using the transformations given in
- *        \f$\ref{ss:quadapprox}\f$ in the Lecture Notes for Advanced Numerical
- *        Methods for CSE.
+ *        Single Layer BIO for the Helmholtz kernel,
+ *        using common and composite Gauss-Legendre quadrature rules.
  *
- * This File is a part of the 2D-Parametric BEM package
+ * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
 
 #ifndef SINGLELAYERHPP
@@ -15,21 +14,27 @@
 #include "abstract_parametrized_curve.hpp"
 #include "gauleg.hpp"
 
+/**
+ * This namespace contains all the functions for evaluating the Single Layer
+ * Galerkin Matrix using common and composite Gauss-Legendre quadrature rules.
+ */
     namespace single_layer_helmholtz {
 /**
- * This function is used to evaluate the Interaction Matrix for the pair
- * of panels \f$\Pi\f$ and \f$\Pi\f$', for the bilinear form induced by
- * the Single Layer BIO. It implements the case where the panels are adjacent.
- * The matrix entries are calculated by using a local arclength parametrization
- * and the transformations mentioned in \f$\ref{par:Vadj}\f$
+ * This function is used to evaluate the Interaction Matrix for a pair of
+ * panels \f$\Pi\f$ and \f$\Pi\f$' for the bilinear form induced by the Single
+ * Layer BIO for the Helmholtz kernel, using the given trial and test spaces.
+ * It implements the case where the panels \f$\Pi\f$ and \f$\Pi\f$' are adjacent.
+ * This function calculates a matrix entry by using a composite Gauss-Legnedre
+ * quadrature rule with which a tensor product quadrature rule is generated.
  *
- * @param pi Parametrization for the first panel \f$\Pi\f$.
- * @param pi_p Parametrization for the second panel \f$\Pi\f$'.
- * @param space The BEM space to be used for calculations
+ * @param pi parametrization for the first panel \f$\Pi\f$
+ * @param pi_p parametrization for the second panel \f$\Pi\f$'
+ * @param space the trial & test space for evaluating the matrix
  * @param GaussQR QuadRule object containing the Gaussian quadrature to be
- * applied.
- * @return An Eigen::MatrixXd type Interaction Matrix (QXQ)
- *         where Q is number of local shape functions in BEM space
+ * applied
+ * @param k wavenumber
+ * @param c refraction index
+ * @return the matrix V for Helmholtz kernel Single Layer BIO bilinear form
  */
         Eigen::MatrixXcd ComputeIntegralAdjacent(const AbstractParametrizedCurve &pi,
                                                  const AbstractParametrizedCurve &pi_p,
@@ -39,19 +44,21 @@
                                                  const double c);
 
 /**
- * This function is used to evaluate the Interaction Matrix for the pair
- * of panels \f$\Pi\f$ and \f$\Pi\f$', for the bilinear form induced by
- * the Single Layer BIO. It implements the case where the panels are coinciding.
- * The matrix entries are calculated by using transformations mentioned in
- * \f$\ref{par:Vidp}\f$
+ * This function is used to evaluate the Interaction Matrix for a pair of
+ * panels \f$\Pi\f$ and \f$\Pi\f$' for the bilinear form induced by the Single
+ * Layer BIO for the Helmholtz kernel, using the given trial and test spaces.
+ * It implements the case where the panels \f$\Pi\f$ and \f$\Pi\f$' are coinciding.
+ * This function calculates a matrix entry by using a composite Gauss-Legnedre
+ * quadrature rule with which a tensor product quadrature rule is generated.
  *
- * @param pi Parametrization for the first panel \f$\Pi\f$.
- * @param pi_p Parametrization for the second panel \f$\Pi\f$'.
- * @param space The BEM space to be used for calculations
+ * @param pi parametrization for the first panel \f$\Pi\f$
+ * @param pi_p parametrization for the second panel \f$\Pi\f$'
+ * @param space the trial & test space for evaluating the matrix
  * @param GaussQR QuadRule object containing the Gaussian quadrature to be
- * applied.
- * @return An Eigen::MatrixXd type Interaction Matrix (QXQ)
- *         where Q is number of local shape functions in BEM space
+ * applied
+ * @param k wavenumber
+ * @param c refraction index
+ * @return the matrix V for Helmholtz kernel Single Layer BIO bilinear form
  */
         Eigen::MatrixXcd ComputeIntegralCoinciding(const AbstractParametrizedCurve &pi,
                                                    const AbstractParametrizedCurve &pi_p,
@@ -61,18 +68,20 @@
                                                    const double c);
 
 /**
- * This function is used to evaluate the Interaction Matrix for the pair
- * of panels \f$\Pi\f$ and \f$\Pi\f$', for the bilinear form induced by
- * the Single Layer BIO. It implements the case where the panels are completely
- * disjoint. The matrix entries are calculated by Gauss Legendre quadrature.
+ * This function is used to evaluate the Interaction Matrix for a pair of
+ * panels \f$\Pi\f$ and \f$\Pi\f$' for the bilinear form induced by the Single
+ * Layer BIO for the Helmholtz kernel, using the given trial and test spaces. It implements the case
+ * where the panels \f$\Pi\f$ and \f$\Pi\f$' are completely disjoint. This
+ * function calculates a matrix entry by using Gauss-Legendre quadrature rule.
  *
- * @param pi Parametrization for the first panel \f$\Pi\f$.
- * @param pi_p Parametrization for the second panel \f$\Pi\f$'.
- * @param space The BEM space to be used for calculations
+ * @param pi parametrization for the first panel \f$\Pi\f$
+ * @param pi_p parametrization for the second panel \f$\Pi\f$'
+ * @param space the trial & test space for evaluating the matrix
  * @param GaussQR QuadRule object containing the Gaussian quadrature to be
- * applied.
- * @return An Eigen::MatrixXd type Interaction Matrix (QXQ)
- *         where Q is number of local shape functions in BEM space
+ * applied
+ * @param k wavenumber
+ * @param c refraction index
+ * @return the matrix V for Helmholtz kernel Single Layer BIO bilinear form
  */
         Eigen::MatrixXcd ComputeIntegralGeneral(const AbstractParametrizedCurve &pi,
                                                 const AbstractParametrizedCurve &pi_p,
@@ -80,18 +89,16 @@
                                                 const QuadRule &GaussQR,
                                                 const std::complex<double> k,
                                                 const double c);
+
 /**
- * This function is used to evaluate the Interaction Matrix defined in
- * \f$\eqref{eq:Al}\f$ for the pair of panels \f$\Pi\f$ and \f$\Pi\f$', for the
- * bilinear form induced by the Single Layer BIO given by the formula :
- * \f$I_{ij}\f$ = \f$-\frac{1}{2\pi} \int_{-1}^{1} \int_{-1}^{1}
- * \log{(\|\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)\|)} \hat{b}^{j}(t) \hat{b}^{i}(s)
- * \|\dot{\gamma}_{\Pi}(s)\| \|\dot{\gamma}_{\Pi'}(t)\| dt ds \f$ where
- * \f$\hat{b}^{j}\f$ & \f$\hat{b}^{i}\f$ are local shape functions associated
- * the trial and test BEM space \f$S_{p}^{-1}\f$. The interaction matrix \f$I\f$
- * , is of size QXQ where Q is the number of local shape functions in the BEM
- * space. The computation of the entries are based on cases and delegated to
- * these functions accordingly:
+ * This function is used to evaluate the Interaction Matrix
+ * for the pair of panels \f$\Pi\f$ and \f$\Pi\f$' for the
+ * bilinear form induced by the Helmholtz kernel Single Layer BIO.
+ * \f$I\f$, the interaction matrix is of size \f$Q_{test}\times Q_{trial}\f$
+ * where \f$Q_{test}\f$ is the number of reference shape functions for the test
+ * BEM space and \f$Q_{trial}\f$ is the number of reference shape functions in
+ * the trial BEM space. The computation of the entries are based on cases and
+ * delegated to these functions accordingly:
  *
  * ComputeIntegralGeneral()
  *
@@ -99,13 +106,17 @@
  *
  * ComputeIntegralCoinciding()
  *
- * @param pi Parametrization for the first panel \f$\Pi\f$.
- * @param pi_p Parametrization for the second panel \f$\Pi\f$'.
- * @param space The BEM space to be used for calculations
- * @param GaussQR QuadRule object containing the Gaussian quadrature to be
- * applied.
- * @return An Eigen::MatrixXd type Interaction Matrix (QXQ)
- *         where Q is number of local shape functions in BEM space
+ * @param pi parametrization for the first panel \f$\Pi\f$
+ * @param pi_p parametrization for the second panel \f$\Pi\f$'
+ * @param space the trial & test space for evaluating the matrix
+ * @param GaussQR QuadRule object containing the
+ * Gauss-Legendre quadrature rule to be applied.
+ * @param CGaussQR QuadRule object containing the composite
+ * Gauss-Legendre quadrature rule to be applied.
+ * @param k wavenumber
+ * @param c refraction index
+ * @return an Eigen::MatrixXd type Interaction Matrix
+ * (\f$Q_{test}\times Q_{trial}\f$)
  */
         Eigen::MatrixXcd InteractionMatrix(const AbstractParametrizedCurve &pi,
                                            const AbstractParametrizedCurve &pi_p,
@@ -117,18 +128,19 @@
 
 /**
  * This function is used to evaluate the full Galerkin matrix based on the
- * Bilinear form for Single Layer BIO. It uses the trial and test spaces and
- * Parametrized mesh specified as inputs. It evaluates the matrix by panel
- * oriented assembly (\f$\ref{pc:ass}\f$) by first evaluating the interaction
- * matrix for all possible pairs of panels and then using the local to global
- * map of BEM spaces to fill the matrix entries.
+ * Bilinear form for the Helmholtz kernel Single Layer BIO. It uses the trial
+ * and test spaces and the parametrized mesh object, specified in the inputs
+ * to the function. It evaluates the matrix by panel oriented assembly by
+ * first evaluating the interaction matrix for all possible pairs of panels and
+ * then using the local to global map of BEM spaces to fill the matrix entries.
  *
- * @param mesh ParametrizedMesh object containing all the parametrized
- *             panels in the mesh
- * @param space The trial and test BEM space to be used for evaluating
- *              the Galerkin matrix
- * @param N Order for Gauss quadrature
- * @return An Eigen::MatrixXd type Galerkin Matrix for the given mesh and space
+ * @param mesh ParametrizedMesh object containing all the panels in the form
+ *             of small parametrized curves
+ * @param space the trial & test space for evaluating the matrix
+ * @param N the order for common/composite Gauss-Legendre quadrature rule
+ * @param k wavenumber
+ * @param c refraction index
+ * @return an Eigen::MatrixXd type Galerkin Matrix for the given mesh and space
  */
         Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
                                         const AbstractBEMSpace &space,

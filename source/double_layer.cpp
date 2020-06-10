@@ -1,15 +1,4 @@
-/**
- * \file double_layer.cpp
- * \brief This file declares the functions to evaluate the entries of
- *        Galerkin matrices based on the bilinear form induced by the
- *        Double Layer BIO, using the transformations given in
- *        \f$\ref{ss:quadapprox}\f$ in the Lecture Notes for Advanced Numerical
- *        Methods for CSE.
- *
- * This File is a part of the 2D-Parametric BEM package test
- */
 
-#include <iostream>
 #include "double_layer.hpp"
 #include </usr/include/complex_bessel.h>
 

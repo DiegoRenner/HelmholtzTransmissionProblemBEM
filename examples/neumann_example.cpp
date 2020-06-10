@@ -1,3 +1,11 @@
+/**
+ * \file neumann_example.cpp
+ * \brief This script computes the solution to a Neumann problem
+ * using first kind direct BIEs.
+ * No command line parameters are necessary.
+ *
+ * This File is a part of the HelmholtzTransmissionProblemBEM library.
+ */
 #include <complex>
 #include <iostream>
 #include "continuous_space.hpp"
@@ -7,11 +15,6 @@
 #include "gen_sol.hpp"
 #include "mass_matrix.hpp"
 
-/**
- * This script computes the solution to a Neumann problem
- * using first kind direct BIEs.
- * No command line parameters are necessary.
- */
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
 int main() {

@@ -1,9 +1,9 @@
 /**
- * \file
+ * \file gen_sol.hpp
  * \brief This file contains functions that generate solutions
- * for the Helmholtz Equation and the Helmholtz transmission problem
+ * for the Helmholtz Equation and the Helmholtz transmission problem.
  *
- * This File is a part of the HelmholtzTransmissionProblemBEM library
+ * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
 
 
@@ -107,7 +107,7 @@ namespace sol {
      * with a refraction index of the inner domain of \p n_i on a 2-dimensional ball of radius \p r.
      * The wavenumber is given by \p k and \p n is the index of the coefficient in the series expansion of the solution.
      * @param n index of coefficient in series expansion of solution
-     * @param r radius of ball on which solution is computed
+     * @param eps radius of ball on which solution is computed
      * @param k wavenuber
      * @param n_i refraction index of inner domain
      * @return transmission coefficient of <tt>n</tt>-th product in series expansion of the solution

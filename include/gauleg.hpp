@@ -118,10 +118,12 @@ inline std::pair<Eigen::RowVectorXd, Eigen::RowVectorXd>
 
 /**
  * This function is evaluates a standard Gaussian quadrature rule for the domain
- * [-1,1] for the given order. The quadrature rule is returned in the form of a
+ * [a,b] for the given order. The quadrature rule is returned in the form of a
  * QuadRule object
  *
  * @param N Order for Gaussian quadrature
+ * @param a left boundary of domain
+ * @param b right boundary of domain
  * @return QuadRule object containing the quadrature rule
  */
 inline QuadRule getGaussQR(unsigned N, double a, double b) {

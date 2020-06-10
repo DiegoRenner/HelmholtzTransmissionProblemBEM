@@ -1,5 +1,5 @@
 /**
- * \file
+ * \file solvers.hpp
  * \brief This file defines lowest order solvers for direct first kind BIEs
  * for the Dirichlet and the Neumann problem as well as a direct second kind
  * BIE for the Helmholtz transmission problem.
@@ -43,7 +43,7 @@ namespace bvp {
          * \p u_dir, the order of the quadrature ruile used to compute the Galerkin matrix entries
          * \p order and the wavenumber \p k.
          * @param mesh mesh of the boundary on which to compute BIOs
-         * @param u_dir Dirichlet data
+         * @param u_neu Dirichlet data
          * @param order order of qudrature rule for matrix entries
          * @param k wavenumber
          * @return Dirichlet data of u
@@ -68,7 +68,7 @@ namespace tp {
     namespace direct_second_kind {
         /**
          * This function returns the solution to the Helmholtz transmission problem
-         * on boundary given by \p mesh for an incoming wave defined by \u_inc_dir and
+         * on boundary given by \p mesh for an incoming wave defined by \p u_inc_dir and
          * \p u_inc_neu. The wavenumber is set by \p k and th refraction indeces by
          * \p c_o and \p c_i. The Galerkin matrix entries are compute with a quadrature rule
          * defined by the parameter \p order.

@@ -1,11 +1,14 @@
 /**
- * This script tries to find minimas in the smallest sinuglar values
+ * \file parabolic_approximation.cpp
+ * \brief This script tries to find minimas in the smallest sinuglar values
  * of the solutions operator for the second kind direct BIEs for
  * the Helmholtz Transmission problem.
  * The minimas are searched for using a parabolic approximation
- * based on evaluating the smallest singular values and it's first
+ * based on evaluating the smallest singular values and their first
  * two derivatives.
  * No command line arguments are necessary.
+ *
+ * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
 #include <complex>
 #include <iostream>
