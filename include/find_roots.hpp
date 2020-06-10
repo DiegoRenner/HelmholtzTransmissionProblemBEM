@@ -37,7 +37,8 @@ double zbrent( const std::function<double(double)> f,
 
 /**
  * Search for roots using Newton Raphson method.
- * Here the function \p f returns a vector containing the value of the function and it's derivative.
+ * Here the function \p f returns the function of which to find a root and
+ * \p f_der returns the derivative of \p f.
  * If there is a root of the function \p f[0] within the interval defined by [\p x1, \p x2]
  * then this function will set the \p root_found flag to true
  * and return the value of the root with a precision of \p tol.
@@ -50,7 +51,8 @@ double zbrent( const std::function<double(double)> f,
  * @param num_iter numbers of iterations taken to find root
  * @return value of root if root was found
  */
-double rtsafe( const std::function<Eigen::MatrixXd(double)> f,
+double rtsafe( const std::function<double(double)> f,
+               const std::function<double(double)> f_der,
                double x1,
                double x2,
                double tol,

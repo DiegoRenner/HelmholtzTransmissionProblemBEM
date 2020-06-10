@@ -91,7 +91,8 @@ double zbrent( const function<double(double)> f,
     return 0.0; //Never get here.
 }
 
-double rtsafe( std::function<Eigen::MatrixXd(double)> fct,
+double rtsafe( std::function<double(double)> fct,
+               std::function<double(double)> fct_der,
                double x1,
                double x2,
                double tol,
@@ -101,12 +102,8 @@ double rtsafe( std::function<Eigen::MatrixXd(double)> fct,
     int j;
     double df,dx,dxold,f,fh,fl;
     double temp,xh,xl,rts;
-    Eigen::MatrixXd tempM = fct(x1);
-    fl = tempM(0,0);
-    df = tempM(0,1);
-    tempM = fct(x2);
-    fh = tempM(0,0);
-    df = tempM(0,1);
+    fl = fct(x1);
+    fh = fct(x2);
     if ((fl > 0.0 && fh > 0.0) || (fl < 0.0 && fh < 0.0)) {
         std::cout << "Root must be bracketed in rtsafe" << std::endl;
         if (fl > fh){
@@ -134,9 +131,8 @@ double rtsafe( std::function<Eigen::MatrixXd(double)> fct,
     rts=0.5*(x1+x2);
     dxold=fabs(x2-x1);
     dx=dxold;
-    tempM = fct(rts);
-    f = tempM(0,0);
-    df = tempM(0,1);
+    f = fct(rts);
+    df = fct_der(rts);
     //Loop over allowed iterations.
     for (j=1;j<=MAXIT;j++) {
         // Bisect if Newton out of range,or not decreasing fast enough.
@@ -169,9 +165,8 @@ double rtsafe( std::function<Eigen::MatrixXd(double)> fct,
             return rts;
         }
         //The one new function evaluation per iteration.
-        tempM = fct(rts);
-        f = tempM(0,0);
-        df = tempM(0,1);
+        f = fct(rts);
+        df = fct_der(rts);
         //Maintain the bracket on the root.
         if (f < 0.0)
             xl=rts;

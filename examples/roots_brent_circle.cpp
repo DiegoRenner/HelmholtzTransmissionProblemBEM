@@ -19,11 +19,13 @@
 #include <complex>
 #include <iostream>
 #include <fstream>
+#include <chrono>
 #include "parametrized_circular_arc.hpp"
 #include "singular_values.hpp"
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 
+using namespace std::chrono;
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
 // define tolerance when searching for root
@@ -41,8 +43,8 @@ int main(int argc, char** argv) {
     unsigned n_points_y = 1;
     unsigned numpanels;
     numpanels = atoi(argv[6]);
-    double h_x = 10.0/n_points_x;
-    double h_y = 10.0/n_points_y;
+    double h_x = 100.0/n_points_x;
+    double h_y = 100.0/n_points_y;
     ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
 
     // define order of quadrature rule used to compute matrix entries and which singular value to evaluate
@@ -58,6 +60,8 @@ int main(int argc, char** argv) {
     ParametrizedMesh mesh(curve.split(numpanels));
     for (unsigned j = 0; j < n_points_x; j++) {
         for (unsigned k = 0; k < n_points_y; k++) {
+            auto duration_ops = milliseconds::zero();
+            auto duration = milliseconds::zero();
 
             // define wavenumber for current loop
             complex_t k_temp = (k_0+j*h_x+ii*double(k)*h_y);
@@ -71,26 +75,35 @@ int main(int argc, char** argv) {
 
             // define functions that return singular value and it's derivative
             auto sv_eval = [&] (double k_in) {
+                auto start = high_resolution_clock::now();
                 Eigen::MatrixXcd T_in;
                 T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
+                auto end = high_resolution_clock::now();
+                duration_ops += duration_cast<milliseconds>(end-start);
                 return sv(T_in, list, count)(m);
             };
             auto sv_eval_der = [&] (double k_in) {
+                auto start = high_resolution_clock::now();
                 Eigen::MatrixXcd T_in;
                 Eigen::MatrixXcd T_der_in;
                 T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
                 T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
+                auto end = high_resolution_clock::now();
+                duration_ops += duration_cast<milliseconds>(end-start);
                 return sv_1st_der(T_in, T_der_in, list, count)(m,1);
             };
 
             // search for root
             bool root_found = false;
-            unsigned num_iter;
+            unsigned num_iter = 0;
+            auto start = high_resolution_clock::now();
             double root = zbrent(sv_eval_der,k_temp.real(), k_temp.real()+h_x,epsilon,root_found,num_iter);
+            auto end = high_resolution_clock::now();
+            duration += duration_cast<milliseconds>(end-start);
 
             // write result to file
             file_out.open(argv[8], std::ios_base::app);
-            file_out << k_temp.real();
+            file_out << k_temp.real() << " " << duration.count() << " " << duration_ops.count();
 
             // check if root was found
             if (root_found) {

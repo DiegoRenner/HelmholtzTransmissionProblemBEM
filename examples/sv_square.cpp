@@ -37,8 +37,8 @@ int main(int argc, char** argv) {
     unsigned n_points_y = 1;
     unsigned numpanels;
     numpanels = atoi(argv[5]);
-    double h_x = 10.0/n_points_x;
-    double h_y = 10.0/n_points_y;
+    double h_x = 100.0/n_points_x;
+    double h_y = 100.0/n_points_y;
     using PanelVector = PanelVector;
     // Corner points for the square
     Eigen::RowVectorXd x1(2);
