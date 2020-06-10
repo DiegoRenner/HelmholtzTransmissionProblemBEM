@@ -124,7 +124,6 @@ int main(int argc, char** argv) {
                 // write results to file
                 filename.open(argv[7], std::ios_base::app);
                 filename << k_temp.real() << " "<< res(m,0) << " " << res(m,1)  << " " << sv_ext_der1 << " " << res(m,2) << " " << sv_ext_der2 << std::endl;
-                std::cout << res(m,1) << " " << sv_eval(k_temp.real()) << std::endl;
                 filename.close();
             }
         }

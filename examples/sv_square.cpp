@@ -1,4 +1,3 @@
-
 /**
  * \file sv_square.cpp
  * \brief This script computes the singular values

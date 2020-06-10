@@ -8,7 +8,7 @@
  * The script can be run as follows:
  * <tt>
  * /path/to/transmission_problem_verification \<radius of circle\>
- *      \<\#coeffs for series expansion of solution> \<refraction inside\>
+ *      \<\#coeffs for series expansion of solution\> \<refraction inside\>
  *      \<refraction outside\> \<wavenumber\>
  *      \<order of quadrature rule\> \<outputfile\>
  * </tt>

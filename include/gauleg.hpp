@@ -3,11 +3,12 @@
  * \brief This file defines the function to evaluate points and weights for
  *        Gauss Legendre quadrature rule.
  *
- * This File is a part of the 2D-Parametric BEM package
+ * This File is a part of the HelmholtzTransmissionBEM.
+ * It has been adapted from the 2D-Parametric BEM package.
  */
+
 #ifndef GAULEGHPP
 #define GAULEGHPP
-
 
 /**
  * This Struct object is used to store a quadrature Rule.
@@ -18,6 +19,7 @@ struct QuadRule {
     Eigen::MatrixXd x; // quadrature nodes (columns of a matrix with dim rows)
     Eigen::VectorXd w; // vector of quadrature weights
 };
+
 /**
  * Compute Gaussian quadrature nodes and weights for n nodes over
  * interval [a,b]. The nodes and weights are returned as a std pair.
@@ -131,6 +133,7 @@ inline QuadRule getGaussQR(unsigned N, double a, double b) {
   Eigen::RowVectorXd weights, points;
   std::tie(points, weights) =
       gauleg(a, b, N, std::numeric_limits<double>::epsilon());
+  // assign to QuadRule struct
   QuadRule gauss;
   gauss.dim = 1;
   gauss.n = N;
@@ -139,11 +142,20 @@ inline QuadRule getGaussQR(unsigned N, double a, double b) {
   return gauss;
 }
 
+/**
+ * This function is evaluates a composite Gaussian quadrature rule for the domain
+ * [0,1] for the given order. The quadrature rule is returned in the form of a
+ * QuadRule object
+ *
+ * @param N Order for Gaussian quadrature
+ * @return QuadRule object containing the quadrature rule
+ */
 inline QuadRule getCGaussQR(unsigned N) {
-    // Getting standard Gauss Legendre quadrature weights and nodes
+    // getting composite Gauss-Legendre quadrature weights and nodes
     Eigen::RowVectorXd weights, points;
     std::tie(points, weights) =
             cgauleg_redux(N, std::numeric_limits<double>::epsilon());
+    // assign to QuadRule struct
     QuadRule gauss;
     gauss.dim = 1;
     gauss.n = N*(N+1)/2-1;

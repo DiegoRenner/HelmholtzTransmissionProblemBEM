@@ -1,42 +1,58 @@
-//
-// Created by diegorenner on 2/20/20.
-//
+/**
+ * \file single_layer_test.cpp
+ * \brief This test file compares Single Layer BIO for the
+ * Helmholtz kernel to a pre computed known solution from
+ * a file.
+ */
 #include <complex>
 #include <Eigen/Dense>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
+#include <single_layer.hpp>
 #include "parametrized_circular_arc.hpp"
 #include "abstract_bem_space.hpp"
 #include "continuous_space.hpp"
 #include "discontinuous_space.hpp"
 
 typedef std::complex<double> complex_t;
-double sqrt_epsilon = std::sqrt(std::numeric_limits<double>::epsilon());
 
+// define FEM-spaces of lowest order
 DiscontinuousSpace<0> discont_space;
 ContinuousSpace<1> cont_space;
 
+// define wavenumber and refraction index
 double k = 1.0;
-double n_i = 23.0;
+// set this refraction index for commented input file
+//double c_o = 1;
+double c_i = 5;
+
+// define boundary and mesh on boundary
 double eps = 0.25;
 ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
-unsigned order = 11;
-double c_o = k;
-double c_i = k*sqrt(n_i);
 int numpanels = 50;
 ParametrizedMesh mesh(curve.split(numpanels));
-Eigen::VectorXcd V = single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, n_i).block(0,0,1,numpanels).transpose();
+
+// define order of quadrature rule with which to compute matrix entries of operator
+unsigned order = 11;
+
+// compute operator and extract first row
+Eigen::VectorXcd V =
+        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_i).block(0,0,1,numpanels).transpose();
+
+// set variables for reading operator from file
 Eigen::VectorXcd V_expected(numpanels);
 std::ifstream fp_data;
 double real, imag;
 char sign;
 int i = 0;
 std::string path = "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/single_layer_i_" + std::to_string(numpanels) + ".dat";
+// use this file with c_o
+//std::string path = "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/single_layer_o_" + std::to_string(numpanels) + ".dat";
 
-TEST(SingleLayerTest, disjoint_fair) {
-
+TEST(SingleLayerTest, compare_row) {
+    // read first row of operator from file
     fp_data.open(path);
     while(fp_data >> real >> imag) {
         V_expected(i) = complex_t((sign=='-')?-real:real,imag);
@@ -44,34 +60,9 @@ TEST(SingleLayerTest, disjoint_fair) {
         if (i==numpanels) break;
         fp_data >> sign >> sign;
     }
-    std::cout << V.transpose() << std::endl;
-    std::cout << "***********************************" << std::endl;
-    std::cout << V_expected.transpose() << std::endl;
-    std::cout << "***********************************" << std::endl;
-    std::cout << (V.segment(2,numpanels-3)-V_expected.segment(2,numpanels-3)).lpNorm<2>()/(numpanels-3) << std::endl;
-    ASSERT_TRUE((V.segment(2,numpanels-3)-V_expected.segment(2,numpanels-3)).lpNorm<2>()/(numpanels-3) < sqrt_epsilon);
-    //fp_data.close();
+    fp_data.close();
+
+    // compare known solution operator from file with computed one
+    ASSERT_TRUE((V-V_expected).lpNorm<2>() < 5e-4);
 }
 
-TEST(SingleLayerTest, coinciding_precise) {
-    fp_data.open(path);
-    i = 0;
-    while(fp_data >> real >> sign >> imag >> sign) {
-        V_expected[i] = complex_t(real, imag);
-        i++;
-    }
-    ASSERT_TRUE(abs(V[0]-V_expected[0]) < 0.0001);
-    fp_data.close();
-}
-
-TEST(SingleLayerTest, adjacent_precise) {
-    fp_data.open(path);
-    i = 0;
-    while(fp_data >> real >> sign >> imag >> sign) {
-        V_expected[i] = complex_t(real, imag);
-        i++;
-    }
-    ASSERT_TRUE(abs(V[1]-V_expected[1]) < 0.0001);
-    ASSERT_TRUE(abs(V[numpanels-1]-V_expected[numpanels-1]) < 0.0001);
-    fp_data.close();
-}
