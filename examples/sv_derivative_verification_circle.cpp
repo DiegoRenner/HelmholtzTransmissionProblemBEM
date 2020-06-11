@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
     complex_t k_0 = atof(argv[4]);
 
     // define mesh in space and on wavenumber on which to perform verification
-    unsigned n_points_x = 250;
+    unsigned n_points_x = 2500;
     unsigned n_points_y = 1;
     unsigned numpanels;
     numpanels = atoi(argv[5]);
