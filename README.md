@@ -94,7 +94,7 @@ The scatterer is set to be a circle
 The results are written to disk.
 The script can be run as follows:
 ~~~
-/path/to/library/bin/roots_brent_circle <radius of circle> 
+/path/to/library/bin/roots_newton_circle <radius of circle> 
     <refraction inside> <refraction outside> <wavenumber> 
     <#grid points for root search> <#panels> 
     <order of quadrature rule> <outputfile>.
