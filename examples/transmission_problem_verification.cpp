@@ -65,7 +65,6 @@ int main(int argc, char** argv) {
     double a_n[2*l+1];
     for( int i = 0; i<2*l+1; i++) {
         a_n[i] = 1./((k*k*(c_o-c_i))*sqrt((2*l+1)*M_PI*eps*eps*(jn(i-l,k)*jn(i-l,k)-jn(i-l-1,k)*jn(i-l+1,k))));
-        std::cout << a_n[i] << std::endl;
     }
     auto u_i_dir = [&] (double x1, double x2) {
         return sol::u_i(x1, x2, l, a_n, k);
@@ -92,11 +91,11 @@ int main(int argc, char** argv) {
 
         // compute interpolation coefficients
         // in FEM-sapces for resulting waves
-        auto start = high_resolution_clock::now();
+        // DEBUG auto start = high_resolution_clock::now();
         Eigen::VectorXcd sol = tp::direct_second_kind::solve(
                 mesh, u_i_dir, u_i_neu, order, k, c_o, c_i);
-        auto end = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(end - start);
+        // DEBUG auto end = high_resolution_clock::now();
+        // DEBUG auto duration = duration_cast<milliseconds>(end - start);
 
         // compute mass matrix for projection on to orthonromal basis functions
         Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
@@ -113,7 +112,8 @@ int main(int argc, char** argv) {
 
         // write difference to computed solution in L^2 norm to file
         filename.open(argv[7], std::ios_base::app);
-        filename << mesh.getPanels()[0]->length() << " " << sqrt(abs((sol-u_t_N).dot(M*(sol-u_t_N)))) << " " << duration.count() << std::endl;
+        // DEBUG filename << mesh.getPanels()[0]->length() << " " << sqrt(abs((sol-u_t_N).dot(M*(sol-u_t_N)))) << " " << duration.count() << std::endl;
+        filename << mesh.getPanels()[0]->length() << " " << sqrt(abs((sol-u_t_N).dot(M*(sol-u_t_N)))) << std::endl;
         filename.close();
 
     }

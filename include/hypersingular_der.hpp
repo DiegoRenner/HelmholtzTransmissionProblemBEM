@@ -106,7 +106,7 @@ namespace hypersingular_helmholtz_der {
  * for the pair of panels \f$\Pi\f$ and \f$\Pi\f$' for the
  * bilinear form induced by the derivative in k of the Hypersingular BIO for
  * the Helmholtz kernel.
- * \f$I\f$, the interaction matrix is of size \f$Q_{test}\times $Q_{trial}\f$
+ * \f$I\f$, the interaction matrix is of size \f$Q_{test}\times Q_{trial}\f$
  * where \f$Q_{test}\f$ is the number of reference shape functions for the test
  * BEM space and \f$Q_{trial}\f$ is the number of reference shape functions in
  * the trial BEM space. The computation of the entries are based on cases and

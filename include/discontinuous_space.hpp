@@ -2,7 +2,7 @@
  * \file discontinuous_space.hpp
  * \brief This file declares a templated class inherited from AbstractBEMSpace
  *        and represents discontinuous spaces of the form \f$S^{-1}_{p}\f$
- *        as defined in \f$\eqref{eq:Qp}\f$, using full template specialization.
+ *        , using full template specialization.
  *
  * This File is a part of the 2D-Parametric BEM package
  */
@@ -16,7 +16,7 @@
  * \class DiscontinuousSpace
  * \brief This template class inherits from the class AbstractBEMSpace
  *        . This class implements the BEM spaces of the form \f$S^{-1}_{p}\f$
- *        defined in \f$\eqref{eq:Qp}\f$. The class is implemented through full
+ *        . The class is implemented through full
  *        template specialization for different values of p.
  */
     template <unsigned int p> class DiscontinuousSpace : public AbstractBEMSpace {
@@ -44,7 +44,7 @@
             return n;
         }
 
-    // Space Dimensions as defined in \f$\ref{T:thm:dimbe}\f$
+    // Space Dimensions as defined
         unsigned int getSpaceDim(unsigned int numpanels) const {
             return numpanels * q_;
         }
@@ -129,7 +129,7 @@
                 return N + n;
         }
 
-    // Space Dimensions as defined in \f$\ref{T:thm:dimbe}\f$
+    // Space Dimensions as defined
         unsigned int getSpaceDim(unsigned int numpanels) const {
             return numpanels * q_;
         }

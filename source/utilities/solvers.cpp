@@ -1,10 +1,3 @@
-/**
- * \file
- * \brief This file defines lowest order indirect/direct BVP solvers to solve a
- * Dirichlet Boundary Value problem of the form given in \f$\eqref{eq:dirbvp}\f$
- *
- * This File is a part of the 2D-Parametric BEM package
- */
 #include "solvers.hpp"
 #include "mass_matrix.hpp"
 #include "continuous_space.hpp"

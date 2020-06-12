@@ -1,13 +1,3 @@
-/**
- * \file hypersingular.cpp
- * \brief This file declares the functions to evaluate the entries of
- *        Galerkin matrices based on the bilinear form induced by the
- *        Hypersingular BIO, using the transformations given in
- *        \f$\ref{ss:quadapprox}\f$ in the Lecture Notes for Advanced Numerical
- *        Methods for CSE.
- *
- * This File is a part of the 2D-Parametric BEM package
- */
 
 #include "hypersingular.hpp"
 #include "discontinuous_space.hpp"
@@ -52,7 +42,7 @@
             // Computing the (i,j)th matrix entry
             for (int i = 0; i < Q; ++i) {
                 for (int j = 0; j < Q; ++j) {
-                    // Lambda expression for functions F and G in \f$\eqref{eq:Vidp}\f$
+                    // Lambda expression for functions F and G
                     auto F = [&](double t) { // Function associated with panel pi_p
                         return space.evaluateShapeFunction(j, t) * pi_p.Derivative_01(t).norm();
                     };
@@ -65,7 +55,7 @@
                     auto G_arc = [&](double s) { // Function associated with panel pi
                         return space.evaluateShapeFunctionDot_01(i, s);
                     };
-                    // Lambda expression for the integrand in \f$\eqref{eq:Kidp}\f$
+                    // Lambda expression for the integrand
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.,0.);
                         // Finding the tangent of pi_p to get its normal
@@ -88,7 +78,7 @@
                         return result * (F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p));
                     };
                     complex_t integral = 0;
-                    // Tensor product quadrature for double integral in \f$\eqref{eq:Kidp}\f$
+                    // Tensor product quadrature for double integral
                     for (unsigned int k = 0; k < N; ++k) {
                         for (unsigned int l = 0; l < N; ++l) {
                             double s = GaussQR.x(l)*(1.-GaussQR.x(k));
@@ -119,10 +109,10 @@
             // Interaction matrix with size Qtest x Qtrial
             Eigen::MatrixXcd interaction_matrix(Qtest, Qtrial);
             // Computing the (i,j)th matrix entry
-            bool swap = 1;//((pi(1) - pi_p(-1)).norm() / 100. > epsilon);
+            bool swap = ((pi(1) - pi_p(-1)).norm() / 100. > epsilon);
             for (int i = 0; i < Qtest; ++i) {
                 for (int j = 0; j < Qtrial; ++j) {
-                    // Lambda expression for functions F and G in \f$\eqref{eq:Kidp}\f$
+                    // Lambda expression for functions F and G
                     auto F = [&](double t) {
                         if (swap) {
                             return space.evaluateShapeFunction_01_swapped(j, t) * pi_p.Derivative_01_swapped(t).norm();
@@ -152,7 +142,7 @@
                             return space.evaluateShapeFunctionDot_01_swapped(i, s);
                         }
                     };
-                    // Lambda expression for the integrand in \f$\eqref{eq:Kidp}\f$
+                    // Lambda expression for the integrand
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.,0.);
                         // Finding the tangent of pi_p to get its normal
@@ -184,7 +174,7 @@
                         return result * (F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p));
                     };
                     complex_t integral = complex_t(0.,0.);
-                    // Tensor product quadrature for double integral in \f$\eqref{eq:Kidp}\f$
+                    // Tensor product quadrature for double integral
                     for (unsigned int k = 0; k < N; ++k) {
                         for (unsigned int l = 0; l < N; ++l) {
                             double s = GaussQR.x(k)*GaussQR.x(l);
@@ -217,7 +207,7 @@
             // Computing the (i,j)th matrix entry
             for (int i = 0; i < Q; ++i) {
                 for (int j = 0; j < Q; ++j) {
-                    // Lambda expression for functions F and G in \f$\eqref{eq:titg}\f$ for
+                    // Lambda expression for functions F and G
                     // Double Layer BIO
                     auto F = [&](double t) { // Function associated with panel pi_p
                         return space.evaluateShapeFunction(j, t) * pi_p.Derivative_01(t).norm();
@@ -231,7 +221,7 @@
                     auto G_arc = [&](double s) { // Function associated with panel pi
                         return space.evaluateShapeFunctionDot_01(i, s);
                     };
-                    // Lambda expression for \f$\hat{K}\f$ in \f$\eqref{eq:titg}\f$ for double
+                    // Lambda expression for \f$\hat{K}\f$
                     // Layer BIO
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.,0.);
@@ -287,8 +277,7 @@
             unsigned int Q = space.getQ();
             // Initializing the Galerkin matrix with zeros
             Eigen::MatrixXcd output = Eigen::MatrixXd::Zero(dims, dims);
-            // Panel oriented assembly \f$\ref{pc:ass}\f$
-            //QuadRule LogWeightQR = getLogWeightQR(1, N);
+            // Panel oriented assembly
             QuadRule GaussQR = getGaussQR(N,0.,1.);
             QuadRule CGaussQR = getCGaussQR(N);
             for (unsigned int i = 0; i < numpanels; ++i) {

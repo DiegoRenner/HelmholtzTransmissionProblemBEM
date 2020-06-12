@@ -43,8 +43,8 @@ double zbrent( const std::function<double(double)> f,
  * then this function will set the \p root_found flag to true
  * and return the value of the root with a precision of \p tol.
  * This function was taken from the book "Numerical Recipes in C"
- * @param f function to search for root and it's derivative
- * @param f_der derivative of function to search for root and it's derivative
+ * @param f function to search for root
+ * @param f_both function and derivative of function to search for root
  * @param x1 initial interval, left bound
  * @param x2 initial interval, right bound
  * @param tol tolerance at which to stop search
@@ -53,7 +53,7 @@ double zbrent( const std::function<double(double)> f,
  * @return value of root if root was found
  */
 double rtsafe( const std::function<double(double)> f,
-               const std::function<double(double)> f_der,
+               const std::function<Eigen::MatrixXd(double)> f_both,
                double x1,
                double x2,
                double tol,

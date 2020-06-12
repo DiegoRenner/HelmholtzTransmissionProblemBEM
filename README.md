@@ -77,7 +77,7 @@ The results are written to disk.
 The script can be run as follows:
 ~~~
 /path/to/library/bin/roots_brent_circle <radius of circle> 
-    <refraction inside> <refraction outside> <wavenumber> 
+    <refraction inside> <refraction outside> <initial wavenumber> 
     <#grid points for root search> <#panels> 
     <order of quadrature rule> <outputfile>.
 ~~~
@@ -95,7 +95,7 @@ The results are written to disk.
 The script can be run as follows:
 ~~~
 /path/to/library/bin/roots_newton_circle <radius of circle> 
-    <refraction inside> <refraction outside> <wavenumber> 
+    <refraction inside> <refraction outside> <initial wavenumber> 
     <#grid points for root search> <#panels> 
     <order of quadrature rule> <outputfile>.
 ~~~
@@ -114,7 +114,7 @@ The results are written to file.
 The script can be run as follows:
 ~~~
 /path/to/library/bin/sv_circle <radius of circle> 
-    <refraction inside> <refraction outside> <wavenumber>
+    <refraction inside> <refraction outside> <initial wavenumber>
     <#panels> <order of quadrature rule> <outputfile>.
 ~~~
 The resulting file will contain the value of k in the first column.
@@ -130,7 +130,7 @@ The results are written to file.
 The script can be run as follows:
 ~~~
 /path/to/library/bin/sv_circle <half of side length of square> 
-    <refraction inside> <refraction outside> <wavenumber>
+    <refraction inside> <refraction outside> <initial wavenumber>
     <#panels> <order of quadrature rule> <outputfile>.
 ~~~
 The resulting file will contain the value of k in the first column.
@@ -148,7 +148,7 @@ The script can be run as follows:
 ~~~
 /path/to/library/bin/sv_derivative_verification_circle 
     <radius of circle> <refraction inside> <refraction outside> 
-    <wavenumber> <#panels> <order of quadrature rule> <outputfile>.
+    <initial wavenumber> <#panels> <order of quadrature rule> <outputfile>.
 ~~~
 The resulting file will contain the value of k in the first column.
 The second column will contain the value of the smallest singular value at this k.
@@ -165,7 +165,7 @@ The script can be run as follows:
 ~~~
 /path/to/library/bin/sv_derivative_verification_circle 
     <half side length of square> <refraction inside> 
-    <refraction outside> <wavenumber> <#panels> 
+    <refraction outside> <initial wavenumber> <#panels> 
     <order of quadrature rule> <outputfile>.
 ~~~
 The resulting file will contain the value of k in the first column.
@@ -184,7 +184,7 @@ The results are written to file.
 The script can be run as follows:
 ~~~
 /path/to/library/bin/sv_derivative_full <radius of circle> 
-    <refraction inside> <refraction outside> <wavenumber>
+    <refraction inside> <refraction outside> <initial wavenumber>
     <#panels> <order of quadrature rule> <outputfile>.
 ~~~
 The resulting file will contain the value of k in the first column.
@@ -203,7 +203,7 @@ The script can be run as follows:
 ~~~
 /path/to/library/bin/transmission_problem_verification 
     <radius of circle> <#coeffs for series expansion of solution> 
-    <refraction inside> <refraction outside> <wavenumber>
+    <refraction inside> <refraction outside> <initial wavenumber>
     <order of quadrature rule> <outputfile>.
 ~~~
 This output file will contain two columns.

@@ -9,7 +9,7 @@
  *
  * <tt>
  *  /path/to/roots_newton_circle \<radius of circle\> \<refraction inside\>
- *     \<refraction outside\> \<wavenumber\> \<\#grid points for root search\>
+ *     \<refraction outside\> \<initial wavenumber\> \<\#grid points for root search\>
  *     \<\#panels\> \<order of quadrature rule\> \<outputfile\>.
  * </tt>
  *
@@ -37,7 +37,7 @@ typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
 
 // define tolerance when searching for root
-double epsilon = 1e-6;
+double epsilon = 1e-3;
 int main(int argc, char** argv){
 
     // define radius of circle refraction index and initial wavenumber
@@ -90,7 +90,7 @@ int main(int argc, char** argv){
                 duration_ops += duration_cast<milliseconds>(end-start);
                 return sv(T_in, list, count)(m);
             };
-            auto sv_eval_der2 = [&] (double k_in) {
+            auto sv_eval_both = [&] (double k_in) {
                 auto start = high_resolution_clock::now();
                 Eigen::MatrixXcd T_in;
                 Eigen::MatrixXcd T_der_in;
@@ -98,7 +98,7 @@ int main(int argc, char** argv){
                 T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
                 T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
                 T_der2_in = gen_sol_op_2nd_der(mesh, order, k_in , c_o, c_i);
-                double res = sv_2nd_der(T_in, T_der_in, T_der2_in, list, count)(m,2);
+                Eigen::MatrixXd res = sv_2nd_der(T_in, T_der_in, T_der2_in, list, count).block(m,1,1,2);
                 auto end = high_resolution_clock::now();
                 duration_ops += duration_cast<milliseconds>(end-start);
                 return res;
@@ -119,7 +119,7 @@ int main(int argc, char** argv){
             bool root_found = false;
             unsigned num_iter=0;
             auto start = high_resolution_clock::now();
-            double root =  rtsafe(sv_eval_der,sv_eval_der2,k_temp.real(), k_temp.real()+h_x,epsilon,root_found,num_iter);
+            double root =  rtsafe(sv_eval_der,sv_eval_both,k_temp.real(), k_temp.real()+h_x,epsilon,root_found,num_iter);
             auto end = high_resolution_clock::now();
             duration += duration_cast<milliseconds>(end-start);
             // define functions that return singular value and it's derivative

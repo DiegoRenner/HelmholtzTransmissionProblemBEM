@@ -10,7 +10,7 @@
  *
  * <tt>
  * /path/to/sv_derivative_verification_circle \<radius of circle\>
- *      \<refraction inside\> \<refraction outside\> \<wavenumber\>
+ *      \<refraction inside\> \<refraction outside\> \<initial wavenumber\>
  *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>.
  * </tt>
  *

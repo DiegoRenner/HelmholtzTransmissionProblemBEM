@@ -1,7 +1,7 @@
 /**
  * \file singular_values.hpp
  * \brief This file defines lowest order indirect/direct BVP solvers to solve a
- * Dirichlet Boundary Value problem of the form given in \f$\eqref{eq:dirbvp}\f$
+ * Dirichlet Boundary Value problem
  *
  * This File is a part of the 2D-Parametric BEM package
  * It incorporates an extrpolation function taken from the lectur document

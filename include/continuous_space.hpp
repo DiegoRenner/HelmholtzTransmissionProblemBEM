@@ -2,7 +2,7 @@
  * \file continuous_space.hpp
  * \brief This file declares a templated class inherited from AbstractBEMSpace
  *        and represents discontinuous spaces of the form \f$S^{0}_{p}\f$
- *        as defined in \f$\eqref{eq:Sp}\f$, using full template specialization.
+ *        , using full template specialization.
  *
  * This File is a part of the 2D-Parametric BEM package
  */
@@ -15,9 +15,9 @@
 /**
  * \class ContinuousSpace
  * \brief This templated class inherits from the class AbstractBEMSpace
- *        . This class implements the BEM spaces of the form \f$S^{0}_{p}\f$
- *        defined in \f$\eqref{eq:Sp}\f$. The class is implemented through full
- * template specialization for different values of p.
+ *        . This class implements the BEM spaces of the form \f$S^{0}_{p}\f$.
+ *        The class is implemented through full
+ *          template specialization for different values of p.
  */
     template <unsigned int p> class ContinuousSpace : public AbstractBEMSpace {
     public:
@@ -47,7 +47,7 @@
                 return (n % N == 0) ? 1 : (n + 1);
         }
 
-    // Space Dimensions as defined in \f$\ref{T:thm:dimbe}\f$
+    // Space Dimensions as defined
         unsigned int getSpaceDim(unsigned int numpanels) const {
             return numpanels * (q_ - 1);
         }
@@ -154,7 +154,7 @@
                 return N + n;
         }
 
-        // Space Dimensions as defined in \f$\ref{T:thm:dimbe}\f$
+        // Space Dimensions as defined
         unsigned int getSpaceDim(unsigned int numpanels) const {
             return numpanels * (q_ - 1);
         }

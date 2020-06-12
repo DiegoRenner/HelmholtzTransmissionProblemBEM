@@ -1,13 +1,3 @@
-/**
- * \file single_layer.cpp
- * \brief This file declares the functions to evaluate the entries of
- *        Galerkin matrices based on the bilinear form induced by the
- *        Single Layer BIO, using the transformations given in
- *        \f$\ref{ss:quadapprox}\f$ in the Lecture Notes for Advanced Numerical
- *        Methods for CSE.
- *
- * This File is a part of the 2D-Parametric BEM package
- */
 
 #include <iostream>
 #include "mass_matrix.hpp"
@@ -41,7 +31,7 @@
                                                 const QuadRule &GaussQR){
             unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // Calculating the quadrature order for stable evaluation of integrands for
-            // disjoint panels as mentioned in \f$\ref{par:distpan}\f$
+            // disjoint panels
             // No. of Reference Shape Functions in trial/test space
             int Qtrial = trial_space.getQ();
             int Qtest = test_space.getQ();
@@ -50,7 +40,7 @@
             // Computing the (i,j)th matrix entry
             for (int i = 0; i < Qtest; ++i) {
                 for (int j = 0; j < Qtrial; ++j) {
-                    // Lambda expression for functions F and G in \f$\eqref{eq:titg}\f$ for
+                    // Lambda expression for functions F and G
                     // Single Layer BIO
                     auto F = [&](double t) { // Function associated with panel pi_p
                         return trial_space.evaluateShapeFunction(j, t) * pi_p.Derivative_01(t).norm();
@@ -68,7 +58,7 @@
                     interaction_matrix(i, j) = integral;
                 }
             }
-            return interaction_matrix;//.transpose();
+            return interaction_matrix;
         }
 
         Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
@@ -87,7 +77,7 @@
             unsigned int cols = trial_space.getSpaceDim(numpanels);
             // Initializing the Galerkin matrix with zeros
             Eigen::MatrixXcd output = Eigen::MatrixXcd::Zero(rows, cols);
-            // Panel oriented assembly \f$\ref{pc:ass}\f$
+            // Panel oriented assembly
             QuadRule GaussQR = getGaussQR(N,0.,1.);
             QuadRule CGaussQR = getCGaussQR(N);
             for (unsigned int i = 0; i < numpanels; ++i) {

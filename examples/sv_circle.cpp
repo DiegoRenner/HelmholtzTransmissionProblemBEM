@@ -10,7 +10,7 @@
  *
  * <tt>
  * /path/to/sv_circle \<radius of circle\> \<refraction inside\>
- *      \<refraction outside\> \<wavenumber\>
+ *      \<refraction outside\> \<initial wavenumber\>
  *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>.
  * </tt>
  *

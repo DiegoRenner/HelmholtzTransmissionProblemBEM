@@ -11,7 +11,7 @@
  *
  * <tt>
  *  /path/to/roots_brent_circle \<radius of circle\> \<refraction inside\>
- *     \<refraction outside\> \<wavenumber\> \<\#grid points for root search\>
+ *     \<refraction outside\> \<initial wavenumber\> \<\#grid points for root search\>
  *     \<\#panels\> \<order of quadrature rule\> \<outputfile\>.
  * </tt>
  *
@@ -38,7 +38,7 @@ using namespace std::chrono;
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
 // define tolerance when searching for root
-double epsilon = 1e-6;
+double epsilon = 1e-3;
 int main(int argc, char** argv) {
 
     // define radius of circle refraction index and initial wavenumber

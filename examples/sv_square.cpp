@@ -10,7 +10,7 @@
  *
  * <tt>
  * /path/to/sv_square \<half of side length of square\> \<refraction inside\>
- *      \<refraction outside\> \<wavenumber\>
+ *      \<refraction outside\> \<initial wavenumber\>
  *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>.
  * </tt>
  *

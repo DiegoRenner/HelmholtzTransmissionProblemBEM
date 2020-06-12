@@ -44,14 +44,14 @@
             // Computing the (i,j)th matrix entry
             for (int i = 0; i < Qtest; ++i) {
                 for (int j = 0; j < Qtrial; ++j) {
-                    // Lambda expression for functions F and G in \f$\eqref{eq:Kidp}\f$
+                    // Lambda expression for functions F and G
                     auto F = [&](double t) {
                         return trial_space.evaluateShapeFunction(j, t) * pi_p.Derivative_01(t).norm();
                     };
                     auto G = [&](double s) {
                         return test_space.evaluateShapeFunction(i, s) * pi.Derivative_01(s).norm();
                     };
-                    // Lambda expression for the integrand in \f$\eqref{eq:Kidp}\f$
+                    // Lambda expression for the integrand
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.,0.);
                         // Finding the tangent of pi_p to get its normal
@@ -70,7 +70,7 @@
                         return result*F(t)*G(s);
                     };
                     complex_t integral = complex_t(0.,0.);
-                    // Tensor product quadrature for double integral in \f$\eqref{eq:Kidp}\f$
+                    // Tensor product quadrature for double integral
                     for (unsigned int k = 0; k < N; ++k) {
                         for (unsigned int l = 0; l < N; ++l) {
                             double s = GaussQR.x(l)*(1.-GaussQR.x(k));
@@ -105,7 +105,7 @@
             bool swap = 1;//((pi(1) - pi_p(-1)).norm() / 100. > sqrt(epsilon));
             for (int i = 0; i < Qtest; ++i) {
                 for (int j = 0; j < Qtrial; ++j) {
-                    // Lambda expression for functions F and G in \f$\eqref{eq:Kidp}\f$
+                    // Lambda expression for functions F and G
                     auto F = [&](double t) {
                         if (swap) {
                             return trial_space.evaluateShapeFunction_01_swapped((j)%2, t) * pi_p.Derivative_01_swapped(t).norm();
@@ -120,7 +120,7 @@
                             return test_space.evaluateShapeFunction_01_swapped(i, s) * pi.Derivative_01_swapped(s).norm();
                         }
                     };
-                    // Lambda expression for the integrand in \f$\eqref{eq:Kidp}\f$
+                    // Lambda expression for the integrand
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.,0.);
                         // Finding the tangent of pi_p to get its normal
@@ -153,7 +153,7 @@
                         return result * F(t) * G(s);
                     };
                     complex_t integral = complex_t(0.,0.);
-                    // Tensor product quadrature for double integral in \f$\eqref{eq:Kidp}\f$
+                    // Tensor product quadrature for double integral
                     for (unsigned int k = 0; k < N; ++k) {
                         for (unsigned int l = 0; l < N; ++l) {
                             double s = GaussQR.x(k)*GaussQR.x(l);
@@ -187,7 +187,7 @@
             // Computing the (i,j)th matrix entry
             for (int i = 0; i < Qtest; ++i) {
                 for (int j = 0; j < Qtrial; ++j) {
-                    // Lambda expression for functions F and G in \f$\eqref{eq:titg}\f$ for
+                    // Lambda expression for functions F and G
                     // Double Layer BIO
                     auto F = [&](double t) { // Function associated with panel pi_p
                         return trial_space.evaluateShapeFunction(j, t) *
@@ -197,7 +197,7 @@
                         return test_space.evaluateShapeFunction(i, s) *
                                pi.Derivative_01(s).norm();
                     };
-                    // Lambda expression for \f$\hat{K}\f$ in \f$\eqref{eq:titg}\f$ for double
+                    // Lambda expression for \f$\hat{K}\f$
                     // Layer BIO
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.,0.);
@@ -251,8 +251,7 @@
             unsigned int Qtrial = trial_space.getQ();
             // Initializing the Galerkin matrix with zeros
             Eigen::MatrixXcd output = Eigen::MatrixXd::Zero(rows, cols);
-            // Panel oriented assembly \f$\ref{pc:ass}\f$
-            //QuadRule LogWeightQR = getLogWeightQR(1, N);
+            // Panel oriented assembly
             QuadRule GaussQR = getGaussQR(N,0.,1.);
             QuadRule CGaussQR = getCGaussQR(N);
             for (unsigned int i = 0; i < numpanels; ++i) {

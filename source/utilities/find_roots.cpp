@@ -1,15 +1,9 @@
-//
-// Created by diegorenner on 4/29/20.
-//
-
 #include <limits>
 #include <functional>
 #include <iostream>
 #include <cmath>
-#include <fstream>
 #include "find_roots.hpp"
 
-#define ITMAX 10
 #define MAXIT 10
 #define EPS std::numeric_limits<double>::epsilon()
 
@@ -32,7 +26,7 @@ double zbrent( const function<double(double)> f,
         return 0.0;
     }
     fc=fb;
-    for (iter=1; iter <= ITMAX; iter++) {
+    for (iter=1; iter <= MAXIT; iter++) {
         if ((fb > 0.0 && fc > 0.0) || (fb < 0.0 && fc < 0.0)) {
             c = a; //Rename a, b, c and adjust bounding interval d.
             fc=fa;
@@ -92,7 +86,7 @@ double zbrent( const function<double(double)> f,
 }
 
 double rtsafe( std::function<double(double)> fct,
-               std::function<double(double)> fct_der,
+               std::function<Eigen::MatrixXd(double)> fct_both,
                double x1,
                double x2,
                double tol,
@@ -131,8 +125,9 @@ double rtsafe( std::function<double(double)> fct,
     rts=0.5*(x1+x2);
     dxold=fabs(x2-x1);
     dx=dxold;
-    f = fct(rts);
-    df = fct_der(rts);
+    Eigen::MatrixXd tempM = fct_both(rts);
+    f = tempM(0,0);
+    df = tempM(0,1);
     //Loop over allowed iterations.
     for (j=1;j<=MAXIT;j++) {
         // Bisect if Newton out of range,or not decreasing fast enough.
@@ -165,8 +160,9 @@ double rtsafe( std::function<double(double)> fct,
             return rts;
         }
         //The one new function evaluation per iteration.
-        f = fct(rts);
-        df = fct_der(rts);
+        tempM = fct_both(rts);
+        f = tempM(0,0);
+        df = tempM(0,1);
         //Maintain the bracket on the root.
         if (f < 0.0)
             xl=rts;
