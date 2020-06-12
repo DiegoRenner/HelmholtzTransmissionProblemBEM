@@ -8,7 +8,7 @@ https://github.com/joeydumont/complex_bessel
 
 for passing complex arguments to the Hankel and Bessel functions.
 This library has to be installed seperately.
-To generate the documentation <tt>latex</tt> and <tt>doxygen</tt> have to be installed.
+To generate the documentation <tt>latex</tt> and <tt>doxygen</tt> have to be installed as well.
 Running CMake also configures <tt>make</tt> targets.
 These can then be built by running 
 
