@@ -7,6 +7,7 @@ HelmholtzTransmissionProblemBEM also relies on the library
 https://github.com/joeydumont/complex_bessel
 
 for passing complex arguments to the Hankel and Bessel functions.
+This library has to be installed seperately.
 To generate the documentation <tt>latex</tt> and <tt>doxygen</tt> have to be installed.
 Running CMake also configures <tt>make</tt> targets.
 These can then be built by running 
