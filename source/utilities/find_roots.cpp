@@ -9,8 +9,8 @@
 #include <fstream>
 #include "find_roots.hpp"
 
-#define ITMAX 100
-#define MAXIT 100
+#define ITMAX 10
+#define MAXIT 10
 #define EPS std::numeric_limits<double>::epsilon()
 
 

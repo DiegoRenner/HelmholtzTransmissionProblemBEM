@@ -78,9 +78,10 @@ int main(int argc, char** argv) {
                 auto start = high_resolution_clock::now();
                 Eigen::MatrixXcd T_in;
                 T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
+                double res = sv(T_in, list, count)(m);
                 auto end = high_resolution_clock::now();
                 duration_ops += duration_cast<milliseconds>(end-start);
-                return sv(T_in, list, count)(m);
+                return res;
             };
             auto sv_eval_der = [&] (double k_in) {
                 auto start = high_resolution_clock::now();
@@ -88,9 +89,10 @@ int main(int argc, char** argv) {
                 Eigen::MatrixXcd T_der_in;
                 T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
                 T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
+                double res = sv_1st_der(T_in, T_der_in, list, count)(m,1);
                 auto end = high_resolution_clock::now();
                 duration_ops += duration_cast<milliseconds>(end-start);
-                return sv_1st_der(T_in, T_der_in, list, count)(m,1);
+                return res;
             };
 
             // search for root
