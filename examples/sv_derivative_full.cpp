@@ -1,6 +1,6 @@
 /**
  * \file sv_derivative_full.cpp
- * \brief This script computes the singular values and
+ * \brief This target builds a script that computes the singular values and
  * their first two derivatives of the Galerkin BEM
  * approximated BIO for the second-kind direct BIEs of the Helmholtz
  * transmission problem.
@@ -14,6 +14,15 @@
  *      \<refraction outside\> \<wavenumber\>
  *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>
  * </tt>
+ * The resulting file will contain the value of $k$ in the first column.
+ * Then the singular values and their first two derivatives at 
+ * $k$ will be listed from smallest to largest in the columns.
+ * The singular values and their derivatives occupy three neighboring columns.
+ * The final three columns will contain the value of the root,
+ * the value of the first derivative at the root and the 
+ * number of iterations taken to find the root in the interval 
+ * between the current and the next evaluation point.
+ * If no root was found these three columns will contain \f$\verb|NAN|\f$.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */

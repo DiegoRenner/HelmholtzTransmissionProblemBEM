@@ -44,6 +44,7 @@ double zbrent( const std::function<double(double)> f,
  * and return the value of the root with a precision of \p tol.
  * This function was taken from the book "Numerical Recipes in C"
  * @param f function to search for root and it's derivative
+ * @param f_der derivative of function to search for root and it's derivative
  * @param x1 initial interval, left bound
  * @param x2 initial interval, right bound
  * @param tol tolerance at which to stop search

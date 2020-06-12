@@ -1,6 +1,6 @@
 /**
  * \file sv_square.cpp
- * \brief This script computes the singular values
+ * \brief This target builds a script that computes the singular values
  * of the Galerkin BEM approximated BIO for the
  * second-kind direct BIEs of the Helmholtz
  * transmission problem.
@@ -12,6 +12,9 @@
  *      \<refraction outside\> \<wavenumber\>
  *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>
  * </tt>
+ * The resulting file will contain the value of $k$ in the first column.
+ * The rest of the columns contain the singular values from 
+ * smallest to largest for this $k$.
  *
  */
 #include <complex>

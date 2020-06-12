@@ -1,6 +1,6 @@
 /**
  * \file transmission_problem_verification.cpp
- * \brief This script computes solutions to
+ * \brief This target builds a script that computes solutions to
  * the analytically solvable case of the Helmholtz transmission
  * problem where the scatterer is a circle using second-kind direct
  * BIEs and Galerkin BEM.
@@ -12,6 +12,11 @@
  *      \<refraction outside\> \<wavenumber\>
  *      \<order of quadrature rule\> \<outputfile\>
  * </tt>
+ * This output file will contain two columns.
+ * The first will contain the current panel size.
+ * The second will contain the residual error in the euclidean 
+ * norm of the computed FEM-space interpolation coefficients to the 
+ * known FEM-space interpolation coefficients for the current number of panels.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */

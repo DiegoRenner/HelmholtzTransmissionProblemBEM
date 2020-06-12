@@ -12,7 +12,9 @@ To generate the documentation <tt>latex</tt> and <tt>doxygen</tt> have to be ins
 Running CMake also configures <tt>make</tt> targets.
 These can then be built by running 
 
-<tt>make <target_name></tt>.
+~~~
+make <target_name>
+~~~.
 
 The compiled binary can be found in the <tt>bin</tt> directory.
 

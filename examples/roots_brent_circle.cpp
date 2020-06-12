@@ -1,17 +1,24 @@
 /**
  * \file roots_brent_circle.cpp
- * \brief This script computes minimas in the smallest singular value of the
- * solutions operator for the sedond kind direct BIEs of the Helmholtz
+ * \brief This target builds a script that computes minimas in 
+ * the smallest singular value of the
+ * Galerkin BEM approximated solutions operator for the sedond-kind direct 
+ * BIEs of the Helmholtz
  * transmission problem using the Van Wijngaarden-Dekker-Brent method.
  * The scatterer is set to be a circle
- *
- *  The results are written to disk.
- *  The script can be run as follows
+ * The results are written to disk.
+ * The script can be run as follows:
  *  <tt>
  *   /path/to/roots_brent_circle \<radius of circle\> \<refraction inside\>
  *      \<refraction outside\> \<wavenumber\> \<\#grid points for root search\>
  *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>
  *  </tt>
+ * The resulting file will contain the left boundary of the 
+ * interval used to compute the root in the first column. 
+ * Then in the next three columns will be the point, the 
+ * function value and the derivative at which the root was found.
+ * The last column will contain the number of iterations used to find the root.
+ * If no root was found the last four columns will be set to \f$\verb|NAN|\f$.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */

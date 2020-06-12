@@ -1,6 +1,6 @@
 /**
  * \file sv_derivative_verification_square.cpp
- * \brief This script verifies the derivatives of the singular
+ * \brief This target builds a script that verifies the derivatives of the singular
  * values and their derivatives of the Galerkin BEM BIO for the
  * second-kind direct BIEs of the Helmholtz transmsission problem
  * using extrapolation.
@@ -12,6 +12,11 @@
  *      \<refraction inside\> \<refraction outside\> \<wavenumber\>
  *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>
  * </tt>
+ * The resulting file will contain the value of $k$ in the first column.
+ * The second column will contain the value of the smallest singular value at this $k$.
+ * Then the columns will contain the computed derivative, the 
+ * extrapolated derivative, the computed second derivative and the extrapolated second 
+ * derivative in this order.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */

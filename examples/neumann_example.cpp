@@ -1,8 +1,16 @@
 /**
  * \file neumann_example.cpp
- * \brief This script computes the solution to a Neumann problem
+ * \brief This target builds a script that computes the solution to a Neumann problem
  * using first kind direct BIEs.
  * No command line parameters are necessary.
+ * Once built the script can be run as follows: 
+ * <tt>
+ * /path/to/library/bin/neumann_example.
+ * </tt>
+ * The user will be updated over the residual error in 
+ * the euclidean norm of the computed FEM-space interpolation coefficients to the 
+ * known FEM-space interpolation coefficients for the current 
+ * number of panels through the command line
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */

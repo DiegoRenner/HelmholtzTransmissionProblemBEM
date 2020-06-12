@@ -1,12 +1,22 @@
 /**
  * \file parabolic_approximation.cpp
- * \brief This script tries to find minimas in the smallest sinuglar values
- * of the solutions operator for the second kind direct BIEs for
+ * \brief This target builds a script that tries to find minimas in the smallest sinuglar values
+ * of the Galerkin BEM approximated solutions operator for the second-kind direct BIEs of 
  * the Helmholtz Transmission problem.
  * The minimas are searched for using a parabolic approximation
  * based on evaluating the smallest singular values and their first
  * two derivatives.
+ * The results are written to disk.
  * No command line arguments are necessary.
+ * The script can be run as follows:
+ * <tt>
+ * /path/to/library/bin/parabolic_approximation.
+ * </tt>
+ * In the file the first column contains the initial point used for the parabolic approximation.
+ * The next three columns contain the function value and the first 
+ * two derivatives at the initial point that were used to compute the parabolic approximation.
+ * The user also will get updates on the current best approximation for a 
+ * minima and the value of the first derivatie at this point through the command line.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
