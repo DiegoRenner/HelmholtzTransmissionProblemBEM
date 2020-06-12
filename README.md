@@ -1,5 +1,5 @@
 # HelmholtzTransmissionProblemBEM
-## Usage
+## Configuration and Dependencies
 The library can be configured by running <tt>cmake CMakeLists.txt</tt> in the base directory.
 This should automatically install the Eigen library for matrix computations if this is not already available.
 HelmholtzTransmissionProblemBEM also relies on the library
@@ -14,6 +14,8 @@ These can then be built by running
 <tt>make <target_name></tt>.
 
 The compiled binary can be found in the <tt>bin</tt> directory.
+
+## Usage
 We will show how the built targets are to be used.
 
 #### <tt>doxygen_HelmholtzTransmissionProblemBEM</tt>
