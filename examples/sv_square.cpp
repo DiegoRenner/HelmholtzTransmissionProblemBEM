@@ -7,14 +7,16 @@
  * The scatterer is set to be a square.
  * The results are written to file.
  * The script can be run as follows:
+ *
  * <tt>
  * /path/to/sv_square \<half of side length of square\> \<refraction inside\>
  *      \<refraction outside\> \<wavenumber\>
- *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>
+ *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>.
  * </tt>
- * The resulting file will contain the value of $k$ in the first column.
+ *
+ * The resulting file will contain the value of \f$k\f$ in the first column.
  * The rest of the columns contain the singular values from 
- * smallest to largest for this $k$.
+ * smallest to largest for this \f$k\f$.
  *
  */
 #include <complex>

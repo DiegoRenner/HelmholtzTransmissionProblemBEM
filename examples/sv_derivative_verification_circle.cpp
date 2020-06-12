@@ -7,13 +7,15 @@
  * The scatterer is set to be a circle.
  * The results are written to file.
  * The script can be run as follows:
+ *
  * <tt>
  * /path/to/sv_derivative_verification_circle \<radius of circle\>
  *      \<refraction inside\> \<refraction outside\> \<wavenumber\>
- *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>
+ *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>.
  * </tt>
- * The resulting file will contain the value of $k$ in the first column.
- * The second column will contain the value of the smallest singular value at this $k$.
+ *
+ * The resulting file will contain the value of \f$k\f$ in the first column.
+ * The second column will contain the value of the smallest singular value at this \f$k\f$.
  * Then the columns will contain the computed derivative, the 
  * extrapolated derivative, the computed second derivative and the extrapolated second 
  * derivative in this order.

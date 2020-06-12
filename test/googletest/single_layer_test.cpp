@@ -1,7 +1,7 @@
 /**
  * \file single_layer_test.cpp
  * \brief This test file compares Single Layer BIO for the
- * Helmholtz kernel to a pre computed known solution from
+ * Helmholtz kernel to a precomputed known solution from
  * a file.
  */
 #include <complex>

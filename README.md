@@ -1,6 +1,10 @@
 # HelmholtzTransmissionProblemBEM
 ## Configuration and Dependencies
-The library can be configured by running <tt>cmake CMakeLists.txt</tt> in the base directory.
+The library can be configured by running 
+~~~
+cmake CMakeLists.txt
+~~~
+ in the base directory.
 This should automatically install the Eigen library for matrix computations if this is not already available.
 HelmholtzTransmissionProblemBEM also relies on the library
 
@@ -13,8 +17,9 @@ Running CMake also configures <tt>make</tt> targets.
 These can then be built by running 
 
 ~~~
-make <target_name>
-~~~.
+make <target_name>.
+~~~
+
 
 The compiled binary can be found in the <tt>bin</tt> directory.
 
@@ -110,7 +115,7 @@ The script can be run as follows:
 ~~~
 /path/to/library/bin/sv_circle <radius of circle> 
     <refraction inside> <refraction outside> <wavenumber>
-    <#panels> <order of quadrature rule> <outputfile>
+    <#panels> <order of quadrature rule> <outputfile>.
 ~~~
 The resulting file will contain the value of k in the first column.
 The rest of the columns contain the singular values from smallest to largest for this k.
@@ -126,7 +131,7 @@ The script can be run as follows:
 ~~~
 /path/to/library/bin/sv_circle <half of side length of square> 
     <refraction inside> <refraction outside> <wavenumber>
-    <#panels> <order of quadrature rule> <outputfile>
+    <#panels> <order of quadrature rule> <outputfile>.
 ~~~
 The resulting file will contain the value of k in the first column.
 The rest of the columns contain the singular values from smallest to largest for this k.
@@ -143,7 +148,7 @@ The script can be run as follows:
 ~~~
 /path/to/library/bin/sv_derivative_verification_circle 
     <radius of circle> <refraction inside> <refraction outside> 
-    <wavenumber> <#panels> <order of quadrature rule> <outputfile>
+    <wavenumber> <#panels> <order of quadrature rule> <outputfile>.
 ~~~
 The resulting file will contain the value of k in the first column.
 The second column will contain the value of the smallest singular value at this k.
@@ -161,7 +166,7 @@ The script can be run as follows:
 /path/to/library/bin/sv_derivative_verification_circle 
     <half side length of square> <refraction inside> 
     <refraction outside> <wavenumber> <#panels> 
-    <order of quadrature rule> <outputfile>
+    <order of quadrature rule> <outputfile>.
 ~~~
 The resulting file will contain the value of k in the first column.
 The second column will contain the value of the smallest singular value at this k.
@@ -180,7 +185,7 @@ The script can be run as follows:
 ~~~
 /path/to/library/bin/sv_derivative_full <radius of circle> 
     <refraction inside> <refraction outside> <wavenumber>
-    <#panels> <order of quadrature rule> <outputfile>
+    <#panels> <order of quadrature rule> <outputfile>.
 ~~~
 The resulting file will contain the value of k in the first column.
 Then the singular values and their first two derivatives at k will be listed from smallest to largest in the columns.
@@ -199,7 +204,7 @@ The script can be run as follows:
 /path/to/library/bin/transmission_problem_verification 
     <radius of circle> <#coeffs for series expansion of solution> 
     <refraction inside> <refraction outside> <wavenumber>
-    <order of quadrature rule> <outputfile>
+    <order of quadrature rule> <outputfile>.
 ~~~
 This output file will contain two columns.
 The first will contain the current panel size.

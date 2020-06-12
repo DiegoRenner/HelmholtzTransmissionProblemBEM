@@ -9,14 +9,16 @@
  * The scatterer is set to be a circle.
  * The results are written to file.
  * The script can be run as follows:
+ *
  * <tt>
  * /path/to/sv_circle \<radius of circle\> \<refraction inside\>
  *      \<refraction outside\> \<wavenumber\>
- *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>
+ *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>.
  * </tt>
- * The resulting file will contain the value of $k$ in the first column.
+ *
+ * The resulting file will contain the value of \f$k\f$ in the first column.
  * Then the singular values and their first two derivatives at 
- * $k$ will be listed from smallest to largest in the columns.
+ * \f$k\f$ will be listed from smallest to largest in the columns.
  * The singular values and their derivatives occupy three neighboring columns.
  * The final three columns will contain the value of the root,
  * the value of the first derivative at the root and the 
