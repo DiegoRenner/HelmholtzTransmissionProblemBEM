@@ -17,6 +17,7 @@ The compiled binary can be found in the <tt>bin</tt> directory.
 
 ## Usage
 We will show how the built targets are to be used.
+We commonly refer to the wavenumber by k.
 
 #### <tt>doxygen_HelmholtzTransmissionProblemBEM</tt>
 This target generates a documentation of the library in the <tt>doxygen/generated_doc</tt> directory.
@@ -108,8 +109,8 @@ The script can be run as follows:
     <refraction inside> <refraction outside> <wavenumber>
     <#panels> <order of quadrature rule> <outputfile>
 ~~~
-The resulting file will contain the value of $k$ in the first column.
-The rest of the columns contain the singular values from smallest to largest for this $k$.
+The resulting file will contain the value of k in the first column.
+The rest of the columns contain the singular values from smallest to largest for this k.
 
 #### <tt>sv_square</tt>
 This target builds a script that computes the singular values
@@ -124,8 +125,8 @@ The script can be run as follows:
     <refraction inside> <refraction outside> <wavenumber>
     <#panels> <order of quadrature rule> <outputfile>
 ~~~
-The resulting file will contain the value of $k$ in the first column.
-The rest of the columns contain the singular values from smallest to largest for this $k$.
+The resulting file will contain the value of k in the first column.
+The rest of the columns contain the singular values from smallest to largest for this k.
 
 
 #### <tt>sv_derivative_verification_circle</tt>
@@ -141,8 +142,8 @@ The script can be run as follows:
     <radius of circle> <refraction inside> <refraction outside> 
     <wavenumber> <#panels> <order of quadrature rule> <outputfile>
 ~~~
-The resulting file will contain the value of $k$ in the first column.
-The second column will contain the value of the smallest singular value at this $k$.
+The resulting file will contain the value of k in the first column.
+The second column will contain the value of the smallest singular value at this k.
 Then the columns will contain the computed derivative, the extrapolated derivative, the computed second derivative and the extrapolated second derivative in this order.
 
 #### <tt>sv_derivative_verification_square</tt>
@@ -159,8 +160,8 @@ The script can be run as follows:
     <refraction outside> <wavenumber> <#panels> 
     <order of quadrature rule> <outputfile>
 ~~~
-The resulting file will contain the value of $k$ in the first column.
-The second column will contain the value of the smallest singular value at this $k$.
+The resulting file will contain the value of k in the first column.
+The second column will contain the value of the smallest singular value at this k.
 Then the columns will contain the computed derivative, the extrapolated derivative, the computed second derivative and the extrapolated second derivative in this order.
 
 #### <tt>sv_derivative_full</tt>
@@ -178,8 +179,8 @@ The script can be run as follows:
     <refraction inside> <refraction outside> <wavenumber>
     <#panels> <order of quadrature rule> <outputfile>
 ~~~
-The resulting file will contain the value of $k$ in the first column.
-Then the singular values and their first two derivatives at $k$ will be listed from smallest to largest in the columns.
+The resulting file will contain the value of k in the first column.
+Then the singular values and their first two derivatives at k will be listed from smallest to largest in the columns.
 The singular values and their derivatives occupy three neighboring columns.
 The final three columns will contain the value of the root, the value of the first derivative at the root and the number of iterations taken to find the root in the interval between the current and the next evaluation point.
 If no root was found these three columns will contain <tt>NAN</tt>.
