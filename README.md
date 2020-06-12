@@ -1,15 +1,22 @@
 # TransmissionScatteringProblemBEM
-## Usage
+##Usage
 The library can be configured by running <tt>cmake CMakeLists.txt</tt> in the base directory.
 This should automatically install the Eigen library for matrix computations if this is not already available.
-HelmholtzTransmissionProblemBEM also relies on the library https://github.com/joeydumont/complex_bessel for passing complex arguments to the Hankel and Bessel functions.
+HelmholtzTransmissionProblemBEM also relies on the library
+
+https://github.com/joeydumont/complex\_bessel
+
+for passing complex arguments to the Hankel and Bessel functions.
 To generate the documentation \LaTeX and <tt>doxygen</tt> have to be installed.
 Running CMake also configures <tt>make</tt> targets.
-These can then be built by running <tt>make <target_name></tt>.
+These can then be built by running 
+
+<tt>make <target_name></tt>.
+
 The compiled binary can be found in the <tt>bin</tt> directory.
 We will show how the built targets are to be used.
 
-### <tt>doxygen_HelmholtzTransmissionProblemBEM</tt>
+<tt>doxygen_HelmholtzTransmissionProblemBEM</tt>
 This target generates a documentation of the library in the <tt>doxygen/generated_doc</tt> directory.
 The documentation can be browsed using any common browser.
 
@@ -57,14 +64,12 @@ transmission problem using the Van Wijngaarden-Dekker-Brent method.
 The scatterer is set to be a circle
 The results are written to disk.
 The script can be run as follows:
-
-<tt>
-/path/to/library/bin/roots_brent_circle \<radius of circle\> 
-    \<refraction inside\> \<refraction outside\> \<wavenumber\> 
-    \<#grid points for root search\> \<#panels\> 
-    \<order of quadrature rule\> \<outputfile\>.
-</tt>
-
+<pre>
+/path/to/library/bin/roots_brent_circle <radius of circle> 
+    <refraction inside> <refraction outside> <wavenumber> 
+    <#grid points for root search> <#panels> 
+    <order of quadrature rule> <outputfile>.
+</pre>
 The resulting file will contain the left boundary of the interval used to compute the root in the first column. 
 Then in the next three columns will be the point, the function value and the derivative at which the root was found.
 The last column will contain the number of iterations used to find the root.
@@ -77,14 +82,12 @@ transmission problem using the Newton-Raphson method.
 The scatterer is set to be a circle
 The results are written to disk.
 The script can be run as follows:
-
 <tt>
-/path/to/library/bin/roots_brent_circle \<radius of circle\> 
-    \<refraction inside\> \<refraction outside\> \<wavenumber\> 
-    \<#grid points for root search\> \<#panels\> 
-    \<order of quadrature rule\> \<outputfile\>.
+/path/to/library/bin/roots_brent_circle <radius of circle> 
+    <refraction inside> <refraction outside> <wavenumber> 
+    <#grid points for root search> <#panels> 
+    <order of quadrature rule> <outputfile>.
 </tt>
-
 The resulting file will contain the left boundary of the interval used to compute the root in the first column. 
 Then in the next three columns will be the point, the function value and the derivative at which the root was found.
 The last column will contain the number of iterations used to find the root.
@@ -98,13 +101,11 @@ transmission problem.
 The scatterer is set to be a circle.
 The results are written to file.
 The script can be run as follows:
-
 <tt>
-/path/to/library/bin/sv_circle \<radius of circle\> 
-    \<refraction inside\> \<refraction outside\> \<wavenumber\>
-    \<#panels\> \<order of quadrature rule\> \<outputfile\>
+/path/to/library/bin/sv_circle <radius of circle> 
+    <refraction inside> <refraction outside> <wavenumber>
+    <#panels> <order of quadrature rule> <outputfile>
 </tt>
-
 The resulting file will contain the value of $k$ in the first column.
 The rest of the columns contain the singular values from smallest to largest for this $k$.
 
@@ -116,13 +117,11 @@ transmission problem.
 The scatterer is set to be a square.
 The results are written to file.
 The script can be run as follows:
-
 <tt>
-/path/to/library/bin/sv_circle \<half of side length of square\> 
-    \<refraction inside\> \<refraction outside\> \<wavenumber\>
-    \<#panels\> \<order of quadrature rule\> \<outputfile\>
+/path/to/library/bin/sv_circle <half of side length of square> 
+    <refraction inside> <refraction outside> <wavenumber>
+    <#panels> <order of quadrature rule> <outputfile>
 </tt>
-
 The resulting file will contain the value of $k$ in the first column.
 The rest of the columns contain the singular values from smallest to largest for this $k$.
 
@@ -135,13 +134,11 @@ using extrapolation.
 The scatterer is set to be a circle.
 The results are written to file.
 The script can be run as follows:
-
 <tt>
 /path/to/library/bin/sv_derivative_verification_circle 
-    \<radius of circle\> \<refraction inside\> \<refraction outside\> 
-    \<wavenumber\> \<#panels\> \<order of quadrature rule\> \<outputfile\>
+    <radius of circle> <refraction inside> <refraction outside> 
+    <wavenumber> <#panels> <order of quadrature rule> <outputfile>
 </tt>
-
 The resulting file will contain the value of $k$ in the first column.
 The second column will contain the value of the smallest singular value at this $k$.
 Then the columns will contain the computed derivative, the extrapolated derivative, the computed second derivative and the extrapolated second derivative in this order.
@@ -154,14 +151,12 @@ using extrapolation.
 The scatterer is set to be a square.
 The results are written to file.
 The script can be run as follows:
-
 <tt>
 /path/to/library/bin/sv_derivative_verification_circle 
-    \<half side length of square\> \<refraction inside\> 
-    \<refraction outside\> \<wavenumber\> \<#panels\> 
-    \<order of quadrature rule\> \<outputfile\>
+    <half side length of square> <refraction inside> 
+    <refraction outside> <wavenumber> <#panels> 
+    <order of quadrature rule> <outputfile>
 </tt>
-
 The resulting file will contain the value of $k$ in the first column.
 The second column will contain the value of the smallest singular value at this $k$.
 Then the columns will contain the computed derivative, the extrapolated derivative, the computed second derivative and the extrapolated second derivative in this order.
@@ -176,13 +171,11 @@ by use of the Newton-Raphson method.
 The scatterer is set to be a circle.
 The results are written to file.
 The script can be run as follows:
-
 <tt>
-/path/to/library/bin/sv_derivative_full \<radius of circle> 
-    \<refraction inside> \<refraction outside> \<wavenumber>
-    \<#panels> \<order of quadrature rule> \<outputfile>
+/path/to/library/bin/sv_derivative_full <radius of circle> 
+    <refraction inside> <refraction outside> <wavenumber>
+    <#panels> <order of quadrature rule> <outputfile>
 </tt>
-
 The resulting file will contain the value of $k$ in the first column.
 Then the singular values and their first two derivatives at $k$ will be listed from smallest to largest in the columns.
 The singular values and their derivatives occupy three neighboring columns.
@@ -196,14 +189,12 @@ problem where the scatterer is a circle using second-kind direct
 BIEs and Galerkin BEM.
 The results are written to file.
 The script can be run as follows:
-
 <tt>
 /path/to/library/bin/transmission_problem_verification 
-    \<radius of circle\> \<#coeffs for series expansion of solution\> 
-    \<refraction inside\> \<refraction outside\> \<wavenumber\>
-    \<order of quadrature rule\> \<outputfile\>
+    <radius of circle> <#coeffs for series expansion of solution> 
+    <refraction inside> <refraction outside> <wavenumber>
+    <order of quadrature rule> <outputfile>
 </tt>
-
 This output file will contain two columns.
 The first will contain the current panel size.
 The second will contain the residual error in the euclidean norm of the computed FEM-space interpolation coefficients to the known FEM-space interpolation coefficients for the current number of panels.
