@@ -65,10 +65,10 @@ The scatterer is set to be a circle
 The results are written to disk.
 The script can be run as follows:
 <tt>
-/path/to/library/bin/roots_brent_circle <radius of circle> 
-    <refraction inside> <refraction outside> <wavenumber> 
-    <#grid points for root search> <#panels> 
-    <order of quadrature rule> <outputfile>.
+/path/to/library/bin/roots_brent_circle \<radius of circle\> 
+    \<refraction inside\> \<refraction outside\> \<wavenumber\> 
+    \<#grid points for root search\> \<#panels\> 
+    \<order of quadrature rule\> \<outputfile\>.
 </tt>
 The resulting file will contain the left boundary of the interval used to compute the root in the first column. 
 Then in the next three columns will be the point, the function value and the derivative at which the root was found.
