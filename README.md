@@ -1,4 +1,4 @@
-# TransmissionScatteringProblemBEM
+# HelmholtzTransmissionProblemBEM
 ## Usage
 The library can be configured by running <tt>cmake CMakeLists.txt</tt> in the base directory.
 This should automatically install the Eigen library for matrix computations if this is not already available.
@@ -7,7 +7,7 @@ HelmholtzTransmissionProblemBEM also relies on the library
 https://github.com/joeydumont/complex_bessel
 
 for passing complex arguments to the Hankel and Bessel functions.
-To generate the documentation \LaTeX and <tt>doxygen</tt> have to be installed.
+To generate the documentation <tt>latex</tt> and <tt>doxygen</tt> have to be installed.
 Running CMake also configures <tt>make</tt> targets.
 These can then be built by running 
 
