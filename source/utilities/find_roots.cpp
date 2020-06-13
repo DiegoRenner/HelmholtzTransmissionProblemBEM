@@ -121,7 +121,7 @@ double rtsafe( std::function<double(double)> fct,
         xh=x1;
         xl=x2;
     }
-    // Initialize the guess for root,the “stepsize before last,”and the last step.
+    // Initialize the guess for root,the “stepsize before last”, and the last step.
     rts=0.5*(x1+x2);
     dxold=fabs(x2-x1);
     dx=dxold;

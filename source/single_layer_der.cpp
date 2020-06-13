@@ -1,6 +1,6 @@
 
 #include "single_layer_der.hpp"
-#include "/usr/include/complex_bessel.h"
+#include "complex_bessel.h"
 
     namespace single_layer_helmholtz_der {
 

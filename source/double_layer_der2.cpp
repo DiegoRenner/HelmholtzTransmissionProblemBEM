@@ -1,6 +1,6 @@
 
 #include "double_layer_der2.hpp"
-#include "/usr/include/complex_bessel.h"
+#include "complex_bessel.h"
 
     namespace double_layer_helmholtz_der2 {
 

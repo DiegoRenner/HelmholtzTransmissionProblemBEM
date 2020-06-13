@@ -1,5 +1,4 @@
 
-#include <iostream>
 #include "mass_matrix.hpp"
 
     namespace mass_matrix {

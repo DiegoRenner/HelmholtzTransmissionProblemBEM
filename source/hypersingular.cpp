@@ -1,7 +1,7 @@
 
 #include "hypersingular.hpp"
 #include "discontinuous_space.hpp"
-#include "/usr/include/complex_bessel.h"
+#include "complex_bessel.h"
 
     namespace hypersingular_helmholtz {
 
