@@ -27,12 +27,13 @@ double zbrent( const function<double(double)> f,
     }
     fc=fb;
     for (iter=1; iter <= MAXIT; iter++) {
+        // reorient boundary for next interpolation
         if ((fb > 0.0 && fc > 0.0) || (fb < 0.0 && fc < 0.0)) {
-            c = a; //Rename a, b, c and adjust bounding interval d.
+            c = a;
             fc=fa;
             e=d=b-a;
         }
-        if (fabs(fc) < fabs(fb)) {
+        if (fabs(fc) < fabs(fb))
             a=b;
             b=c;
             c=a;
@@ -40,15 +41,19 @@ double zbrent( const function<double(double)> f,
             fb=fc;
             fc=fa;
         }
-        tol1=2.0*EPS*fabs(b)+0.5*tol; //Convergence Check
+        // check if converged
+        tol1=2.0*EPS*fabs(b)+0.5*tol;
         xm=0.5*(c-b);
         if (fabs(xm) <= tol1 || fb == 0.0){
             root_found = true;
             num_iter = iter;
             return b;
         }
+        // try quadratic interpolation if
+        // bounds are decreasing
         if (fabs(e) >= tol1 && fabs(fa) > fabs(fb)) {
-            s=fb/fa; //Attempt inverse quadratic interpolation.
+            // compute parameters for quadratic interpolation
+            s=fb/fa;
             if (a == c) {
                 p=2.0*xm*s;
                 q=1.0-s;
@@ -58,31 +63,44 @@ double zbrent( const function<double(double)> f,
                 p=s*(2.0*xm*q*(q-r)-(b-a)*(r-1.0));
                 q=(q-1.0)*(r-1.0)*(s-1.0);
             }
-            if (p > 0.0) q = -q; //Check whether in bounds
+            // check if quadratic interpolation
+            // would fall within bounds
+            if (p > 0.0) q = -q;
             p=fabs(p);
             min1=3.0*xm*q-fabs(tol1*q);
             min2=fabs(e*q);
             if(2.0*p < (min1 < min2 ? min1 : min2)) {
-                e=d; //Accept interpolation
+                // interpolation accepted
+                e=d;
                 d=p/q;
             } else {
-                d=xm; //Interpolation failed, use bisection.
+                // interpolation rejected, bisect instead
+                d=xm;
                 e=d;
             }
         } else {
-            d = xm; //Bounds decreasing too slowly, use bisection.
+            // convergence too slow, bounds not collapsing
+            // fast enough, bisect
+            d = xm;
             e = d;
         }
-        a=b; //Move last best guess to a.
+        // store previous best guess before
+        // computing new best guess
+        a=b;
         fa=fb;
-        if (fabs(d) > tol1) //Evaluate new trial root.
+        // compute new best guess
+        // if step taken is too small, take
+        // minimum accepted step towards 0
+        if (fabs(d) > tol1)
             b += d;
         else
             b += (xm >= 0) ? fabs(tol1) : -fabs(tol1);
+        // one new function evaluation per iteration
         fb = f(b);
     }
     cout << "Maximum number of iterations exceeded in zbrent" << endl;
-    return 0.0; //Never get here.
+    // should never be reached
+    return 0.0;
 }
 
 double rtsafe( std::function<double(double)> fct,
@@ -98,6 +116,7 @@ double rtsafe( std::function<double(double)> fct,
     double temp,xh,xl,rts;
     fl = fct(x1);
     fh = fct(x2);
+    // sanity checks
     if ((fl > 0.0 && fh > 0.0) || (fl < 0.0 && fh < 0.0)) {
         std::cout << "Root must be bracketed in rtsafe" << std::endl;
         if (fl > fh){
@@ -114,64 +133,68 @@ double rtsafe( std::function<double(double)> fct,
         root_found = true;
         return x2;
     }
-    if (fl < 0.0) { //Orient the search so that f (xl) < 0.
+    // assign boundaries s.t f(xl) < 0
+    if (fl < 0.0) {
         xl=x1;
         xh=x2;
     } else {
         xh=x1;
         xl=x2;
     }
-    // Initialize the guess for root,the “stepsize before last”, and the last step.
+    // set first guess for root, lest step, and "step before last"
     rts=0.5*(x1+x2);
     dxold=fabs(x2-x1);
     dx=dxold;
+    // initialize functions and derivative value
     Eigen::MatrixXd tempM = fct_both(rts);
     f = tempM(0,0);
     df = tempM(0,1);
-    //Loop over allowed iterations.
+    // loop over max number of allowed iterations
     for (j=1;j<=MAXIT;j++) {
-        // Bisect if Newton out of range,or not decreasing fast enough.
+        // check if newton step is out of range or too slow
+        // if it is, bisect
         if ((((rts-xh)*df-f)*((rts-xl)*df-f) > 0.0) || (fabs(2.0*f) > fabs(dxold*df))) {
             dxold=dx;
             dx=0.5*(xh-xl);
             rts=xl+dx;
-            //Change in root is negligible.
+            // if change in root is negligible assume convergence
             if (xl == rts) {
                 root_found = true;
                 num_iter = j;
                 return rts;
             }
         } else {
-            //Newton step acceptable. Take it.
+            // newton step accepted
             dxold=dx;
             dx=f/df;
             temp=rts;
             rts -= dx;
+            // if change in root is negligible assume convergence
             if (temp == rts) {
                 root_found = true;
                 num_iter = j;
                 return rts;
             }
         }
-        //Convergence criterion.
+        // if change in root is small enough assume convergence
         if (fabs(dx) < tol) {
             root_found = true;
             num_iter = j;
             return rts;
         }
-        //The one new function evaluation per iteration.
+        // one new function/derivative evaluation per iteration
         tempM = fct_both(rts);
         f = tempM(0,0);
         df = tempM(0,1);
-        //Maintain the bracket on the root.
+        // assign new boundary making sure root stay bracketed
         if (f < 0.0)
             xl=rts;
         else
             xh=rts;
     }
     std::cout << "Maximum number of iterations exceeded in rtsafe" << std::endl;
+    // should never be reached
     return 0.0;
-    //Never get here.
 };
 Eigen::VectorXd parabolic_approximation(const std::function<Eigen::VectorXd(double)> f,
                                         const std::function<Eigen::VectorXd(double)> f_der,

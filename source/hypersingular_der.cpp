@@ -1,4 +1,3 @@
-
 #include "hypersingular_der.hpp"
 #include "discontinuous_space.hpp"
 #include "complex_bessel.h"
