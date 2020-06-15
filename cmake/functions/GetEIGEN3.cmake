@@ -14,7 +14,7 @@ if(${EIGEN3_FOUND})
   add_custom_target(Eigen) # dependency dummy
 
 else()
-  #  if not found system wide download. 
+  #  if not found system wide download.
     SET(DOWNLOADING_EIGEN ON)
     message("-- Downloading Eigen3")
     ExternalProject_Add(
