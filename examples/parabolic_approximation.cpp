@@ -7,18 +7,17 @@
  * based on evaluating the smallest singular values and their first
  * two derivatives.
  * The results are written to disk.
- * No command line arguments are necessary.
  * The script can be run as follows:
  *
  * <tt>
- * /path/to/library/bin/parabolic_approximation.
+ * /path/to/library/bin/parabolic_approximation \<outfile\>.
  * </tt>
  *
  * In the file the first column contains the initial point used for the parabolic approximation.
  * The next three columns contain the function value and the first 
  * two derivatives at the initial point that were used to compute the parabolic approximation.
  * The user also will get updates on the current best approximation for a 
- * minima and the value of the first derivatie at this point through the command line.
+ * minima and the value of the first derivatvie at this point through the command line.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
@@ -34,7 +33,7 @@ typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
 double epsilon = 1e-3;
 
-int main() {
+int main(int argc, char** argv) {
     // define radius of circle refraction indexces and initial wavenumber
     double eps = 0.25;
     double c_i = 23.;
@@ -54,7 +53,7 @@ int main() {
     }
     // clear existing file
     std::ofstream filename;
-    filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/parabolic_approximation.dat", std::ofstream::out | std::ofstream::trunc);
+    filename.open(argv[1], std::ofstream::out | std::ofstream::trunc);
     filename.close();
     //set range in which to search for next approximated minima
     double step = 0.25;
@@ -80,7 +79,7 @@ int main() {
         // find next approximation of minima using parabolic approximation
         Eigen::VectorXd res =  parabolic_approximation(sv_eval,sv_eval_der,sv_eval_der2,k_temp.real(),step);
         // write values used for parabolic approximation to file for plotting
-        filename.open("/home/diegorenner/Uni/Thesis/matlab_plots/parabolic_approximation.dat", std::ios_base::app);
+        filename.open(argv[1], std::ios_base::app);
         filename << k_temp.real() << " " << res.segment(1,3).transpose() << std::endl;
         filename.close();
         double first_der = sv_eval_der(k_temp.real())(0,0);

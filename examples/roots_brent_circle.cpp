@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
 
             // write result to file
             file_out.open(argv[8], std::ios_base::app);
-            file_out << k_temp.real() << " " << duration.count() << " " << duration_ops.count();
+            file_out << k_temp.real();//<< " " << duration.count() << " " << duration_ops.count();
 
             // check if root was found
             if (root_found) {

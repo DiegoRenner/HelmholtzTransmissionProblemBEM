@@ -89,7 +89,6 @@ int main(int argc, char** argv) {
 
     // clear existing file
     std::ofstream filename;
-    std::cout << argv[7] << std::endl;
     filename.open(argv[7], std::ofstream::out | std::ofstream::trunc);
     filename.close();
 

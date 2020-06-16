@@ -130,14 +130,14 @@ int main(int argc, char** argv) {
                     T_der_in = gen_sol_op_1st_der(mesh, order, k_in, c_o, c_i);
                     T_der2_in = gen_sol_op_2nd_der(mesh, order, k_in, c_o, c_i);
                 }
-                Eigen::MatrixXcd res = sv_2nd_der(T_in, T_der_in, T_der2_in, list, count).block(m,1,1,2);
+                Eigen::MatrixXd res = sv_2nd_der(T_in, T_der_in, T_der2_in, list, count).block(m,1,1,2);
                 return res;
             };
 
             // compute minima of smallest singular value
             bool root_found = false;
             unsigned num_iter;
-            double root =  rtsafe(sv_eval_der, sv_eval_both,k_temp.real(), k_temp.real()+h_x,epsilon,root_found,num_iter);
+            double root = rtsafe(sv_eval_der, sv_eval_both,k_temp.real(), k_temp.real()+h_x,epsilon,root_found,num_iter);
             // write results to file for plotting later on
             file_out.open(argv[7], std::ios_base::app);
             file_out << k_temp.real() << " ";

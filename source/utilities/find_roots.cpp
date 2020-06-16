@@ -1,6 +1,7 @@
 #include <limits>
 #include <functional>
 #include <iostream>
+#include <ostream>
 #include <cmath>
 #include "find_roots.hpp"
 
@@ -33,7 +34,7 @@ double zbrent( const function<double(double)> f,
             fc=fa;
             e=d=b-a;
         }
-        if (fabs(fc) < fabs(fb))
+        if (fabs(fc) < fabs(fb)){
             a=b;
             b=c;
             c=a;

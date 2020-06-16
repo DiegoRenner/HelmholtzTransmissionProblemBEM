@@ -102,19 +102,24 @@ namespace double_layer_helmholtz {
  * for the pair of panels \f$\Pi\f$ and \f$\Pi\f$' for the
  * bilinear form induced by the Helmholtz kernel Double Layer BIO,
  * given by the formula :
- * \f$I_{ij}\f$ = \f$\frac{ik\sqrt{c}}{4} \int_{0}^{1} \int_{0}^{1}
- * H_1^{1}(k\sqrt{c}\|(\gamma_{\Pi}(s)-\gamma_{\Pi'}(t))\|)
- * (\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)) \cdot \textbf{n}(\gamma_{\Pi'}(t))
- * \hat{b}^{j}(t) \hat{\beta}^{i}(s) \|\dot{\gamma}_{\Pi}(s)\|
- * \|\dot{\gamma}_{\Pi'}(t)\| dt ds \f$ where \f$\hat{b}^{j}\f$
+ * \f{eqnarray*}{ 
+ * I_{ij} = \frac{ik\sqrt{c}}{4} \int_{0}^{1} \int_{0}^{1}
+ * &H&_1^{(1)}(k\sqrt{c}\|\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)\|) 
+ * \cdot \frac{\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)}{\|\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)\|} \\
+ * &\cdot& \textbf{n}(\gamma_{\Pi'}(t))
+* \hat{b}^{j}(t) \hat{\beta}^{i}(s) \|\dot{\gamma}_{\Pi}(s)\|
+ * \|\dot{\gamma}_{\Pi'}(t)\| dt ds \f} where \f$\hat{b}^{j}\f$
  *  & \f$\hat{\beta}^{i}\f$ are reference shape functions associated with the
  * trial space \f$S_{p}^{0}\f$ and test space \f$S_{p}^{-1}\f$ respectively.
  * For \f$ k \rightarrow 0 \f$ the limit
- * \f$I_{ij}\f$ = \f$\frac{1}{2\pi} \int_{0}^{1} \int_{0}^{1}
+ * \f{eqnarray*}{
+ * I_{ij} = \frac{1}{2\pi} \int_{0}^{1} \int_{0}^{1}
  * \frac{(\gamma_{\Pi}(s)-\gamma_{\Pi'}(t))}
  * {\|\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)\|^2}.\textbf{n}(\gamma_{\Pi'}(t))
  * \hat{b}^{j}(t) \hat{\beta}^{i}(s) \|\dot{\gamma}_{\Pi}(s)\|
- * \|\dot{\gamma}_{\Pi'}(t)\| dt ds \f$ is computed.
+ * \|\dot{\gamma}_{\Pi'}(t)\| dt ds 
+ * \f}
+ * is computed.
  * \f$I\f$, the interaction matrix is of size \f$Q_{test}\times Q_{trial}\f$
  * where \f$Q_{test}\f$ is the number of reference shape functions for the test
  * BEM space and \f$Q_{trial}\f$ is the number of reference shape functions in

@@ -62,7 +62,7 @@ The results are written to disk.
 No command line arguments are necessary.
 The script can be run as follows:
 ~~~
-/path/to/library/bin/parabolic_approximation.
+/path/to/library/bin/parabolic_approximation <outfile>.
 ~~~
 In the file the first column contains the initial point used for the parabolic approximation.
 The next three columns contain the function value and the first two derivatives at the initial point that were used to compute the parabolic approximation.

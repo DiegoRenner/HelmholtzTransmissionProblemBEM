@@ -167,7 +167,6 @@ double der_by_ext( std::function<double(double)> f ,
             y[k] = y[k+1] - (y[k+1]-y[k] )*h[i]/(h[i]-h[k]) ;
         // termination of extrapolation when desired tolerance is reached
         const double errest = std::abs(y[1]-y[0]) ; // error indicator
-        std::cout << y[0] << std::endl;
         if(errest<rtol*std::abs ( y [ 0 ] ) || errest < atol ) //
             break ;
     }
