@@ -104,7 +104,20 @@ namespace single_layer_helmholtz_der2 {
  * This function is used to evaluate the Interaction Matrix
  * for the pair of panels \f$\Pi\f$ and \f$\Pi\f$' for the
  * bilinear form induced by the second derivative in \p k of
- * the Single Layer BIO for the Helmholtz kernel.
+ * the Single Layer BIO for the Helmholtz kernel,
+ * given the formula:
+ * \f{eqnarray*}{ 
+ * I_{ij} = -\frac{ic}{4} \int_{0}^{1} \int_{0}^{1}
+ * H_1'^{(1)}(k\sqrt{c}\|\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)\|)
+ * \|\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)\|^2
+ * \hat{b}^{j}(t) \hat{b}^{i}(s) \|\dot{\gamma}_{\Pi}(s)\|
+ * \|\dot{\gamma}_{\Pi'}(t)\| dt ds \f}
+ * where \f$\hat{b}^{j}\f$ and \f$\hat{b}^{j}\f$
+ * are reference shape functions associated with the
+ * trial space and test space \f$S_{p}^{0}\f$.
+ * For \f$ k \rightarrow 0 \f$ the limit
+ * \f$ I_{ij} = 0 \f$
+ * is computed since in the limit the single layer kernel does not depend on k.
  * \f$I\f$, the interaction matrix is of size \f$Q_{test}\times Q_{trial}\f$
  * where \f$Q_{test}\f$ is the number of reference shape functions for the test
  * BEM space and \f$Q_{trial}\f$ is the number of reference shape functions in

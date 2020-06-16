@@ -95,7 +95,29 @@ namespace hypersingular_helmholtz {
 /**
  * This function is used to evaluate the Interaction Matrix
  * for the pair of panels \f$\Pi\f$ and \f$\Pi\f$' for the
- * bilinear form induced by the Helmholtz kernel Hypersingular BIO.
+ * bilinear form induced by the Helmholtz kernel Hypersingular BIO,
+ * given the formula:
+ * \f{eqnarray*}{ 
+ * I_{ij} = \frac{i}{4} \int_{0}^{1} \int_{0}^{1}
+ * &H_0^{(1)}&(k\sqrt{c}\|\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)\|) \\
+ * &\cdot& \Big[\hat{B}^{j}(t) \hat{B}^{i}(s) 
+ * - ck^2 \hat{b}^{j}(t) \hat{b}^{i}(s) \|\dot{\gamma}_{\Pi}(s)\| \|\dot{\gamma}_{\Pi'}(t)\|
+ * \mathbf{n}(\gamma_{\Pi}(s)) \cdot \mathbf{n}(\gamma_{\Pi'}(s))\Big]
+ * dt ds \f}
+ * where \f$\hat{B}^{j}\f$ and \f$\hat{B}^{j}\f$
+ * refer to the arc-length derivatives of \f$\hat{b}^{j}\f$ and \f$\hat{b}^{j}\f$ which 
+ * are reference shape functions associated with the
+ * trial space and test space \f$S_{p}^{1}\f$.
+ * For \f$ k \rightarrow 0 \f$ the limit
+ * \f{eqnarray*}{
+ * I_{ij} = -\frac{1}{2\pi} \int_{0}^{1} \int_{0}^{1}
+ * &\ln&(\|\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)\|) \\
+ * &\cdot& \Big[\hat{B}^{j}(t) \hat{B}^{i}(s) 
+ * - (ck^2)\hat{b}^{j}(t) \hat{b}^{i}(s) \|\dot{\gamma}_{\Pi}(s)\| \|\dot{\gamma}_{\Pi'}(t)\|
+ * \mathbf{n}(\gamma_{\Pi}(s)) \cdot \mathbf{n}(\gamma_{\Pi'}(s))\Big]
+ * dt ds 
+ * \f}
+ * is computed.
  * \f$I\f$, the interaction matrix is of size \f$Q_{test}\times Q_{trial}\f$
  * where \f$Q_{test}\f$ is the number of reference shape functions for the test
  * BEM space and \f$Q_{trial}\f$ is the number of reference shape functions in

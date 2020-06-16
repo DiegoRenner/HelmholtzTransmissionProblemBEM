@@ -122,6 +122,9 @@
  * \|\dot{\gamma}_{\Pi'}(t)\| dt ds 
  * \f} 
  * is computed.
+ * For \f$ k \rightarrow 0 \f$ the limit
+ * \f$I_{ij}\f$ = 0
+ * is computed since in the limit the double layer kernel does not depend on \f$k\f$.
  * \f$I\f$, the interaction matrix is of size \f$Q_{test}\times Q_{trial}\f$
  * where \f$Q_{test}\f$ is the number of reference shape functions for the test
  * BEM space and \f$Q_{trial}\f$ is the number of reference shape functions in

@@ -1,4 +1,3 @@
-
 #include "single_layer.hpp"
 #include "complex_bessel.h"
 

@@ -105,7 +105,7 @@ namespace double_layer_helmholtz {
  * \f{eqnarray*}{ 
  * I_{ij} = \frac{ik\sqrt{c}}{4} \int_{0}^{1} \int_{0}^{1}
  * &H&_1^{(1)}(k\sqrt{c}\|\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)\|) 
- * \cdot \frac{\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)}{\|\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)\|} \\
+ * \frac{\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)}{\|\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)\|} \\
  * &\cdot& \textbf{n}(\gamma_{\Pi'}(t))
 * \hat{b}^{j}(t) \hat{\beta}^{i}(s) \|\dot{\gamma}_{\Pi}(s)\|
  * \|\dot{\gamma}_{\Pi'}(t)\| dt ds \f} where \f$\hat{b}^{j}\f$
@@ -115,7 +115,7 @@ namespace double_layer_helmholtz {
  * \f{eqnarray*}{
  * I_{ij} = \frac{1}{2\pi} \int_{0}^{1} \int_{0}^{1}
  * \frac{(\gamma_{\Pi}(s)-\gamma_{\Pi'}(t))}
- * {\|\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)\|^2}.\textbf{n}(\gamma_{\Pi'}(t))
+ * {\|\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)\|^2}\cdot\textbf{n}(\gamma_{\Pi'}(t))
  * \hat{b}^{j}(t) \hat{\beta}^{i}(s) \|\dot{\gamma}_{\Pi}(s)\|
  * \|\dot{\gamma}_{\Pi'}(t)\| dt ds 
  * \f}
