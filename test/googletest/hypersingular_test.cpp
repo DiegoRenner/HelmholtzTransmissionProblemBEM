@@ -1,6 +1,6 @@
 /**
  * \file hypersingular_test.cpp
- * \brief This test file compares Hypersingular BIO for the
+ * \brief This test file compares the Hypersingular BIO for the
  * Helmholtz kernel to a precomputed known solution from
  * a file.
  */

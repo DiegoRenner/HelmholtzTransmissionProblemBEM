@@ -1,6 +1,9 @@
-//
-// Created by diegorenner on 2/20/20.
-//
+/**
+ * \file mass_matrix_test.cpp
+ * \brief This test file compares the Identitiy BIO
+ * for different FEM-spaces to a precomputed known
+ * solution from a file.
+ */
 #include "mass_matrix.hpp"
 #include <complex>
 #include <Eigen/Dense>
@@ -14,64 +17,78 @@
 #include "discontinuous_space.hpp"
 
 typedef std::complex<double> complex_t;
-double sqrt_epsilon = std::sqrt(std::numeric_limits<double>::epsilon());
 
+// define FEM-spaces of lowest order
 DiscontinuousSpace<0> discont_space;
 ContinuousSpace<1> cont_space;
 
+// define wavenumber and refraction index
 double k = 1.0;
 double n_i = 23.0;
-double eps = 0.25;
-ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
-unsigned order = 11;
 double c_o = k;
 double c_i = k*sqrt(n_i);
+
+// define boundary and mesh on boundary
+double eps = 0.25;
+ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
 int numpanels = 50;
 ParametrizedMesh mesh(curve.split(numpanels));
-Eigen::VectorXcd M = mass_matrix::GalerkinMatrix(mesh, discont_space, cont_space, order).block(0,0,1,numpanels).transpose();
-Eigen::VectorXcd M_expected(numpanels);
-std::ifstream fp_data;
-double real, imag;
-char sign;
-int i = 0;
-std::string path = "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/mass_matrix_cont_" + std::to_string(numpanels) + ".dat";
 
-TEST(SingleLayerTest, disjoint_fair) {
+// define order of quadrature rule with which to compute matrix entries of operator
+unsigned order = 11;
+
+// run test for continuous FEM-sapces
+TEST(SingleLayerTest, cont_sapce) {
+    // compute operator and extract first row
+    Eigen::VectorXcd M = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, order).block(0,0,1,numpanels).transpose();
+
+    // set variables for reading operator from file
+    Eigen::VectorXcd M_expected(numpanels);
+    std::ifstream fp_data;
+    double real;
+    char sign;
+    int i = 0;
+    std::string path =
+            "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/mass_matrix_cont_" + std::to_string(numpanels) + ".dat";
+    // read first row of operator from file
     fp_data.open(path);
-    while(fp_data >> real >> imag) {
-        M_expected(i) = complex_t((sign=='-')?-real:real,imag);
+    while(fp_data >> real) {
+        M_expected(i) = real;
         i++;
         if (i==numpanels) break;
-        fp_data >> sign >> sign;
+        fp_data >> sign;
     }
-    std::cout << M.transpose() << std::endl;
-    std::cout << "***********************************" << std::endl;
-    std::cout << M_expected.transpose() << std::endl;
-    std::cout << "***********************************" << std::endl;
-    std::cout << (M.segment(2,numpanels-3)-M_expected.segment(2,numpanels-3)).lpNorm<2>()/(numpanels-3) << std::endl;
-    ASSERT_TRUE((M.segment(2,numpanels-3)-M_expected.segment(2,numpanels-3)).lpNorm<2>()/(numpanels-3) < sqrt_epsilon);
+
+    // compare known solution operator from file with computed one
+    ASSERT_TRUE((M-M_expected).lpNorm<2>() < 5e-5);
     fp_data.close();
 }
 
-TEST(SingleLayerTest, coinciding_precise) {
-    fp_data.open(path);
-    i = 0;
-    while(fp_data >> real >> sign >> imag >> sign) {
-        M_expected[i] = complex_t(real, imag);
-        i++;
-    }
-    ASSERT_TRUE(abs(M[0]-M_expected[0]) < 0.0001);
-    fp_data.close();
-}
+// run test for discontinuous FEM-sapces
+TEST(SingleLayerTest, discont_spaces) {
+    // compute operator and extract first row
+    Eigen::VectorXcd M = mass_matrix::GalerkinMatrix(mesh, cont_space, discont_space, order).block(0,0,1,numpanels).transpose();
 
-TEST(SingleLayerTest, adjacent_precise) {
+    // set variables for reading operator from file
+    Eigen::VectorXcd M_expected(numpanels);
+    std::ifstream fp_data;
+    double real;
+    char sign;
+    int i = 0;
+    std::string path =
+            "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/mass_matrix_discont_" + std::to_string(numpanels) + ".dat";
+    // read first row of operator from file
     fp_data.open(path);
-    i = 0;
-    while(fp_data >> real >> sign >> imag >> sign) {
-        M_expected[i] = complex_t(real, imag);
+    while(fp_data >> real) {
+        M_expected(i) = real;
         i++;
+        if (i==numpanels) break;
+        fp_data >> sign;
     }
-    ASSERT_TRUE(abs(M[1]-M_expected[1]) < 0.0001);
-    ASSERT_TRUE(abs(M[numpanels-1]-M_expected[numpanels-1]) < 0.0001);
+
+
+    // compare known solution operator from file with computed one
+    std::cout << (M-M_expected).lpNorm<2>() << std::endl;
+    ASSERT_TRUE((M-M_expected).lpNorm<2>() < 5e-5);
     fp_data.close();
 }

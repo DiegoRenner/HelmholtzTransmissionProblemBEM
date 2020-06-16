@@ -93,7 +93,17 @@
 /**
  * This function is used to evaluate the Interaction Matrix
  * for the pair of panels \f$\Pi\f$ and \f$\Pi\f$' for the
- * bilinear form induced by the Helmholtz kernel Single Layer BIO.
+ * bilinear form induced by the Helmholtz kernel Single Layer BIO,
+ * given the formula:
+ * \f{eqnarray*}{ 
+ * I_{ij} = \frac{{i}}{4} \int_{0}^{1} \int_{0}^{1}
+ * H_0^{(1)}(k\sqrt{c}\|\gamma_{\Pi}(s)-\gamma_{\Pi'}(t)\|) 
+ * \hat{b}^{j}(t) \hat{b}^{i}(s) \|\dot{\gamma}_{\Pi}(s)\|
+ * \|\dot{\gamma}_{\Pi'}(t)\| dt ds \f}
+ * where \f$\hat{b}^{j}\f$
+ * is a reference shape function associated with the
+ * trial space \f$S_{p}^{0}\f$.
+ * For \f$ k \rightarrow 0 \f$ the limit
  * \f$I\f$, the interaction matrix is of size \f$Q_{test}\times Q_{trial}\f$
  * where \f$Q_{test}\f$ is the number of reference shape functions for the test
  * BEM space and \f$Q_{trial}\f$ is the number of reference shape functions in
