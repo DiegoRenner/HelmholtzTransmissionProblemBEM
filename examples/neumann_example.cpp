@@ -12,7 +12,7 @@
  * The user will be updated over the residual error in 
  * the euclidean norm of the computed FEM-space interpolation coefficients to the 
  * known FEM-space interpolation coefficients for the current 
- * number of panels through the command line
+ * number of panels through the command line.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
@@ -53,6 +53,12 @@ int main() {
     };
     // define FEM-sapces for result validation later on
     ContinuousSpace<1> cont_space;
+    // Inform user of started computation.
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "Solving Neumann problem for increasing grid sizes." << std::endl;
+    std::cout << "Using first-kind direct BIEs." << std::endl;
+    std::cout << "Using lowest order FEM-spaces." << std::endl;
+    std::cout << std::endl;
     // Loop over #panels
     for (unsigned i = 0; i <= n_runs; i++) {
         // compute mesh
@@ -64,12 +70,14 @@ int main() {
         Eigen::VectorXcd res_known = cont_space.Interpolate_helmholtz(fund_sol_dir,mesh);
         // compute mass matrix for projection onto orthonormal basis functions
         Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
-        // update user on residual error between computed and known FEM-space interpolation coefficients
-        // that have been projected onto orthornomal basis
+        // update user on residual error between computed and known FEM-space 
+	// interpolation coefficients that have been projected onto orthornomal basis
+        std::cout << "#######################################################" << std::endl;
         std::cout << "Computed Dirichlet data on " << numpanels[i] << " panels." << std::endl;
         std::cout << "Residual error of FEM-space interpolation coefficients:" << std::endl;
         std::cout << sqrt(((res-res_known)).dot(M*(res-res_known))).real() << std::endl;
-        std::cout << "*******************************************************" << std::endl;
+        std::cout << "#######################################################" << std::endl;
+        std::cout << std::endl;
     }
 
     return 0;

@@ -16,8 +16,8 @@
  * In the file the first column contains the initial point used for the parabolic approximation.
  * The next three columns contain the function value and the first 
  * two derivatives at the initial point that were used to compute the parabolic approximation.
- * The user also will get updates on the current best approximation for a 
- * minima and the value of the first derivatvie at this point through the command line.
+ * The user will be updated through the command line about the
+ * progress of the algorithm.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
@@ -75,6 +75,12 @@ int main(int argc, char** argv) {
         Eigen::MatrixXd res = sv_2nd_der(T_in, T_der_in, T_der2_in, list, count).block(0,2,count,1);
         return res;
     };
+    // Inform user of started computation.
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "Finding resonances using parabolic approximation." << std::endl;
+    std::cout << "Computing on baseline problem using " << numpanels << " panels." << std::endl;
+    std::cout << std::endl;
+    // loop over maximum of allowed iterations
     for (unsigned j = 0; j < 1000; j++) {
         // find next approximation of minima using parabolic approximation
         Eigen::VectorXd res =  parabolic_approximation(sv_eval,sv_eval_der,sv_eval_der2,k_temp.real(),step);
@@ -84,18 +90,22 @@ int main(int argc, char** argv) {
         filename.close();
         double first_der = sv_eval_der(k_temp.real())(0,0);
         // update user
+        std::cout << "#######################################################" << std::endl;
+        std::cout << "The parabolic approximations were computed at: " << k_temp.real() << std::endl;
+        std::cout << "The function value and the derivatives used were:" << std::endl;
+        std::cout << res.segment(1,3).transpose() << std::endl;
         std::cout << "The current best approximation for a minima is:" << std::endl;
         std::cout << res(0) << std::endl;
-        std::cout << "The value of the first derivative is:" << std::endl;
+        std::cout << "The value of the first derivative at this point is:" << std::endl;
         std::cout << first_der << std::endl;
-        std::cout << "**********************" << std::endl;
         // if a minima has been found, take a large step to hop out of current basin
         k_temp = res(0);
         if (abs(first_der) < epsilon){
             k_temp+=2*step;
+            std::cout << "A resonance has been found, jumping to find next." << std::endl;
         }
-
-
+        std::cout << "#######################################################" << std::endl;
+	std::cout << std::endl;
     }
     return 0;
 }
