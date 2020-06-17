@@ -71,7 +71,7 @@ int main() {
         // compute mass matrix for projection onto orthonormal basis functions
         Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
         // update user on residual error between computed and known FEM-space 
-	// interpolation coefficients that have been projected onto orthornomal basis
+		// interpolation coefficients that have been projected onto orthornomal basis
         std::cout << "#######################################################" << std::endl;
         std::cout << "Computed Dirichlet data on " << numpanels[i] << " panels." << std::endl;
         std::cout << "Residual error of FEM-space interpolation coefficients:" << std::endl;

@@ -19,6 +19,9 @@
  * Then the columns will contain the computed derivative, the 
  * extrapolated derivative, the computed second derivative and the extrapolated second 
  * derivative in this order.
+ * Then the columns will contain the computed derivative, the 
+ * extrapolated derivative, the computed second derivative and the extrapolated second 
+ * derivative in this order.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
@@ -92,6 +95,13 @@ int main(int argc, char** argv) {
     filename.open(argv[7], std::ofstream::out | std::ofstream::trunc);
     filename.close();
 
+	#ifdef CMDL
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "Validating singular value derivatives of BIO." << std::endl;
+    std::cout << "Computing on userdefined problem using square domain." << std::endl;
+    std::cout << std::endl;
+	#endif
+
     // initialize operators
     Eigen::MatrixXcd T_next = gen_sol_op(mesh, order, k_0 , c_o, c_i);
     Eigen::MatrixXcd T_der_next = gen_sol_op_1st_der(mesh, order, k_0 , c_o, c_i);
@@ -159,6 +169,14 @@ int main(int argc, char** argv) {
                 filename.open(argv[7], std::ios_base::app);
                 filename << k_temp.real() << " "<< res(m,0) << " " << res(m,1)  << " " << sv_ext_der1 << " " << res(m,2) << " " << sv_ext_der2 << std::endl;
                 filename.close();
+				#ifdef CMDL
+				std::cout << "#######################################################" << std::endl;
+				std::cout << "SV derivatives validated at " << k_temp.real() << "." << std::endl;
+				std::cout << "Computed and extrapolated values are:"  << std::endl;
+				std::cout <<  res(m,1)  << " " << sv_ext_der1 << " " << res(m,2) << " " << sv_ext_der2 << std::endl;
+				std::cout << "#######################################################" << std::endl;
+				std::cout << std::endl;
+				#endif
             }
         }
     return 0;

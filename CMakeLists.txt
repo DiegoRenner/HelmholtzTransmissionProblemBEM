@@ -27,6 +27,13 @@ if( NOT CMAKE_BUILD_TYPE )
     message(STATUS "No build type selected. Default to Release")
     set(CMAKE_BUILD_TYPE "Release")
 endif()
+# SET COMMAND LINE OUPUT IF REQUESTED
+option(CMDL "Command line output requested." OFF)
+if (CMDL)
+    add_definitions(-DCMDL)
+endif()
+unset(CMDL CACHE)
+
 
 # COMPILATION FLAGS
 ###########################################################################

@@ -17,6 +17,9 @@
  * The resulting file will contain the value of \f$k\f$ in the first column.
  * The rest of the columns contain the singular values from 
  * smallest to largest for this \f$k\f$.
+ * The user will be updated through the command line about the
+ * progress of the algorithm
+ * if \f$ \verb|-DCMDL| \f$ is set.
  *
  */
 #include <complex>
@@ -72,7 +75,7 @@ int main(int argc, char** argv) {
     panels.insert(panels.end(), line3panels.begin(), line3panels.end());
     panels.insert(panels.end(), line4panels.begin(), line4panels.end());
     // construction of a ParametrizedMesh object from the vector of panels
-    ParametrizedMesh parametrizedmesh(panels);
+    ParametrizedMesh mesh(panels);
 
 
     // define order of quadrature rule used to compute matrix entries
@@ -83,8 +86,12 @@ int main(int argc, char** argv) {
     file_out.open(argv[7], std::ofstream::out | std::ofstream::trunc);
     file_out.close();
 
-    // compute mesh for numpanels
-    ParametrizedMesh mesh(panels);
+	#ifdef CMDL
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "Computing singular values of BIO." << std::endl;
+    std::cout << "Computing on userdefined problem using square domain." << std::endl;
+    std::cout << std::endl;
+	#endif
     for (unsigned j = 0; j < n_points_x; j++) {
         for (unsigned k = 0; k < n_points_y; k++) {
             Eigen::MatrixXd res(2*numpanels,3);
@@ -109,11 +116,16 @@ int main(int argc, char** argv) {
             file_out << k_temp.real() << " ";
             file_out << res.block(0, 0, count, 1).transpose() << std::endl;
             file_out.close();
-
-
+			#ifdef CMDL
+            std::cout << "#######################################################" << std::endl;
+			std::cout << "Singular values at " << k_temp << " computed." << std::endl;
+			std::cout << "Smallest singular value is: " 
+				<< res.block(0, 0, 1, 1).transpose() << std::endl;
+            std::cout << "#######################################################" << std::endl;
+			std::cout << std::endl;
+			#endif
         }
     }
 
     return 0;
 }
-

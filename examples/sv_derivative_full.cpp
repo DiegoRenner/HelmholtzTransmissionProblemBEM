@@ -25,6 +25,9 @@
  * number of iterations taken to find the root in the interval 
  * between the current and the next evaluation point.
  * If no root was found these three columns will contain \f$\verb|NAN|\f$.
+ * The user will be updated through the command line about the
+ * progress of the algorithm
+ * if \f$ \verb|-DCMDL| \f$ is set.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
@@ -56,6 +59,7 @@ int main(int argc, char** argv) {
     double h_x = 10.0/n_points_x;
     double h_y = 10.0/n_points_y;
     ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
+    ParametrizedMesh mesh(curve.split(numpanels));
 
     // define order of quadrature rule used to compute matrix entries
     unsigned order = atoi(argv[6]);
@@ -67,8 +71,14 @@ int main(int argc, char** argv) {
     file_out.open(argv[7], std::ofstream::out | std::ofstream::trunc);
     file_out.close();
 
+	#ifdef CMDL
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "Computing singular values and derivatives of BIO." << std::endl;
+    std::cout << "Computing on userdefined problem using circular domain." << std::endl;
+    std::cout << std::endl;
+	#endif
+
     // Initialize operators and mesh
-    ParametrizedMesh mesh(curve.split(numpanels));
     Eigen::MatrixXcd T_next = gen_sol_op(mesh, order, k_0 , c_o, c_i);
     Eigen::MatrixXcd T_der_next = gen_sol_op_1st_der(mesh, order, k_0 , c_o, c_i);
     Eigen::MatrixXcd T_der2_next = gen_sol_op_2nd_der(mesh, order, k_0 , c_o, c_i);
@@ -134,10 +144,21 @@ int main(int argc, char** argv) {
                 return res;
             };
 
+			#ifdef CMDL
+            std::cout << "#######################################################" << std::endl;
+			std::cout << "Singular values and derivatives computed." << std::endl;
+			std::cout << "The values for the smallest singular values are:" << std::endl;
+			std::cout << res(0, 0) << " " << res(0, 1) << " " << res(0, 2) << std::endl;
+			#endif
+
             // compute minima of smallest singular value
             bool root_found = false;
             unsigned num_iter;
             double root = rtsafe(sv_eval_der, sv_eval_both,k_temp.real(), k_temp.real()+h_x,epsilon,root_found,num_iter);
+			#ifdef CMDL
+            std::cout << "#######################################################" << std::endl;
+			std::cout << std::endl;
+			#endif
             // write results to file for plotting later on
             file_out.open(argv[7], std::ios_base::app);
             file_out << k_temp.real() << " ";

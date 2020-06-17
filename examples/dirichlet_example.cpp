@@ -50,7 +50,7 @@ int main() {
     auto fund_sol_neu = [&] (double x1, double x2){
         return sol::fund_sol_neu(k,x1,x2,ipt[0],ipt[1]);
     };
-    // define FEM-sapces for result validation later on
+	// define FEM-sapces for result validation later on
     DiscontinuousSpace<0> discont_space;
     // Inform user of started computation.
     std::cout << "-------------------------------------------------------" << std::endl;
@@ -70,16 +70,14 @@ int main() {
         // compute mass matrix for projection onto orthonormal basis functions
         Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh,discont_space,discont_space,order);
         // update user on residual error between computed and known FEM-space 
-	// interpolation coefficients that have been projected onto orthornomal basis
+		// interpolation coefficients that have been projected onto orthornomal basis
         std::cout << "#######################################################" << std::endl;
         std::cout << "Computed Neumann data on " << numpanels[i] << " panels." << std::endl;
         std::cout << "Residual error of FEM-space interpolation coefficients:" << std::endl;
         std::cout << sqrt(((res-res_known)).dot(M*(res-res_known))).real() << std::endl;
         std::cout << "#######################################################" << std::endl;
         std::cout << std::endl;
-
     }
-
     return 0;
 }
 

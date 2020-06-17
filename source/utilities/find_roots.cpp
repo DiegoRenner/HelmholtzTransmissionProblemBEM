@@ -23,7 +23,9 @@ double zbrent( const function<double(double)> f,
     double fa=f(a), fb=f(b), fc, p, q, r, s, tol1, xm;
     // sanity checks
     if ((fa > 0.0 && fb > 0.0) || (fa < 0.0 && fb < 0.0)) {
+		#ifdef CMDL
         cout << "Root must be bracketed in zbrent" << endl;
+		#endif
         return 0.0;
     }
     fc=fb;
@@ -99,7 +101,9 @@ double zbrent( const function<double(double)> f,
         // one new function evaluation per iteration
         fb = f(b);
     }
+	#ifdef CMDL
     cout << "Maximum number of iterations exceeded in zbrent" << endl;
+	#endif
     // should never be reached
     return 0.0;
 }
@@ -119,7 +123,9 @@ double rtsafe( std::function<double(double)> fct,
     fh = fct(x2);
     // sanity checks
     if ((fl > 0.0 && fh > 0.0) || (fl < 0.0 && fh < 0.0)) {
+		#ifdef CMDL
         std::cout << "Root must be bracketed in rtsafe" << std::endl;
+		#endif
         if (fl > fh){
             return x1;
         }else{
@@ -193,7 +199,9 @@ double rtsafe( std::function<double(double)> fct,
         else
             xh=rts;
     }
+	#ifdef CMDL
     std::cout << "Maximum number of iterations exceeded in rtsafe" << std::endl;
+	#endif
     // should never be reached
     return 0.0;
 };

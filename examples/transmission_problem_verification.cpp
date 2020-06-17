@@ -17,6 +17,9 @@
  * The second will contain the residual error in the euclidean 
  * norm of the computed FEM-space interpolation coefficients to the 
  * known FEM-space interpolation coefficients for the current number of panels.
+ * Then the columns will contain the computed derivative, the 
+ * extrapolated derivative, the computed second derivative and the extrapolated second 
+ * derivative in this order.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
@@ -83,6 +86,13 @@ int main(int argc, char** argv) {
     DiscontinuousSpace<0> discont_space;
     ContinuousSpace<1> cont_space;
 
+	#ifdef CMDL
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "Computing convergence rate for Helmholtz TP BIEs." << std::endl;
+    std::cout << "Computing on userdefined problem using circular domain." << std::endl;
+    std::cout << std::endl;
+	#endif
+
     // Loop over number of panels
     for (unsigned i = 0; i < n_runs; i++) {
 
@@ -112,10 +122,16 @@ int main(int argc, char** argv) {
 
         // write difference to computed solution in L^2 norm to file
         filename.open(argv[7], std::ios_base::app);
-        // DEBUG filename << mesh.getPanels()[0]->length() << " " << sqrt(abs((sol-u_t_N).dot(M*(sol-u_t_N)))) << " " << duration.count() << std::endl;
         filename << mesh.getPanels()[0]->length() << " " << sqrt(abs((sol-u_t_N).dot(M*(sol-u_t_N)))) << std::endl;
         filename.close();
-
+		#ifdef CMDL
+        std::cout << "#######################################################" << std::endl;
+        std::cout << "Computed Cauchy data on " << numpanels[i] << " panels." << std::endl;
+        std::cout << "Residual error of FEM-space interpolation coefficients:" << std::endl;
+		std::cout << sqrt(abs((sol-u_t_N).dot(M*(sol-u_t_N)))) << std::endl;
+        std::cout << "#######################################################" << std::endl;
+        std::cout << std::endl;
+		#endif
     }
     return 0;
 }

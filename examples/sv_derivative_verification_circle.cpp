@@ -51,6 +51,7 @@ int main(int argc, char** argv) {
     double h_x = 100.0/n_points_x;
     double h_y = 100.0/n_points_y;
     ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
+    ParametrizedMesh mesh(curve.split(numpanels));
 
     // define order of quadrature rule used to compute matrix entries
     // and which singular value to evaluate for extrapolation
@@ -62,9 +63,12 @@ int main(int argc, char** argv) {
     filename.open(argv[7], std::ofstream::out | std::ofstream::trunc);
     filename.close();
 
-    // compute mesh for numpanels
-    ParametrizedMesh mesh(curve.split(numpanels));
-
+	#ifdef CMDL
+    std::cout << "-------------------------------------------------------" << std::endl;
+    std::cout << "Validating singular value derivatives of BIO." << std::endl;
+    std::cout << "Computing on userdefined problem using circular domain." << std::endl;
+    std::cout << std::endl;
+	#endif
     // initialize operators
     Eigen::MatrixXcd T_next = gen_sol_op(mesh, order, k_0 , c_o, c_i);
     Eigen::MatrixXcd T_der_next = gen_sol_op_1st_der(mesh, order, k_0 , c_o, c_i);
@@ -132,6 +136,14 @@ int main(int argc, char** argv) {
                 filename.open(argv[7], std::ios_base::app);
                 filename << k_temp.real() << " "<< res(m,0) << " " << res(m,1)  << " " << sv_ext_der1 << " " << res(m,2) << " " << sv_ext_der2 << std::endl;
                 filename.close();
+				#ifdef CMDL
+				std::cout << "#######################################################" << std::endl;
+				std::cout << "SV derivatives validated at " << k_temp.real() << "." << std::endl;
+				std::cout << "Computed and extrapolated values are:" << std::endl;
+				std::cout <<  res(m,1)  << " " << sv_ext_der1 << " " << res(m,2) << " " << sv_ext_der2 << std::endl;
+				std::cout << "#######################################################" << std::endl;
+				std::cout << std::endl;
+				#endif
             }
         }
     return 0;

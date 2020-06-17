@@ -20,7 +20,8 @@
  * The last column will contain the number of iterations used to find the root.
  * If no root was found the last four columns will be set to \f$\verb|NAN|\f$.
  * The user will be updated through the command line about the
- * progress of the algorithm.
+ * progress of the algorithm
+ * if \f$ \verb|-DCMDL| \f$ is set.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
@@ -96,10 +97,12 @@ int main(int argc, char** argv){
     file_out.close();
 
     // Inform user of started computation.
+	#ifdef CMDL
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "Finding resonances using Brent's method." << std::endl;
     std::cout << "Computing on userdefined problem using square domain." << std::endl;
     std::cout << std::endl;
+	#endif
 
     // loop over values of wavenumber 
     for (unsigned j = 0; j < n_points_x; j++) {
@@ -155,19 +158,23 @@ int main(int argc, char** argv){
             unsigned num_iter=0;
             auto start = high_resolution_clock::now();
 	    
-	    // search for root
+			// search for root
+			#ifdef CMDL
             std::cout << "#######################################################" << std::endl;
+			#endif
             double root =  rtsafe(sv_eval_der,sv_eval_both,k_temp.real(), k_temp.real()+h_x,epsilon,root_found,num_iter);
             auto end = high_resolution_clock::now();
             duration += duration_cast<milliseconds>(end-start);
 	    
-	    // write interval searched to command line
+			#ifdef CMDL
+			// write interval searched to command line
             std::cout << "Interval searched: [" << k_temp.real() 
 	    	<< "," << k_temp.real()+h_x << "]" << std::endl;
+			#endif
 
             // write result to file
             file_out.open(argv[8], std::ios_base::app);
-            file_out << k_temp.real() << " " << duration.count() << " " << duration_ops.count();
+            file_out << k_temp.real();// << " " << duration.count() << " " << duration_ops.count();
 
             // check if root was found
             if (root_found) {
@@ -175,10 +182,12 @@ int main(int argc, char** argv){
                 // check if it's actually a root and not a crossing
                 if (abs(val_at_root) < epsilon) {
                     file_out << " " << root << " " << val_at_root << " " << sv_eval(root) << " " << num_iter << std::endl;
-		    // write found roots to command line
-		    std::cout << "A root was found at: " << root << std::endl;
-		    std::cout << "The value of the first derivative here is " << val_at_root << std::endl;
-		    std::cout << "Number of iterations taken: " << num_iter << std::endl;
+				#ifdef CMDL
+				// write found roots to command line
+				std::cout << "A root was found at: " << root << std::endl;
+				std::cout << "The value of the first derivative here is: " << val_at_root << std::endl;
+				std::cout << "Number of iterations taken: " << num_iter << std::endl;
+				#endif
                 } else {
                     file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
                 }
@@ -186,8 +195,10 @@ int main(int argc, char** argv){
                 file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
             }
             file_out.close();
+			#ifdef CMDL
             std::cout << "#######################################################" << std::endl;
-	    std::cout << std::endl;
+			std::cout << std::endl;
+			#endif
         }
     }
     return 0;

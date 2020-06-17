@@ -17,7 +17,8 @@
  * The next three columns contain the function value and the first 
  * two derivatives at the initial point that were used to compute the parabolic approximation.
  * The user will be updated through the command line about the
- * progress of the algorithm.
+ * progress of the algorithm
+ * if \f$ \verb|-DCMDL| \f$ is set.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
@@ -76,10 +77,12 @@ int main(int argc, char** argv) {
         return res;
     };
     // Inform user of started computation.
+	#ifdef CMDL
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "Finding resonances using parabolic approximation." << std::endl;
     std::cout << "Computing on baseline problem using " << numpanels << " panels." << std::endl;
     std::cout << std::endl;
+	#endif
     // loop over maximum of allowed iterations
     for (unsigned j = 0; j < 1000; j++) {
         // find next approximation of minima using parabolic approximation
@@ -90,6 +93,7 @@ int main(int argc, char** argv) {
         filename.close();
         double first_der = sv_eval_der(k_temp.real())(0,0);
         // update user
+		#ifdef CMDL
         std::cout << "#######################################################" << std::endl;
         std::cout << "The parabolic approximations were computed at: " << k_temp.real() << std::endl;
         std::cout << "The function value and the derivatives used were:" << std::endl;
@@ -98,14 +102,19 @@ int main(int argc, char** argv) {
         std::cout << res(0) << std::endl;
         std::cout << "The value of the first derivative at this point is:" << std::endl;
         std::cout << first_der << std::endl;
+		#endif
         // if a minima has been found, take a large step to hop out of current basin
         k_temp = res(0);
         if (abs(first_der) < epsilon){
             k_temp+=2*step;
+			#ifdef CMDL
             std::cout << "A resonance has been found, jumping to find next." << std::endl;
+			#endif
         }
+		#ifdef CMDL
         std::cout << "#######################################################" << std::endl;
-	std::cout << std::endl;
+		std::cout << std::endl;
+		#endif
     }
     return 0;
 }
