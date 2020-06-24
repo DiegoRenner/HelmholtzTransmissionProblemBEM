@@ -16,5 +16,5 @@ execute_process(COMMAND ls complex_bessel_lib
 				WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 include_directories(${PROJECT_SOURCE_DIR}/complex_bessel_lib/include)
 link_directories(${PROJECT_SOURCE_DIR}/complex_bessel_lib/lib)
-#execute_process(COMMAND rm -rf complex_bessel
-#			WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+execute_process(COMMAND rm -rf complex_bessel
+			WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
