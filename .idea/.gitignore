@@ -5,3 +5,5 @@ cmake-build-debug
 cmake-build-release
 cmake-build
 doxygen/generated_doc
+lib
+include/complex_bessel*

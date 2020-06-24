@@ -27,7 +27,9 @@ if( NOT CMAKE_BUILD_TYPE )
     message(STATUS "No build type selected. Default to Release")
     set(CMAKE_BUILD_TYPE "Release")
 endif()
+
 # SET COMMAND LINE OUPUT IF REQUESTED
+###########################################################################
 option(CMDL "Command line output requested." OFF)
 if (CMDL)
     add_definitions(-DCMDL)
@@ -62,6 +64,7 @@ endif()
 
 include(${PROJECT_SOURCE_DIR}/cmake/functions/GetEIGEN3.cmake)
 add_definitions(-DEIGEN3_ACTIVATED)
+include(${PROJECT_SOURCE_DIR}/cmake/functions/Getcomplex_bessel.cmake)
 
 add_subdirectory(doxygen)
 add_subdirectory(examples)
