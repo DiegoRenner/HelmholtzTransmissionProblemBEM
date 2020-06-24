@@ -4,14 +4,14 @@ The library can be configured by running
 ~~~
 cmake CMakeLists.txt
 ~~~
- in the base directory.
-This should automatically install the Eigen library for matrix computations if this is not already available.
-HelmholtzTransmissionProblemBEM also relies on the library
-
-https://github.com/joeydumont/complex_bessel
-
-for passing complex arguments to the Hankel and Bessel functions.
-This library has to be installed seperately.
+in the base directory or
+~~~
+cmake ..
+~~~
+in a subdirectory for an out-of-source build.
+This should automatically install the Eigen library for matrix computations if it is not already available.
+The same goes for the [complex_bessel library](https://github.com/joeydumont/complex_bessel)
+that is used for passing complex arguments to the Hankel and Bessel functions.
 To generate the documentation <tt>latex</tt> and <tt>doxygen</tt> have to be installed as well.
 Running CMake also configures <tt>make</tt> targets.
 These can then be built by running 
@@ -19,7 +19,6 @@ These can then be built by running
 ~~~
 make <target_name>.
 ~~~
-
 
 The compiled binary can be found in the <tt>bin</tt> directory.
 
