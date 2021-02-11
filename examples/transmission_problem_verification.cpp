@@ -109,7 +109,6 @@ int main(int argc, char** argv) {
 
         // compute mass matrix for projection on to orthonromal basis functions
         Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
-        Eigen::MatrixXcd M_discont = mass_matrix::GalerkinMatrix(mesh,discont_space,discont_space,order);
         Eigen::MatrixXcd M(2*numpanels[i],2*numpanels[i]);
         M.block(0,0,numpanels[i],numpanels[i]) = M_cont;
         M.block(numpanels[i],numpanels[i],numpanels[i],numpanels[i]) = M_cont;

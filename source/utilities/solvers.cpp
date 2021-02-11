@@ -73,8 +73,6 @@ namespace tp {
                                const double c_i) {
             // define number of panels for convenience
             int numpanels = mesh.getNumPanels();
-            // space used for interpolation of Neumann data
-            DiscontinuousSpace<0> discont_space;
             // space used for interpolation of Dirichlet data
             ContinuousSpace<1> cont_space;
             // compute operators of second kind direct BIEs for the Helmholtz Transmission problem
@@ -92,8 +90,6 @@ namespace tp {
                     single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i);
             Eigen::MatrixXcd M_cont =
                     mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
-            Eigen::MatrixXcd M_discont =
-                    mass_matrix::GalerkinMatrix(mesh,discont_space,discont_space,order);
             // Build matrices for solving linear system of equations
             Eigen::MatrixXcd A(K_o.rows() + W_o.rows(), K_o.cols() + V_o.cols());
             A.block(0, 0, K_o.rows(), K_o.cols()) = (-K_o + K_i)+M_cont;
@@ -108,9 +104,10 @@ namespace tp {
             A_o.block(K_o.rows(), 0, W_o.rows(), W_o.cols()) = W_o;
             A_o.block(K_o.rows(), K_o.cols(), K_o.cols(), K_o.rows()) =
                     K_o.transpose()+0.5*M_cont;
+
             // Build vectors from incoming wave data for right hand side
             Eigen::VectorXcd u_inc_dir_N = cont_space.Interpolate_helmholtz(u_inc_dir, mesh);
-            Eigen::VectorXcd u_inc_neu_N = discont_space.Interpolate_helmholtz(u_inc_neu, mesh);
+            Eigen::VectorXcd u_inc_neu_N = cont_space.Interpolate_helmholtz(u_inc_neu, mesh);
             Eigen::VectorXcd u_inc_N(2*numpanels);
             u_inc_N << u_inc_dir_N, u_inc_neu_N;
             // compute righ hand side
