@@ -1,7 +1,7 @@
 if(NOT EXISTS /usr/lib/libcomplex_bessel.so)
 	if(NOT EXISTS "${PROJECT_SOURCE_DIR}/complex_bessel_lib")
 		message(STATUS "No complex_bessel library found, installing locally.")
-		execute_process(COMMAND git clone https://github.com/joeydumont/complex_bessel.git
+		execute_process(COMMAND git clone https://github.com/DiegoRenner/complex_bessel.git
 						WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 		execute_process(COMMAND mkdir complex_bessel_lib
 						WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
@@ -22,7 +22,7 @@ else()
 	message(STATUS "Found complex_bessel library installed in /usr/lib directory.") 
 	if(NOT EXISTS "${PROJECT_SOURCE_DIR}/include/complex_bessel.h")
 		message(STATUS "Headers are missing, grabbing them.")
-		execute_process(COMMAND git clone https://github.com/joeydumont/complex_bessel.git
+		execute_process(COMMAND git clone https://github.com/DiegoRenner/complex_bessel.git
 						WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 		execute_process(COMMAND mkdir complex_bessel_lib
 						WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
