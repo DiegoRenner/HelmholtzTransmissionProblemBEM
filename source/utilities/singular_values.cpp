@@ -1,6 +1,5 @@
 #include "singular_values.hpp"
 #include <iostream>
-#include "arpack/arcomp.h"
 
 typedef std::complex<double> complex_t;
 

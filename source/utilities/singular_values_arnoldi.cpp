@@ -2,8 +2,7 @@
 #include <chrono>
 #include <fstream>
 #include "singular_values_arnoldi.hpp"
-#include "arpack/arcomp.h"
-#include "arpack/rcompsol.h"
+#include "../arpackpp_lib/include/arrscomp.h"
 #include "arpp_eig_interface.hpp"
 #include "st_vec_storage.hpp"
 

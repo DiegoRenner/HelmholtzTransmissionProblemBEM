@@ -7,5 +7,4 @@ cmake-build
 doxygen/generated_doc
 complex_bessel_lib
 include/complex_bessel*
-
-include/arpack*
+arpackpp_lib

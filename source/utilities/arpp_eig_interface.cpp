@@ -2,8 +2,6 @@
 #include "gen_sol.hpp"
 #include "arpp_eig_interface.hpp"
 #include "math.h"
-#include "arpack/arcomp.h"
-#include "arpack/arrgcomp.h"
 
 typedef std::complex<double> complex_t;
 

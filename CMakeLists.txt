@@ -65,6 +65,7 @@ endif()
 include(${PROJECT_SOURCE_DIR}/cmake/functions/GetEIGEN3.cmake)
 add_definitions(-DEIGEN3_ACTIVATED)
 include(${PROJECT_SOURCE_DIR}/cmake/functions/Getcomplex_bessel.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/functions/Getarpackpp.cmake)
 
 # ADD SUBDIRECTORIES
 add_subdirectory(doxygen)

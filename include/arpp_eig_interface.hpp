@@ -7,7 +7,7 @@
  * This File is a part of the HelmholtzTransmissionProblemBEM library
  */
 #include "parametrized_mesh.hpp"
-#include "arpack/rcompsol.h"
+#include "../arpackpp_lib/include/arrscomp.h"
 
 #ifndef ARPP_EIG_INTERFACEHPP
 #define ARPP_EIG_INTERFACEHPP
