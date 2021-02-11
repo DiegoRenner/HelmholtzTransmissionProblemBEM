@@ -16,7 +16,8 @@
 #include "gauleg.hpp"
 
 /**
- * This namespace contains all the functions for evaluating the Hypersingular
+ * \namespace hypersingular_helmholtz 
+ * \brief This namespace contains all the functions for evaluating the Hypersingular
  * Galerkin Matrix using common and composite Gauss-Legendre quadrature rules.
  */
 namespace hypersingular_helmholtz {

@@ -16,7 +16,8 @@
 #include "gauleg.hpp"
 
 /**
- * This namespace contains all the functions for evaluating the Double Layer
+ * \namespace double_layer_helmholtz
+ * \brief This namespace contains all the functions for evaluating the Double Layer
  * Galerkin Matrix using common and composite Gauss-Legendre quadrature rules.
  */
 namespace double_layer_helmholtz {

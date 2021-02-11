@@ -14,6 +14,8 @@ if(NOT EXISTS /usr/lib/libcomplex_bessel.so)
 		execute_process(COMMAND rm -rf complex_bessel
 					WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 	else()
+		include_directories(${PROJECT_SOURCE_DIR}/complex_bessel_lib/include)
+		link_directories(${PROJECT_SOURCE_DIR}/complex_bessel_lib/lib)
 		message(STATUS "Found complex_bessel library installed locally.")
 	endif()
 else()

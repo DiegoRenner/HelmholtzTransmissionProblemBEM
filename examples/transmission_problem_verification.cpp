@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
         Eigen::MatrixXcd M_discont = mass_matrix::GalerkinMatrix(mesh,discont_space,discont_space,order);
         Eigen::MatrixXcd M(2*numpanels[i],2*numpanels[i]);
         M.block(0,0,numpanels[i],numpanels[i]) = M_cont;
-        M.block(numpanels[i],numpanels[i],numpanels[i],numpanels[i]) = M_discont;
+        M.block(numpanels[i],numpanels[i],numpanels[i],numpanels[i]) = M_cont;
 
         // compute interpolation coefficients in FEM-spaces of known solution
         Eigen::VectorXcd u_t_dir_N = cont_space.Interpolate_helmholtz(u_t_dir,mesh);

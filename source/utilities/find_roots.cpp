@@ -5,7 +5,7 @@
 #include <cmath>
 #include "find_roots.hpp"
 
-#define MAXIT 10
+#define MAXIT 1000
 #define EPS std::numeric_limits<double>::epsilon()
 
 
@@ -21,6 +21,8 @@ double zbrent( const function<double(double)> f,
     // initialize function values and boundaries
     double a=x1, b=x2, c=x2, d, e, min1, min2;
     double fa=f(a), fb=f(b), fc, p, q, r, s, tol1, xm;
+    cout << fa << endl;
+    cout << fb << endl;
     // sanity checks
     if ((fa > 0.0 && fb > 0.0) || (fa < 0.0 && fb < 0.0)) {
 		#ifdef CMDL
@@ -205,6 +207,7 @@ double rtsafe( std::function<double(double)> fct,
     // should never be reached
     return 0.0;
 };
+
 Eigen::VectorXd parabolic_approximation(const std::function<Eigen::VectorXd(double)> f,
                                         const std::function<Eigen::VectorXd(double)> f_der,
                                         const std::function<Eigen::VectorXd(double)> f_der2,

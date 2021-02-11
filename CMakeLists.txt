@@ -23,10 +23,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 # SET DEFAULT BUILD TYPE
 ###########################################################################
-if( NOT CMAKE_BUILD_TYPE )
-    message(STATUS "No build type selected. Default to Release")
+#if( NOT CMAKE_BUILD_TYPE )
+#    message(STATUS "No build type selected. Default to Release")
     set(CMAKE_BUILD_TYPE "Release")
-endif()
+#endif()
 
 # SET COMMAND LINE OUPUT IF REQUESTED
 ###########################################################################
@@ -59,13 +59,14 @@ endif()
 #
 ###########################################################################
 
-# FIND EIGEN
+# FIND EIGEN & COMPLEX BESSEL LIBRARY
 ###########################################################################
 
 include(${PROJECT_SOURCE_DIR}/cmake/functions/GetEIGEN3.cmake)
 add_definitions(-DEIGEN3_ACTIVATED)
 include(${PROJECT_SOURCE_DIR}/cmake/functions/Getcomplex_bessel.cmake)
 
+# ADD SUBDIRECTORIES
 add_subdirectory(doxygen)
 add_subdirectory(examples)
 add_subdirectory(source)

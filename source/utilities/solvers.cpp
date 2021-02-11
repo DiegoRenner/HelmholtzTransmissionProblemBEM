@@ -79,17 +79,17 @@ namespace tp {
             ContinuousSpace<1> cont_space;
             // compute operators of second kind direct BIEs for the Helmholtz Transmission problem
             Eigen::MatrixXcd K_o =
-                    double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_o);
+                    double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_o);
             Eigen::MatrixXcd K_i =
-                    double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_i);
+                    double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_i);
             Eigen::MatrixXcd W_i =
                     hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i);
             Eigen::MatrixXcd W_o =
                     hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order,k, c_o);
             Eigen::MatrixXcd V_o =
-                    single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_o);
+                    single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_o);
             Eigen::MatrixXcd V_i =
-                    single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_i);
+                    single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i);
             Eigen::MatrixXcd M_cont =
                     mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
             Eigen::MatrixXcd M_discont =
@@ -100,14 +100,14 @@ namespace tp {
             A.block(0, K_o.cols(), V_o.rows(), V_o.cols()) = (V_o-V_i);
             A.block(K_o.rows(), 0, W_o.rows(), W_o.cols()) = W_o-W_i;
             A.block(K_o.rows(), K_o.cols(), K_o.cols(), K_o.rows()) =
-                    (K_o-K_i).transpose()+M_discont;
+                    (K_o-K_i).transpose()+M_cont;
             // Build matrices for right hand side
             Eigen::MatrixXcd A_o(K_o.rows() + W_o.rows(), K_o.cols() + V_o.cols());
             A_o.block(0, 0, K_o.rows(), K_o.cols()) = -K_o + 0.5*M_cont;
             A_o.block(0, K_o.cols(), V_o.rows(), V_o.cols()) = V_o;
             A_o.block(K_o.rows(), 0, W_o.rows(), W_o.cols()) = W_o;
             A_o.block(K_o.rows(), K_o.cols(), K_o.cols(), K_o.rows()) =
-                    K_o.transpose()+0.5*M_discont;
+                    K_o.transpose()+0.5*M_cont;
             // Build vectors from incoming wave data for right hand side
             Eigen::VectorXcd u_inc_dir_N = cont_space.Interpolate_helmholtz(u_inc_dir, mesh);
             Eigen::VectorXcd u_inc_neu_N = discont_space.Interpolate_helmholtz(u_inc_neu, mesh);

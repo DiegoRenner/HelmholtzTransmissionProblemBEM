@@ -14,7 +14,7 @@
 /**
  * \class ParametrizedPolynomial
  * \brief This class represents a polynomial parametrization
- *        of the form \f$\gamma\f$(t) = \f$$\sum_{n=0}^{N} a_n t^{n}$\f$ and
+ *        of the form \f$\gamma\f$(t) = \f$\sum_{n=0}^{N} a_n t^{n}\f$ and
  *        inherits from the Abstract base class representing parametrized curves
  * @see abstract_parametrized_curve.hpp
  */

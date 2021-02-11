@@ -12,13 +12,14 @@
 #define MASSMATRIXRHPP
 
 #include "abstract_bem_space.hpp"
-/**
- * This namespace contains all the functions for evaluating the Identity
- * Galerkin Matrix using common and composite Gauss-Legendre quadrature rules.
- */
 #include "abstract_parametrized_curve.hpp"
 #include "gauleg.hpp"
 
+/**
+ * \namespace mass_matrix
+ * \brief This namespace contains all the functions for evaluating the Identity
+ * Galerkin Matrix using common and composite Gauss-Legendre quadrature rules.
+ */
 namespace mass_matrix{
 /**
  * This function is used to evaluate the Interaction Matrix for a pair of

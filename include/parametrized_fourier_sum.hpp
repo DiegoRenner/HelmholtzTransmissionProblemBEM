@@ -14,8 +14,8 @@
 /**
  * \class ParametrizedFourierSum
  * \brief This class represents Fourier Sum based parametrization
- *        of the form \f$\gamma\f$(t) = \f$$c+\sum_{n=1}^{N} a_n cos(nt)+b_n
- *        sin(nt)$\f$ and inherits from the Abstract base class representing
+ *        of the form \f$\gamma\f$(t) = \f$c+\sum_{n=1}^{N} a_n cos(nt)+b_n
+ *        sin(nt)\f$ and inherits from the Abstract base class representing
  *        parametrized curves
  * @see abstract_parametrized_curve.hpp
  */

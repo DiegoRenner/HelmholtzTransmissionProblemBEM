@@ -12,12 +12,14 @@
 
 #include "parametrized_mesh.hpp"
 /**
- * This namespace contains solvers for boundary value problems
+ * \namespace bvp
+ * \brief This namespace contains solvers for boundary value problems.
  */
 namespace bvp {
 
 /**
- * This namespace contains solvers using direct first kind BIE
+ * \namespace direct_first_kind
+ * \brief This namespace contains solvers using direct first kind BIE
  * for the Dirichlet and the Neumann problem.
  * The solvers use the lowest order BEM spaces for computation.
  */
@@ -56,12 +58,14 @@ namespace bvp {
 } // namespace bvp
 
 /**
- * This namespace contains the solver for our transmission problem
+ * \namespace tp
+ * \brief This namespace contains the solver for the Helmholtz transmission problem.
  */
 namespace tp {
 
     /**
-     * This namespace contains the solver using direct second kind BIEs
+	 * \namespace direct_second_kind
+	 * \brief This namespace contains the solver using direct second kind BIEs
      * for the Helmholtz transmission problem.
      * The solver uses the lowest order BEM spaces for computation.
      */

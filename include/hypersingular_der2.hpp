@@ -16,7 +16,8 @@
 #include "gauleg.hpp"
 
 /**
- * This namespace contains all the functions for evaluating the second
+ * \namespace hypersingular_helmholtz_der2 
+ * \brief This namespace contains all the functions for evaluating the second
  * derivative in \p k of the Hypersingular Galerkin Matrix using
  * common and composite Gauss-Legendre quadrature rules.
  */

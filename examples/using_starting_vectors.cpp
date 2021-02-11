@@ -26,11 +26,16 @@
 #include <complex>
 #include <iostream>
 #include <fstream>
+#include <iostream>
+#include <chrono>
 #include "parametrized_circular_arc.hpp"
-#include "singular_values.hpp"
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
+#include "singular_values.hpp"
+#include "singular_values_arnoldi.hpp"
+#include "st_vec_storage.hpp"
 
+using namespace std::chrono;
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
 int main(int argc, char** argv) {
@@ -42,12 +47,12 @@ int main(int argc, char** argv) {
     complex_t k_0 = atof(argv[4]);
 
     // define mesh in space and on wavenumber on which to perform verification
-    unsigned n_points_x = 2500;
+    unsigned n_points_x = 1000;
     unsigned n_points_y = 1;
     unsigned numpanels;
     numpanels = atoi(argv[5]);
-    double h_x = 100.0/n_points_x;
-    double h_y = 100.0/n_points_y;
+    double h_x = 10.0/n_points_x;
+    double h_y = 10.0/n_points_y;
     ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
     ParametrizedMesh mesh(curve.split(numpanels));
 
@@ -59,38 +64,40 @@ int main(int argc, char** argv) {
     file_out.open(argv[7], std::ofstream::out | std::ofstream::trunc);
     file_out.close();
 
+    unsigned count = atoi(argv[8]);//T.cols();
+    std::cout << count << std::endl;
     // Inform user of started computation.
 	#ifdef CMDL
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "Computing singular values of BIO." << std::endl;
     std::cout << "Computing on userdefined problem using circular domain." << std::endl;
     std::cout << std::endl;
-	#endif
+    #endif
+    StVecStorage st_vec_storage(4*numpanels);
     for (unsigned j = 0; j < n_points_x; j++) {
         for (unsigned k = 0; k < n_points_y; k++) {
-            Eigen::MatrixXd res(2*numpanels,3);
+            // initialize storage for results
+            Eigen::MatrixXd res_direct(2*numpanels,1);
+            Eigen::MatrixXd res_arnoldi(2*numpanels,1);
             // define wavenumber for current loop
-            complex_t k_temp = (k_0+j*h_x+ii*double(k)*h_y);
+            complex_t k_temp = k_0+j*h_x+ii*double(k)*h_y;
 
             // compute solutions operator
             Eigen::MatrixXcd T = gen_sol_op(mesh, order, k_temp, c_o, c_i);
 
             // set singular values to be computed, all
-            unsigned count = T.cols();
             double list[count];
             for (unsigned i = 0; i < count; i++){
                 list[i] = i;
             }
 
-            // compute singular value
-            res = direct::sv(T,list,count);
-
-            // write singular values to file
+            // compute singular value using the Arnoldi algorithm
+            res_arnoldi = arnoldi::sv(T, count, st_vec_storage, k_temp);
             file_out.open(argv[7], std::ios_base::app);
             file_out << k_temp.real() << " ";
-            file_out << res.block(0, 0, count, 1).transpose() << std::endl;
+            file_out << res_arnoldi.block(0, 0, count, 1).transpose() << std::endl;
             file_out.close();
-			
+
 			#ifdef CMDL
             std::cout << "#######################################################" << std::endl;
 			std::cout << "Singular values at " << k_temp << " computed." << std::endl;

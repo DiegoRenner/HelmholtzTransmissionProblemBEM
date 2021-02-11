@@ -16,7 +16,8 @@
 #include "gauleg.hpp"
 
 /**
- * This namespace contains all the functions for evaluating the derivative in \p k of
+ * \namespace double_layer_helmholtz_der
+ * \brief This namespace contains all the functions for evaluating the derivative in \p k of
  * the Double Layer Galerkin Matrix using common and composite Gauss-Legendre
  * quadrature rules.
  */

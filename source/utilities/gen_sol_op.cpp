@@ -34,9 +34,9 @@ typedef std::complex<double> complex_t;
         Eigen::MatrixXcd M_discont = mass_matrix::GalerkinMatrix(mesh, discont_space, discont_space, order);
         Eigen::MatrixXcd M = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
         M.block(0,0,numpanels,numpanels) = M_cont;
-        M.block(numpanels,numpanels,numpanels,numpanels) = M_discont;
+        M.block(numpanels,numpanels,numpanels,numpanels) = M_cont;
 
-        // compute matrix for projection onto ortogonal FEM-sapces
+        // compute matrix for projection onto ortogonal FEM-spaces
         Eigen::MatrixXcd lt(2*numpanels,2*numpanels);
         Eigen::LDLT<Eigen::MatrixXcd> llt(M);
         lt.setIdentity();
@@ -51,17 +51,17 @@ typedef std::complex<double> complex_t;
 
         // compute operator matrices and their derivatives on inner and outer domain
         Eigen::MatrixXcd K_o =
-                double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_o);
+                double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_o);
         Eigen::MatrixXcd K_i =
-                double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, c_i);
+                double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_i);
         Eigen::MatrixXcd W_i =
                 hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i);
         Eigen::MatrixXcd W_o =
                 hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order,k, c_o);
         Eigen::MatrixXcd V_o =
-                single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_o);
+                single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_o);
         Eigen::MatrixXcd V_i =
-                single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_i);
+                single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i);
 
         // build solutions operator and it's derivative, project them
         Eigen::MatrixXcd T = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);

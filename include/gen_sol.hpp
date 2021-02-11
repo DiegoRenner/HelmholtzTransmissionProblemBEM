@@ -13,7 +13,8 @@
 #include <complex>
 
 /**
- * This namesapce nontains all functions for generating solutions
+ * \namespace sol
+ * \brief This namesapce nontains all functions for generating solutions.
  */
 namespace sol {
 
