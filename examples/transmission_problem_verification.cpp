@@ -115,7 +115,6 @@ int main(int argc, char** argv) {
         M.block(numpanels[i],numpanels[i],numpanels[i],numpanels[i]) = M_cont;
 
         // compute interpolation coefficients in FEM-spaces of known solution
-        Eigen::VectorXcd u_t_dir_N = cont_space.Interpolate_helmholtz(u_t_dir,mesh);
         Eigen::VectorXcd u_t_neu_N = cont_space.Interpolate_helmholtz(u_t_neu,mesh);
         Eigen::VectorXcd u_t_N(2*numpanels[i]);
         u_t_N << u_t_dir_N, u_t_neu_N;
