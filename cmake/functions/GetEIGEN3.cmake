@@ -19,7 +19,7 @@ else()
     message("-- Downloading Eigen3")
     ExternalProject_Add(
         Eigen
-        URL https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.zip
+        URL https://gitlab.com/libeigen/eigen/-/archive/3.3.4/eigen-3.3.4.zip
          SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/Eigen
         INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/Eigen_install
         DOWNLOAD_NO_PROGRESS 1
