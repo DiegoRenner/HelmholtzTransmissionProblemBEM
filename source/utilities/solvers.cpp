@@ -110,7 +110,7 @@ namespace tp {
             Eigen::VectorXcd u_inc_neu_N = cont_space.Interpolate_helmholtz(u_inc_neu, mesh);
             Eigen::VectorXcd u_inc_N(2*numpanels);
             u_inc_N << u_inc_dir_N, u_inc_neu_N;
-            // compute righ hand side
+            // compute right hand side
             Eigen::VectorXcd rhs = (A_o * u_inc_N);
             // Solving for coefficients
             Eigen::HouseholderQR<Eigen::MatrixXcd> dec(A);
