@@ -83,7 +83,6 @@ int main(int argc, char** argv) {
     };
 
     // set FEM-sapces of lowest order for validation
-    DiscontinuousSpace<0> discont_space;
     ContinuousSpace<1> cont_space;
 
 	#ifdef CMDL
