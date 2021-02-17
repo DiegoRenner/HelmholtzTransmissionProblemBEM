@@ -111,6 +111,7 @@ int main(int argc, char** argv) {
         // compute mass matrix for projection on to orthonromal basis functions
         Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
         Eigen::MatrixXcd M(2*numpanels[i],2*numpanels[i]);
+        M = Eigen::MatrixXcd(2*numpanels[i],2*numpanels[i]);
         M.block(0,0,numpanels[i],numpanels[i]) = M_cont;
         M.block(numpanels[i],numpanels[i],numpanels[i],numpanels[i]) = M_cont;
 
@@ -122,6 +123,8 @@ int main(int argc, char** argv) {
 
         // write difference to computed solution in L^2 norm to file
         filename.open(argv[7], std::ios_base::app);
+        std::cout << M.row(0) << std::endl;
+        std::cout << "*****************************************" << std::endl;
         std::cout << (sol-u_t_N).transpose() << std::endl;
         std::cout << "*****************************************" << std::endl;
         std::cout << (M*(sol-u_t_N)).transpose() << std::endl;
