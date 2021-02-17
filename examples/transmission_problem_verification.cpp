@@ -63,13 +63,11 @@ int main(int argc, char** argv) {
     for (int i=1; i<n_runs; i++){
         numpanels[i] = 2*numpanels[i-1];
     }
-    std::cout << eps << " " << c_i << " " << c_o << " " << k << " " << order << std::endl;
     // define incoming wave and resulting wave
     int l = atoi(argv[2]);
     double a_n[2*l+1];
     for( int i = 0; i<2*l+1; i++) {
         a_n[i] = 1./((k*k*(c_o-c_i))*sqrt((2*l+1)*M_PI*eps*eps*(jn(i-l,k)*jn(i-l,k)-jn(i-l-1,k)*jn(i-l+1,k))));
-        std::cout << a_n[0] << std::endl;
     }
     auto u_i_dir = [&] (double x1, double x2) {
         return sol::u_i(x1, x2, l, a_n, k);
@@ -111,7 +109,7 @@ int main(int argc, char** argv) {
         // compute mass matrix for projection on to orthonromal basis functions
         Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
         Eigen::MatrixXcd M(2*numpanels[i],2*numpanels[i]);
-        M = Eigen::MatrixXcd(2*numpanels[i],2*numpanels[i]);
+        M = Eigen::MatrixXcd::Zero(2*numpanels[i],2*numpanels[i]);
         M.block(0,0,numpanels[i],numpanels[i]) = M_cont;
         M.block(numpanels[i],numpanels[i],numpanels[i],numpanels[i]) = M_cont;
 
@@ -123,11 +121,6 @@ int main(int argc, char** argv) {
 
         // write difference to computed solution in L^2 norm to file
         filename.open(argv[7], std::ios_base::app);
-        std::cout << M.row(0) << std::endl;
-        std::cout << "*****************************************" << std::endl;
-        std::cout << (sol-u_t_N).transpose() << std::endl;
-        std::cout << "*****************************************" << std::endl;
-        std::cout << (M*(sol-u_t_N)).transpose() << std::endl;
         filename << mesh.getPanels()[0]->length() << " " << sqrt(abs((sol-u_t_N).dot(M*(sol-u_t_N)))) << std::endl;
         filename.close();
 		#ifdef CMDL
