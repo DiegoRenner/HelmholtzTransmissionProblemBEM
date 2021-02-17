@@ -63,11 +63,13 @@ int main(int argc, char** argv) {
     for (int i=1; i<n_runs; i++){
         numpanels[i] = 2*numpanels[i-1];
     }
+    std::cout << eps << " " << c_i << " " << c_o << " " << k << " " << order << std::endl;
     // define incoming wave and resulting wave
     int l = atoi(argv[2]);
     double a_n[2*l+1];
     for( int i = 0; i<2*l+1; i++) {
         a_n[i] = 1./((k*k*(c_o-c_i))*sqrt((2*l+1)*M_PI*eps*eps*(jn(i-l,k)*jn(i-l,k)-jn(i-l-1,k)*jn(i-l+1,k))));
+        std::cout << a_n[0] << std::endl;
     }
     auto u_i_dir = [&] (double x1, double x2) {
         return sol::u_i(x1, x2, l, a_n, k);
@@ -103,6 +105,7 @@ int main(int argc, char** argv) {
         // DEBUG auto start = high_resolution_clock::now();
         Eigen::VectorXcd sol = tp::direct_second_kind::solve(
                 mesh, u_i_dir, u_i_neu, order, k, c_o, c_i);
+                std::cout << sol << std::endl;
         // DEBUG auto end = high_resolution_clock::now();
         // DEBUG auto duration = duration_cast<milliseconds>(end - start);
 
