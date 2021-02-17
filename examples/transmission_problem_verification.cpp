@@ -105,7 +105,6 @@ int main(int argc, char** argv) {
         // DEBUG auto start = high_resolution_clock::now();
         Eigen::VectorXcd sol = tp::direct_second_kind::solve(
                 mesh, u_i_dir, u_i_neu, order, k, c_o, c_i);
-                std::cout << sol << std::endl;
         // DEBUG auto end = high_resolution_clock::now();
         // DEBUG auto duration = duration_cast<milliseconds>(end - start);
 
@@ -120,6 +119,8 @@ int main(int argc, char** argv) {
         Eigen::VectorXcd u_t_neu_N = cont_space.Interpolate_helmholtz(u_t_neu,mesh);
         Eigen::VectorXcd u_t_N(2*numpanels[i]);
         u_t_N << u_t_dir_N, u_t_neu_N;
+        std::cout << u_t_N << std::endl;
+        std::cout << M_cont << std::endl;
 
         // write difference to computed solution in L^2 norm to file
         filename.open(argv[7], std::ios_base::app);
