@@ -119,11 +119,12 @@ int main(int argc, char** argv) {
         Eigen::VectorXcd u_t_neu_N = cont_space.Interpolate_helmholtz(u_t_neu,mesh);
         Eigen::VectorXcd u_t_N(2*numpanels[i]);
         u_t_N << u_t_dir_N, u_t_neu_N;
-        std::cout << u_t_N << std::endl;
-        std::cout << M_cont << std::endl;
 
         // write difference to computed solution in L^2 norm to file
         filename.open(argv[7], std::ios_base::app);
+        std::cout << (sol-u_t_N).transpose() << std::endl;
+        std::cout << "*****************************************" << std::endl;
+        std::cout << (M*(sol-u_t_N)).transpose() << std::endl;
         filename << mesh.getPanels()[0]->length() << " " << sqrt(abs((sol-u_t_N).dot(M*(sol-u_t_N)))) << std::endl;
         filename.close();
 		#ifdef CMDL
