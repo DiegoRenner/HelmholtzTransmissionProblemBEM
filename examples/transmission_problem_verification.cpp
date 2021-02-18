@@ -30,7 +30,6 @@
 #include "solvers.hpp"
 #include "gen_sol.hpp"
 #include "continuous_space.hpp"
-#include "discontinuous_space.hpp"
 #include "mass_matrix.hpp"
 #include <chrono>
 using namespace std::chrono;
@@ -51,10 +50,6 @@ int main(int argc, char** argv) {
     // define order of quadrature rule used to compute matrix entries
     unsigned order = atoi(argv[6]);
 
-    // clear existing file
-    std::ofstream filename;
-    filename.open(argv[7], std::ofstream::out | std::ofstream::trunc);
-    filename.close();
 
     // set number of panels for which to compute BIOs
     unsigned n_runs = 7;
@@ -84,6 +79,17 @@ int main(int argc, char** argv) {
 
     // set FEM-sapces of lowest order for validation
     ContinuousSpace<1> cont_space;
+
+    // generate outputfilename
+    std::string base_order = "../data/file_order_";
+    std::string suffix = ".dat";
+    std::string divider = "_";
+    std::string file_order = base_order.append(argv[6])
+                                + divider.append(argv[2]) + suffix;
+    // clear existing file
+    std::ofstream file_out;
+    file_out.open(file_order, std::ofstream::out | std::ofstream::trunc);
+    file_out.close();
 
 	#ifdef CMDL
     std::cout << "-------------------------------------------------------" << std::endl;
@@ -120,9 +126,9 @@ int main(int argc, char** argv) {
         u_t_N << u_t_dir_N, u_t_neu_N;
 
         // write difference to computed solution in L^2 norm to file
-        filename.open(argv[7], std::ios_base::app);
-        filename << mesh.getPanels()[0]->length() << " " << sqrt(abs((sol-u_t_N).dot(M*(sol-u_t_N)))) << std::endl;
-        filename.close();
+        file_out.open(file_order, std::ios_base::app);
+        file_out << mesh.getPanels()[0]->length() << " " << sqrt(abs((sol - u_t_N).dot(M * (sol - u_t_N)))) << std::endl;
+        file_out.close();
 		#ifdef CMDL
         std::cout << "#######################################################" << std::endl;
         std::cout << "Computed Cauchy data on " << numpanels[i] << " panels." << std::endl;
