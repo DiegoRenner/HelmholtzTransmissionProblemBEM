@@ -32,6 +32,7 @@
 #include "continuous_space.hpp"
 #include "mass_matrix.hpp"
 #include <chrono>
+
 using namespace std::chrono;
 
 typedef std::complex<double> complex_t;
@@ -62,7 +63,7 @@ int main(int argc, char** argv) {
     int l = atoi(argv[2]);
     double a_n[2*l+1];
     for( int i = 0; i<2*l+1; i++) {
-        a_n[i] = 1./((k*k*(c_o-c_i))*sqrt((2*l+1)*M_PI*eps*eps*(jn(i-l,k)*jn(i-l,k)-jn(i-l-1,k)*jn(i-l+1,k))));
+        a_n[i] = 1.;///((k*k*(c_o-c_i))*sqrt((2*l+1)*M_PI*eps*eps*(jn(i-l,k)*jn(i-l,k)-jn(i-l-1,k)*jn(i-l+1,k))));
     }
     auto u_i_dir = [&] (double x1, double x2) {
         return sol::u_i(x1, x2, l, a_n, k);
@@ -79,6 +80,7 @@ int main(int argc, char** argv) {
 
     // set FEM-sapces of lowest order for validation
     ContinuousSpace<1> cont_space;
+    std::cout << cont_space.evaluateShapeFunction(0,1.0) << std::endl;
 
     // generate outputfilename
     std::string base_order = "../data/file_order_";
@@ -113,11 +115,11 @@ int main(int argc, char** argv) {
         // DEBUG auto duration = duration_cast<milliseconds>(end - start);
 
         // compute mass matrix for projection on to orthonromal basis functions
-        Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
-        Eigen::MatrixXcd M(2*numpanels[i],2*numpanels[i]);
-        M = Eigen::MatrixXcd::Zero(2*numpanels[i],2*numpanels[i]);
-        M.block(0,0,numpanels[i],numpanels[i]) = M_cont;
-        M.block(numpanels[i],numpanels[i],numpanels[i],numpanels[i]) = M_cont;
+        //Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
+        //Eigen::MatrixXcd M(2*numpanels[i],2*numpanels[i]);
+        //M = Eigen::MatrixXcd::Zero(2*numpanels[i],2*numpanels[i]);
+        //M.block(0,0,numpanels[i],numpanels[i]) = M_cont;
+        //M.block(numpanels[i],numpanels[i],numpanels[i],numpanels[i]) = M_cont;
 
         // compute interpolation coefficients in FEM-spaces of known solution
         Eigen::VectorXcd u_t_dir_N = cont_space.Interpolate_helmholtz(u_t_dir,mesh);
@@ -125,9 +127,50 @@ int main(int argc, char** argv) {
         Eigen::VectorXcd u_t_N(2*numpanels[i]);
         u_t_N << u_t_dir_N, u_t_neu_N;
 
+
+        PanelVector panels = mesh.getPanels();
+        unsigned N = 20;
+        QuadRule GaussQR = getGaussQR(N,0.,1.);
+        double res = 0.0;
+        unsigned Q = cont_space.getQ();
+        for (unsigned i=0; i < numpanels[i]; i++){
+                for (unsigned k=0; k < N; k++){
+                   //std::cout << sol[i]*cont_space.evaluateShapeFunction(1,GaussQR.x(k)) << std::endl;
+                   //std::cout << sol[(i+1)%numpanels[i]]*cont_space.evaluateShapeFunction(0,GaussQR.x(k)) << std::endl;
+                   //std::cout << u_t_dir(panels[i]->operator[](GaussQR.x(k)).x(),panels[i]->operator[](GaussQR.x(k)).y()) << std::endl;
+                   complex_t temp =  (sol[i]*cont_space.evaluateShapeFunction(1,GaussQR.x(k))
+                           //*panels[i]->Derivative_01(k*0.25).norm()
+                           +
+                           sol[(i+1)%numpanels[i]]*cont_space.evaluateShapeFunction(0,GaussQR.x(k))
+                           //*panels[i]->Derivative_01(k*0.25).norm()
+                           -
+                           u_t_dir(panels[i]->operator[](GaussQR.x(k)).x(),panels[i]->operator[](GaussQR.x(k)).y()))*GaussQR.w(k);
+                   res += (temp*(temp.real()-ii*temp.imag())).real();
+            }
+        }
+        std::cout << "Test: " << sqrt(res) << std::endl;
+
+        double res1 = 0;
+        for (unsigned i=0; i < numpanels[i]; i++){
+            for (unsigned k=0; k < N; k++){
+                //std::cout << sol[i]*cont_space.evaluateShapeFunction(1,GaussQR.x(k)) << std::endl;
+                //std::cout << sol[(i+1)%numpanels[i]]*cont_space.evaluateShapeFunction(0,GaussQR.x(k)) << std::endl;
+                //std::cout << u_t_dir(panels[i]->operator[](GaussQR.x(k)).x(),panels[i]->operator[](GaussQR.x(k)).y()) << std::endl;
+                complex_t temp =  (u_t_N[i]*cont_space.evaluateShapeFunction(1,GaussQR.x(k))
+                                   //*panels[i]->Derivative_01(k*0.25).norm()
+                                   +
+                                   u_t_N[(i+1)%numpanels[i]]*cont_space.evaluateShapeFunction(0,GaussQR.x(k))
+                                   //*panels[i]->Derivative_01(k*0.25).norm()
+                                   -
+                                   u_t_dir(panels[i]->operator[](GaussQR.x(k)).x(),panels[i]->operator[](GaussQR.x(k)).y()))*GaussQR.w(k);
+                res1 += (temp*(temp.real()-ii*temp.imag())).real();
+            }
+        }
+        std::cout << "Test1: " << sqrt(res1) << std::endl;
         // write difference to computed solution in L^2 norm to file
         file_out.open(file_order, std::ios_base::app);
-        file_out << mesh.getPanels()[0]->length() << " " << sqrt(abs((sol - u_t_N).dot(M * (sol - u_t_N)))) << std::endl;
+        //file_out << mesh.getPanels()[0]->length() << " " << sqrt(abs((sol - u_t_N).dot(M * (sol - u_t_N)))) << std::endl;
+        file_out << mesh.getPanels()[0]->length() << " " << sqrt(res) <<  " " << sqrt(res1) << std::endl;
         file_out.close();
 		#ifdef CMDL
         std::cout << "#######################################################" << std::endl;

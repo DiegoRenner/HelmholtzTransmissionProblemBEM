@@ -60,9 +60,9 @@ int main(int argc, char** argv) {
 
     // clear existing file
     std::ofstream file_out;
-    std::string base_vals = "file_vals_";
-    std::string base_roots = "file_roots_";
-    std::string base_iter = "file_iter_";
+    std::string base_vals = "../data/file_vals_";
+    std::string base_roots = "../data/file_roots_";
+    std::string base_iter = "../data/file_iter_";
     std::string suffix = ".dat";
     std::string file_vals = base_vals.append(argv[1])+suffix;
     std::string file_roots = base_roots.append(argv[1])+suffix;
