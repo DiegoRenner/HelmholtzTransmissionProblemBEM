@@ -9,6 +9,7 @@ complex_bessel_lib
 include/complex_bessel*
 arpackpp_lib
 data/*.dat
+data_bckp
 figures/*.pdf
 plotting_scripts/.idea
 plotting_scripts/venv
