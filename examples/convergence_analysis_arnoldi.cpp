@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
     double eps = 0.25;
     double c_i = 20.0;
     double c_o = 1.0;
-    complex_t k_0 = 0.84;
+    complex_t k_0 = 0.6;
 
     // define mesh in space and on wavenumber on which to perform verification
     unsigned n_points_x = 50;
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
         auto sv_eval = [&] (double k_in) {
             Eigen::MatrixXcd T_in;
             T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-            double res = arnoldi::sv(T_in, count, acc)(0);
+            double res = arnoldi::sv(T_in, count, 1e-16)(0);
             return res;
         };
         auto sv_eval_der = [&] (double k_in) {
@@ -118,12 +118,12 @@ int main(int argc, char** argv) {
         if (root_found) {
             double val_at_root = sv_eval_der(root);
             // check if it's actually a root and not a crossing
-            if (abs(val_at_root) < epsilon) {
+            //if (abs(val_at_root) < epsilon) {
                 file_out << " " << root << " " << val_at_root << " " << sv_eval(root) << " " << num_iter << std::endl;
                 // write found roots to command line
-            } else {
-                file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
-            }
+            //} else {
+            //    file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
+            //}
         } else{
             file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
         }
