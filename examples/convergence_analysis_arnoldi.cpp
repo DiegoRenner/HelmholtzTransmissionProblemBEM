@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
         auto sv_eval = [&] (double k_in) {
             Eigen::MatrixXcd T_in;
             T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-            double res = arnoldi::sv(T_in, count, 1e-16)(0);
+            double res = arnoldi::sv(T_in, count, acc)(0);
             return res;
         };
         auto sv_eval_der = [&] (double k_in) {

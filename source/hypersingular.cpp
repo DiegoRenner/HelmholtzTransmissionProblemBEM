@@ -74,7 +74,7 @@
                         if (abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon ) {
                             result = ii*sp_bessel::hankelH1(0,k*sqrt(c)* (pi[s] - pi_p[t]).norm())/4.;
                         } else if ((pi[s]-pi_p[t]).norm() > epsilon ){
-                            result -1/(2*M_PI)*log((pi[s]-pi_p[t]).norm());                        }
+                            result = -1/(2*M_PI)*log((pi[s]-pi_p[t]).norm());                        }
                         return result * (F_arc(t) * G_arc(s) - k*sqrt(c)* k*sqrt(c)* F(t) * G(s) * normal.dot(normal_p));
                     };
                     complex_t integral = 0;

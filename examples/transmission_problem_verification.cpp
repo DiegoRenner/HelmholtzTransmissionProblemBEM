@@ -80,7 +80,6 @@ int main(int argc, char** argv) {
 
     // set FEM-sapces of lowest order for validation
     ContinuousSpace<1> cont_space;
-    std::cout << cont_space.evaluateShapeFunction(0,1.0) << std::endl;
 
     // generate outputfilename
     std::string base_order = "../data/file_order_";
@@ -128,46 +127,58 @@ int main(int argc, char** argv) {
         u_t_N << u_t_dir_N, u_t_neu_N;
 
 
-        PanelVector panels = mesh.getPanels();
+        ParametrizedMesh mesh_refined(curve.split(4*numpanels[n_runs-1]));
+        PanelVector panels = mesh_refined.getPanels();
+        PanelVector panels_rough = mesh.getPanels();
         unsigned N = 20;
         QuadRule GaussQR = getGaussQR(N,0.,1.);
         double res = 0.0;
         unsigned Q = cont_space.getQ();
-        for (unsigned j=0; j < numpanels[i]; j++){
+        for (unsigned j=0; j < 4*numpanels[n_runs-1]; j++){
                 for (unsigned k=0; k < N; k++){
                    //std::cout << sol[j]*cont_space.evaluateShapeFunction(1,GaussQR.x(k)) << std::endl;
                    //std::cout << sol[(j+1)%numpanels[i]]*cont_space.evaluateShapeFunction(0,GaussQR.x(k)) << std::endl;
                    //std::cout << u_t_dir(panels[j]->operator[](GaussQR.x(k)).x(),panels[j]->operator[](GaussQR.x(k)).y()) << std::endl;
-                   complex_t temp =  (sol[j]*cont_space.evaluateShapeFunction(1,GaussQR.x(k))
+                   int j_specific = j/4/pow(2,(n_runs-1-i));
+                   double x =
+                           (GaussQR.x(k)
+                            +(j%(4*int(pow(2,(n_runs-1-i))))))
+                    *1.0/double(4*pow(2,n_runs-1-i));
+                    complex_t temp =  (sol[j_specific]*cont_space.evaluateShapeFunction(1,x)
                            //*panels[i]->Derivative_01(k*0.25).norm()
                            +
-                           sol[(j+1)%numpanels[i]]*cont_space.evaluateShapeFunction(0,GaussQR.x(k))
+                           sol[(j_specific+1)%numpanels[i]]*cont_space.evaluateShapeFunction(0,x)
                            //*panels[i]->Derivative_01(k*0.25).norm()
                            -
                            u_t_dir(panels[j]->operator[](GaussQR.x(k)).x(),panels[j]->operator[](GaussQR.x(k)).y()))*GaussQR.w(k);
-                   res += (temp*(temp.real()-ii*temp.imag())).real();
-            }
+                   res += (temp*(temp.real()-ii*temp.imag())).real()*panels_rough[j_specific]->length()
+                    *double(4*pow(2,n_runs-1-i));
+                }
         }
-        res /=numpanels[i];
         std::cout << "Test: " << sqrt(res) << std::endl;
 
         double res1 = 0;
-        for (unsigned j=0; j < numpanels[i]; j++){
+        for (unsigned j=0; j < 4*numpanels[n_runs-1]; j++){
             for (unsigned k=0; k < N; k++){
                 //std::cout << sol[i]*cont_space.evaluateShapeFunction(1,GaussQR.x(k)) << std::endl;
                 //std::cout << sol[(i+1)%numpanels[i]]*cont_space.evaluateShapeFunction(0,GaussQR.x(k)) << std::endl;
                 //std::cout << u_t_dir(panels[i]->operator[](GaussQR.x(k)).x(),panels[i]->operator[](GaussQR.x(k)).y()) << std::endl;
-                complex_t temp =  (u_t_N[j]*cont_space.evaluateShapeFunction(1,GaussQR.x(k))
+                int j_specific = j/4/pow(2,(n_runs-1-i));
+                double x =
+                        (GaussQR.x(k)
+                         +(j%(4*int(pow(2,(n_runs-1-i))))))
+                        *1.0/double(4*pow(2,n_runs-1-i));
+                complex_t temp =  (u_t_N[j_specific]*cont_space.evaluateShapeFunction(1,x)
                                    //*panels[i]->Derivative_01(k*0.25).norm()
                                    +
-                                   u_t_N[(j+1)%numpanels[i]]*cont_space.evaluateShapeFunction(0,GaussQR.x(k))
+                                   u_t_N[(j_specific+1)%numpanels[i]]*cont_space.evaluateShapeFunction(0,x)
                                    //*panels[i]->Derivative_01(k*0.25).norm()
                                    -
                                    u_t_dir(panels[j]->operator[](GaussQR.x(k)).x(),panels[j]->operator[](GaussQR.x(k)).y()))*GaussQR.w(k);
-                res1 += (temp*(temp.real()-ii*temp.imag())).real();
+                res1 += (temp*(temp.real()-ii*temp.imag())).real()*panels_rough[j_specific]->length()
+                                                                   *double(4*pow(2,n_runs-1-i));
             }
         }
-        res1 /=numpanels[i];
         std::cout << "Test1: " << sqrt(res1) << std::endl;
         // write difference to computed solution in L^2 norm to file
         file_out.open(file_order, std::ios_base::app);
