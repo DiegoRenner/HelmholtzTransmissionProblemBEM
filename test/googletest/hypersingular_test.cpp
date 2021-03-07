@@ -48,9 +48,9 @@ std::ifstream fp_data;
 double real, imag;
 char sign;
 int i = 0;
-std::string path = "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/hypersingular_i_" + std::to_string(numpanels) + ".dat";
+std::string path = "/home/diego/Uni/Thesis/HelmholtzBEM/raw_data/hypersingular_i_" + std::to_string(numpanels) + ".dat";
 // use this file with c_o
-//std::string path = "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/hypersingular_o_" + std::to_string(numpanels) + ".dat";
+//std::string path = "/home/diego/Uni/Thesis/HelmholtzBEM/raw_data/hypersingular_o_" + std::to_string(numpanels) + ".dat";
 
 TEST(HypersingularTest, compare_row) {
     // read first row of operator from file
@@ -62,6 +62,9 @@ TEST(HypersingularTest, compare_row) {
         fp_data >> sign >> sign;
     }
     fp_data.close();
+    std::cout << W.transpose() << std::endl;
+    std::cout << "********************" << std::endl;
+    std::cout << W_expected.transpose() << std::endl;
 
     // compare known solution operator from file with computed one
     ASSERT_TRUE((W-W_expected).lpNorm<2>() < 5e-4);

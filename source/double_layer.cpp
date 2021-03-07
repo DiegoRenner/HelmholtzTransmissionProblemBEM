@@ -60,6 +60,7 @@
                         normal << tangent(1), -tangent(0);
                         // Normalizing the normal vector
                         normal = normal / normal.norm();
+                        //std::cout << (pi[s]-pi_p[t]).norm() << std::endl;
                         if ( abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon ) { // Away from singularity
                             result = ii*k*sqrt(c)*sp_bessel::hankelH1(1,k * sqrt(c) * (pi[s] - pi_p[t]).norm())
                                      *((pi[s] - pi_p[t]).normalized()).dot(normal)/4.;
@@ -83,6 +84,9 @@
                     interaction_matrix(i, j) = integral;
                 }
             }
+            //std::cout << "coinciding" << std::endl;
+            //std::cout << interaction_matrix << std::endl;
+            //std::cout << "*******************" << std::endl;
             return interaction_matrix;
         }
 
@@ -101,15 +105,16 @@
             // Interaction matrix with size Qtest x Qtrial
             Eigen::MatrixXcd interaction_matrix(Qtest, Qtrial);
             // Computing the (i,j)th matrix entry
-            bool swap = 1;//((pi(1) - pi_p(-1)).norm() / 100. > sqrt(epsilon));
+            bool swap = (pi(1) - pi_p(-1)).norm() / 100. > epsilon;
+            //bool swap = 1;//((pi(1) - pi_p(-1)).norm() / 100. > sqrt(epsilon));
             for (int i = 0; i < Qtest; ++i) {
                 for (int j = 0; j < Qtrial; ++j) {
                     // Lambda expression for functions F and G
                     auto F = [&](double t) {
                         if (swap) {
-                            return trial_space.evaluateShapeFunction_01_swapped((j)%2, t) * pi_p.Derivative_01_swapped(t).norm();
+                            return trial_space.evaluateShapeFunction_01_swapped((j), t) * pi_p.Derivative_01_swapped(t).norm();
                         } else {
-                            return trial_space.evaluateShapeFunction((j)%2, t) * pi_p.Derivative_01(t).norm();
+                            return trial_space.evaluateShapeFunction((j), t) * pi_p.Derivative_01(t).norm();
                         }
                     };
                     auto G = [&](double s) {
@@ -166,6 +171,9 @@
                     interaction_matrix(i, j) = integral;
                 }
             }
+            //std::cout << "adjacent" << std::endl;
+            //std::cout << interaction_matrix << std::endl;
+            //std::cout << "*******************" << std::endl;
             return interaction_matrix;
         }
 

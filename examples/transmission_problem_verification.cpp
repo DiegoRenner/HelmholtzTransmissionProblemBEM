@@ -86,18 +86,18 @@ int main(int argc, char** argv) {
     std::string suffix = ".dat";
     std::string divider = "_";
     std::string file_order = base_order.append(argv[6])
-                                + divider.append(argv[2]) + suffix;
+                             + divider.append(argv[2]) + suffix;
     // clear existing file
     std::ofstream file_out;
     file_out.open(file_order, std::ofstream::out | std::ofstream::trunc);
     file_out.close();
 
-	#ifdef CMDL
+#ifdef CMDL
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "Computing convergence rate for Helmholtz TP BIEs." << std::endl;
     std::cout << "Computing on userdefined problem using circular domain." << std::endl;
     std::cout << std::endl;
-	#endif
+#endif
 
     // Loop over number of panels
     for (unsigned i = 0; i < n_runs; i++) {
@@ -125,74 +125,126 @@ int main(int argc, char** argv) {
         Eigen::VectorXcd u_t_neu_N = cont_space.Interpolate_helmholtz(u_t_neu,mesh);
         Eigen::VectorXcd u_t_N(2*numpanels[i]);
         u_t_N << u_t_dir_N, u_t_neu_N;
-
-
-        ParametrizedMesh mesh_refined(curve.split(4*numpanels[n_runs-1]));
-        PanelVector panels = mesh_refined.getPanels();
-        PanelVector panels_rough = mesh.getPanels();
+        //std::cout << sol.transpose() << std::endl;
+        //std::cout << u_t_N.transpose() << std::endl;
+        PanelVector panels_coarse = mesh.getPanels();
         unsigned N = 20;
         QuadRule GaussQR = getGaussQR(N,0.,1.);
-        double res = 0.0;
-        unsigned Q = cont_space.getQ();
-        for (unsigned j=0; j < 4*numpanels[n_runs-1]; j++){
-                for (unsigned k=0; k < N; k++){
-                   //std::cout << sol[j]*cont_space.evaluateShapeFunction(1,GaussQR.x(k)) << std::endl;
-                   //std::cout << sol[(j+1)%numpanels[i]]*cont_space.evaluateShapeFunction(0,GaussQR.x(k)) << std::endl;
-                   //std::cout << u_t_dir(panels[j]->operator[](GaussQR.x(k)).x(),panels[j]->operator[](GaussQR.x(k)).y()) << std::endl;
-                   int j_specific = j/4/pow(2,(n_runs-1-i));
-                   double x =
-                           (GaussQR.x(k)
-                            +(j%(4*int(pow(2,(n_runs-1-i))))))
-                    *1.0/double(4*pow(2,n_runs-1-i));
-                    complex_t temp =  (sol[j_specific]*cont_space.evaluateShapeFunction(1,x)
-                           //*panels[i]->Derivative_01(k*0.25).norm()
-                           +
-                           sol[(j_specific+1)%numpanels[i]]*cont_space.evaluateShapeFunction(0,x)
-                           //*panels[i]->Derivative_01(k*0.25).norm()
-                           -
-                           u_t_dir(panels[j]->operator[](GaussQR.x(k)).x(),panels[j]->operator[](GaussQR.x(k)).y()))*GaussQR.w(k);
-                   res += (temp*(temp.real()-ii*temp.imag())).real()*panels_rough[j_specific]->length()
-                    *double(4*pow(2,n_runs-1-i));
-                }
-        }
-        std::cout << "Test: " << sqrt(res) << std::endl;
+        //for (int j = 0; j < numpanels[i]; j++){
+        //    std::cout << u_t_dir(panels_coarse[(j)%numpanels[i]]->operator[](0.0).x(), panels_coarse[(j) % numpanels[i]]->operator[](0.0).y());
+        //}
+        std::cout << std::endl;
 
-        double res1 = 0;
-        for (unsigned j=0; j < 4*numpanels[n_runs-1]; j++){
-            for (unsigned k=0; k < N; k++){
-                //std::cout << sol[i]*cont_space.evaluateShapeFunction(1,GaussQR.x(k)) << std::endl;
-                //std::cout << sol[(i+1)%numpanels[i]]*cont_space.evaluateShapeFunction(0,GaussQR.x(k)) << std::endl;
-                //std::cout << u_t_dir(panels[i]->operator[](GaussQR.x(k)).x(),panels[i]->operator[](GaussQR.x(k)).y()) << std::endl;
-                int j_specific = j/4/pow(2,(n_runs-1-i));
-                double x =
-                        (GaussQR.x(k)
-                         +(j%(4*int(pow(2,(n_runs-1-i))))))
-                        *1.0/double(4*pow(2,n_runs-1-i));
-                complex_t temp =  (u_t_N[j_specific]*cont_space.evaluateShapeFunction(1,x)
-                                   //*panels[i]->Derivative_01(k*0.25).norm()
+        //generate finer mesh for error approximation
+        //use panels_fine of computation mesh for evaluating shape functions
+        //generate finer mesh for error approximation
+        //ParametrizedMesh mesh_refined(curve.split(4*numpanels[n_runs-1]));
+        //PanelVector panels_fine = mesh_refined.getPanels();
+        //generate QR of higher order for error approximation
+        //double res1 = 0.0;
+        //for (unsigned j=0; j < 4*numpanels[n_runs-1]; j++){
+        //    //compute index for shapefunction on coarser mesh
+        //    //dividing j by the number of points the finer mesh has within one panel of the coarser mesh
+        //    int j_coarse = j / 4 / pow(2, (n_runs - 1 - i));
+        //    for (unsigned k=0; k < N; k++){
+        //        //rescaling quadrature rule to finer mesh
+        //        double x =
+        //                (GaussQR.x(k)
+        //                 +(j%(4*int(pow(2,(n_runs-1-i))))))
+        //                *1.0/double(4*pow(2,n_runs-1-i));
+        //        //contribution of first shape fct.
+        //        complex_t temp = (sol[j_coarse] * cont_space.evaluateShapeFunction(1, x)
+        //                          //*panels_fine[i]->Derivative_01(k*0.25).norm()
+        //                          +
+        //                          //contribution of second shape fct.
+        //                          sol[(j_coarse + 1) % numpanels[i]] * cont_space.evaluateShapeFunction(0, x)
+        //                          //*panels_fine[i]->Derivative_01(k*0.25).norm()
+        //                          -
+        //                          //exact solution
+        //                          u_t_dir(panels_coarse[j_coarse]->operator[](x).x(), panels_coarse[j_coarse]->operator[](x).y()));
+        //        //squared norm multiplied by scaling factors
+        //        res1 += (temp*(temp.real()-ii*temp.imag())).real()*panels_fine[j]->length() * GaussQR.w(k);
+        //    }
+        //}
+        //std::cout << "Test1: " << sqrt(res1) << std::endl;
+
+        complex_t res2 = 0.0;
+        for (int j=0; j < numpanels[i]; j++){
+            //compute index for shapefunction on coarser mesh
+            //dividing j by the number of points the finer mesh has within one panel of the coarser mesh
+            for (int m=0; m < N; m++){
+                //rescaling quadrature rule to finer mesh
+                //contribution of first shape fct.
+                //std::cout << (sol[j] * cont_space.evaluateShapeFunction(1, GaussQR.x(m))) << std::endl;
+                //std::cout << (sol[(j+1)%numpanels[i]] * cont_space.evaluateShapeFunction(1, GaussQR.x(m))) << std::endl;
+                //std::cout << u_t_dir(panels_coarse[j]->operator[](GaussQR.x(m)).x(), panels_coarse[j]->operator[](GaussQR.x(m)).y())<< std::endl;
+                complex_t temp = (sol[j] * cont_space.evaluateShapeFunction(1, GaussQR.x(m))
                                    +
-                                   u_t_N[(j_specific+1)%numpanels[i]]*cont_space.evaluateShapeFunction(0,x)
-                                   //*panels[i]->Derivative_01(k*0.25).norm()
+                                   //contribution of second shape fct.
+                                   sol[(j + 1) % numpanels[i]] * cont_space.evaluateShapeFunction(0, GaussQR.x(m))
                                    -
-                                   u_t_dir(panels[j]->operator[](GaussQR.x(k)).x(),panels[j]->operator[](GaussQR.x(k)).y()))*GaussQR.w(k);
-                res1 += (temp*(temp.real()-ii*temp.imag())).real()*panels_rough[j_specific]->length()
-                                                                   *double(4*pow(2,n_runs-1-i));
+                                   //exact solution
+                                   u_t_dir(panels_coarse[(j)%numpanels[i]]->operator[](GaussQR.x(m)).x(), panels_coarse[(j) % numpanels[i]]->operator[](GaussQR.x(m)).y()));
+                //squared norm multiplied by scaling factors
+                res2 += (temp*(temp.real()-ii*temp.imag())).real() * GaussQR.w(m) * panels_coarse[j]->Derivative_01(GaussQR.x(m)).norm();
             }
         }
-        std::cout << "Test1: " << sqrt(res1) << std::endl;
+        std::cout << "Test2: " << sqrt(res2) << std::endl;
+        complex_t res3 = 0.0;
+        for (int j=0; j < numpanels[i]; j++){
+            //compute index for shapefunction on coarser mesh
+            //dividing j by the number of points the finer mesh has within one panel of the coarser mesh
+            for (int m=0; m < N; m++){
+                //rescaling quadrature rule to finer mesh
+                //contribution of first shape fct.
+                //std::cout << sqrt(pow(panels_coarse[j]->operator[](GaussQR.x(m)).x(),2)
+                //                + pow(panels_coarse[j]->operator[](GaussQR.x(m)).y(),2))
+                //<< std::endl;
+                complex_t temp = (u_t_N[j] * cont_space.evaluateShapeFunction(1, GaussQR.x(m))
+                                 +
+                                 //contribution of second shape fct.
+                                 u_t_N[(j + 1) % numpanels[i]] * cont_space.evaluateShapeFunction(0, GaussQR.x(m))
+                                 -
+                                 //exact solution
+                                 u_t_dir(panels_coarse[j]->operator[](GaussQR.x(m)).x(), panels_coarse[j]->operator[](GaussQR.x(m)).y()));
+                //squared norm multiplied by scaling factors
+                res3 += (temp*(temp.real()-ii*temp.imag())) * GaussQR.w(m) * panels_coarse[j]->length();
+            }
+        }
+        std::cout << "Test3: " << sqrt(res3) << std::endl;
+
+        //double res4 = 0;
+        //for (unsigned j=0; j < 4*numpanels[n_runs-1]; j++){
+        //    int j_specific = j/4/pow(2,(n_runs-1-i));
+        //    for (unsigned k=0; k < N; k++){
+        //        double x =
+        //                (GaussQR.x(k)
+        //                 +(j%(4*int(pow(2,(n_runs-1-i))))))
+        //                *1.0/double(4*pow(2,n_runs-1-i));
+        //        complex_t temp = (u_t_N[j_specific]*cont_space.evaluateShapeFunction(1,x)
+        //                           //*panels_fine[i]->Derivative_01(k*0.25).norm()
+        //                           +
+        //                           u_t_N[(j_specific+1)%numpanels[i]]*cont_space.evaluateShapeFunction(0,x)
+        //                           //*panels_fine[i]->Derivative_01(k*0.25).norm()
+        //                           -
+        //                           u_t_dir(panels_fine[j]->operator[](GaussQR.x(k)).x(), panels_fine[j]->operator[](GaussQR.x(k)).y()));
+        //        res4 += (temp*(temp.real()-ii*temp.imag())).real() * panels_fine[j]->length() * GaussQR.w(k);
+        //    }
+        //}
+        //std::cout << "Test4: " << sqrt(res4) << std::endl;
         // write difference to computed solution in L^2 norm to file
         file_out.open(file_order, std::ios_base::app);
         //file_out << mesh.getPanels()[0]->length() << " " << sqrt(abs((sol - u_t_N).dot(M * (sol - u_t_N)))) << std::endl;
-        file_out << mesh.getPanels()[0]->length() << " " << sqrt(res) <<  " " << sqrt(res1) << std::endl;
+        file_out << mesh.getPanels()[0]->length() << " " << sqrt(res2) <<  " " << sqrt(res3) << std::endl;
         file_out.close();
-		#ifdef CMDL
+#ifdef CMDL
         std::cout << "#######################################################" << std::endl;
-        std::cout << "Computed Cauchy data on " << numpanels[i] << " panels." << std::endl;
+        std::cout << "Computed Cauchy data on " << numpanels[i] << " panels_fine." << std::endl;
         std::cout << "Residual error of FEM-space interpolation coefficients:" << std::endl;
 		std::cout << sqrt(abs((sol-u_t_N).dot(M*(sol-u_t_N)))) << std::endl;
         std::cout << "#######################################################" << std::endl;
         std::cout << std::endl;
-		#endif
+#endif
     }
     return 0;
 }

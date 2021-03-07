@@ -119,6 +119,7 @@
                     };
                     auto integrand = [&](double s, double t) {
                         complex_t result = complex_t(0.0,0.0);
+                        //std::cout << (pi[s]-pi_p[t]).norm() << std::endl;
                         if ( abs(k*sqrt(c))*(pi[s]-pi_p[t]).norm() > epsilon) {
                             result = ii*sp_bessel::hankelH1(0,k*sqrt(c)* (pi[s] - pi_p[t]).norm())/4.;
                         } else if ((pi[s]-pi_p[t]).norm() > epsilon){
@@ -234,3 +235,6 @@
         }
 
     } //namespace single_layer_helmholtz
+
+
+

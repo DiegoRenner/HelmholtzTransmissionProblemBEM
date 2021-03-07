@@ -17,7 +17,8 @@ add_executable(parabolic_approximation parabolic_approximation.cpp)
 add_executable(direct_v_arnoldi direct_v_arnoldi.cpp)
 add_executable(direct_v_arnoldi_1st_der direct_v_arnoldi_1st_der.cpp)
 add_executable(direct_v_arnoldi_2nd_der direct_v_arnoldi_2nd_der.cpp)
-add_executable(convergence_analysis_arnoldi convergence_analysis_arnoldi.cpp)
+add_executable(convergence_analysis_arnoldi_minima convergence_analysis_arnoldi_minima.cpp)
+add_executable(convergence_analysis_arnoldi_SVs convergence_analysis_arnoldi_SVs.cpp)
 add_executable(using_starting_vectors using_starting_vectors.cpp)
 
 
@@ -31,7 +32,7 @@ target_link_libraries(roots_newton_square parametrizations find_zeros complex_be
 target_link_libraries(roots_brent_circle parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
 target_link_libraries(sv_derivative_verification_square parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
 target_link_libraries(sv_derivative_full parametrizations find_zeros complex_bessel compute_SV_der_arnoldi gen_sol_op )
-target_link_libraries(sv_circle parametrizations find_zeros complex_bessel compute_SV_der_arnoldi gen_sol_op blas lapack arpack)
+target_link_libraries(sv_circle parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
 target_link_libraries(sv_square parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
 target_link_libraries(parabolic_approximation parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
 target_link_libraries(direct_v_arnoldi parametrizations find_zeros complex_bessel compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack st_vec_storage)
@@ -39,6 +40,8 @@ target_link_libraries(direct_v_arnoldi_1st_der parametrizations find_zeros compl
         compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack st_vec_storage)
 target_link_libraries(direct_v_arnoldi_2nd_der parametrizations find_zeros complex_bessel
         compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack st_vec_storage)
-target_link_libraries(convergence_analysis_arnoldi parametrizations
+target_link_libraries(convergence_analysis_arnoldi_minima parametrizations
+        find_zeros complex_bessel compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack st_vec_storage)
+target_link_libraries(convergence_analysis_arnoldi_SVs parametrizations
         find_zeros complex_bessel compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack st_vec_storage)
 target_link_libraries(using_starting_vectors parametrizations find_zeros complex_bessel compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack st_vec_storage)

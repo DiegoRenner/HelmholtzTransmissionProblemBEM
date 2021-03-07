@@ -47,9 +47,9 @@ std::ifstream fp_data;
 double real, imag;
 char sign;
 int i = 0;
-std::string path = "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/double_layer_i_" + std::to_string(numpanels) + ".dat";
+std::string path = "/home/diego/Uni/Thesis/HelmholtzBEM/raw_data/double_layer_i_" + std::to_string(numpanels) + ".dat";
 // use this fie with c_o
-//std::string path = "/home/diegorenner/Uni/Thesis/HelmholtzBEM/raw_data/double_layer_o_" + std::to_string(numpanels) + ".dat";
+//std::string path = "/home/diego/Uni/Thesis/HelmholtzBEM/raw_data/double_layer_o_" + std::to_string(numpanels) + ".dat";
 
 TEST(DoubleLayerTest, compare_row) {
     // read first row of operator from file
@@ -60,6 +60,9 @@ TEST(DoubleLayerTest, compare_row) {
         if (i==numpanels) break;
         fp_data >> sign >> sign;
     }
+    std::cout << K.transpose() << std::endl;
+    std::cout << "********************" << std::endl;
+    std::cout << K_expected.transpose() << std::endl;
 
     // compare known solution operator from file with computed one
     ASSERT_TRUE((K-K_expected).lpNorm<2>() < 5*1e-4);
