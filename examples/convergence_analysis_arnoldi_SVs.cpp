@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     complex_t k_0 = atof(argv[4]);
 
     // define mesh in space and on wavenumber on which to perform verification
-    unsigned n_points_x = 156;
+    unsigned n_points_x = 1;
     unsigned n_points_y = 1;
     unsigned numpanels;
     numpanels = atoi(argv[5]);
@@ -80,6 +80,7 @@ int main(int argc, char** argv) {
 
             // compute solutions operator
             Eigen::MatrixXcd T = gen_sol_op(mesh, order, k_temp, c_o, c_i);
+
 
             // set singular values to be computed, all
             unsigned count = 8;

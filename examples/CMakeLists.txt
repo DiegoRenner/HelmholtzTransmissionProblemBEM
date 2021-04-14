@@ -20,6 +20,7 @@ add_executable(direct_v_arnoldi_2nd_der direct_v_arnoldi_2nd_der.cpp)
 add_executable(convergence_analysis_arnoldi_minima convergence_analysis_arnoldi_minima.cpp)
 add_executable(convergence_analysis_arnoldi_SVs convergence_analysis_arnoldi_SVs.cpp)
 add_executable(using_starting_vectors using_starting_vectors.cpp)
+add_executable(debugging_SVs debugging_SVs.cpp)
 
 
 target_link_libraries(dirichlet_example parametrizations generate_solution solvers complex_bessel)
@@ -45,3 +46,4 @@ target_link_libraries(convergence_analysis_arnoldi_minima parametrizations
 target_link_libraries(convergence_analysis_arnoldi_SVs parametrizations
         find_zeros complex_bessel compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack st_vec_storage)
 target_link_libraries(using_starting_vectors parametrizations find_zeros complex_bessel compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack st_vec_storage)
+target_link_libraries(debugging_SVs parametrizations gen_sol_op complex_bessel )
