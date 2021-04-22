@@ -61,7 +61,9 @@ namespace arnoldi {
         prob.FindEigenvalues();
         Eigen::VectorXd res(count);
         for (unsigned i = 0; i < count; i++) {
-            res[i] = abs(1/prob.Eigenvalue(2*count-2*i-1).real());
+            // DON'T USE abs, ONLY std::abs
+            // abs inconsistent across platforms, can cast to int
+            res[i] = std::abs(1/prob.Eigenvalue(2*count-2*i-1).real());
         }
         // DEBUG
         /*std::ofstream file_out_u;
