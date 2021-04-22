@@ -1,9 +1,0 @@
-# Default ignored files
-/workspace.xml
-bin
-cmake-build-debug
-cmake-build-release
-cmake-build
-doxygen/generated_doc
-complex_bessel_lib
-include/complex_bessel*
