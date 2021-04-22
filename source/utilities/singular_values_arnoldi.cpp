@@ -34,7 +34,6 @@ namespace arnoldi {
         std::string which = std::to_string(2*count) + "L";
         ARrcCompStdEig<double> prob(2 * N, 2 * count, "LM", 0, acc, 1000000, NULL);
 
-
         // iterate until entire space is searched
         while (!prob.ArnoldiBasisFound()) {
             // Calling ARPACK FORTRAN code. Almost all work needed to

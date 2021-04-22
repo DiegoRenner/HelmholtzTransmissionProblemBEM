@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
                 int n = j + 1;
                 return par_exp(x1, x2, n);
             };
-            file_out << "n = " << j << " : ";
+            file_out << "n = " << j+1 << " : ";
             for (int l = 0; l < 3; l++) {
                 Eigen::MatrixXcd V =
                         single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k[l], c_o);
@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
                 int n = j + 1;
                 return par_exp(x1, x2, n);
             };
-            file_out << "n = " << j << " : ";
+            file_out << "n = " << j+1 << " : ";
             for (int l = 0; l < 3; l++) {
                 Eigen::MatrixXcd K =
                         double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k[l], c_o);
@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
                 int n = j + 1;
                 return par_exp(x1, x2, n);
             };
-            file_out << "n = " << j << " : ";
+            file_out << "n = " << j+1 << " : ";
             for (int l = 0; l < 3; l++) {
                 Eigen::MatrixXcd W =
                         hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k[l], c_o);

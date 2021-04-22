@@ -10,7 +10,7 @@
  *
  * <tt>
  * /path/to/sv_circle \<radius of circle\> \<refraction inside\>
- *      \<refraction outside\> \<initial wavenumber\>
+ *      \<refraction outside\> \<initial wavenumber\> \<final wavenumber\>
  *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>.
  * </tt>
  *
@@ -40,27 +40,41 @@ int main(int argc, char** argv) {
     double c_i = atof(argv[2]);
     double c_o = atof(argv[3]);
     complex_t k_0 = atof(argv[4]);
+    complex_t k_N = atof(argv[5]);
 
     // define mesh in space and on wavenumber on which to perform verification
-    unsigned n_points_x = 2500;
-    unsigned n_points_y = 1;
-    unsigned numpanels;
-    numpanels = atoi(argv[5]);
-    double h_x = 100.0/n_points_x;
-    double h_y = 100.0/n_points_y;
+    unsigned n_points_x = atoi(argv[6]);
+    unsigned n_points_y = atoi(argv[6]);
+    unsigned numpanels = atoi(argv[7]);
+    double h_x = (k_N-k_0).real()/double(n_points_x-1);
+    double h_y = (k_N-k_0).imag()/double(n_points_x-1);
     ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
     ParametrizedMesh mesh(curve.split(numpanels));
 
     // define order of quadrature rule used to compute matrix entries
-    unsigned order = atoi(argv[6]);
+    unsigned order = atoi(argv[8]);
 
     // clear existing file
     std::ofstream file_out;
-    file_out.open(argv[7], std::ofstream::out | std::ofstream::trunc);
+    file_out.open(argv[9], std::ofstream::out | std::ofstream::trunc);
     file_out.close();
 
     // Inform user of started computation.
 	#ifdef CMDL
+    std::cout << "Parameters are:" << std::endl;
+    std::cout << "radius of circle [arg]: "  << eps << std::endl;
+    std::cout << "refraction inside [arg]: "  << c_i << std::endl;
+    std::cout << "refraction outside [arg]: "  << c_o << std::endl;
+    std::cout << "initial wavenumber [arg]: "  << k_0 << std::endl;
+    std::cout << "final wavenumber [arg]: "  << k_N << std::endl;
+    std::cout << "#points to evaluate [arg]: "  << n_points_x << std::endl;
+    //std::cout << "scan complex wavenumbers [arg]: "  << scan_complex_wavenumbers << std::endl;
+    std::cout << "real step size [computed]: "  << h_x << std::endl;
+    std::cout << "imaginary step size [computed]: "  << h_y << std::endl;
+    std::cout << "#panels [arg]: "  << numpanels << std::endl;
+    std::cout << "order of quadrature rule [arg]: "  << order << std::endl;
+    //std::cout << "accuracy of arnoldi algorithm [arg]: "  << acc << std::endl;
+    std::cout << "file name [arg]: "  << argv << std::endl;
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "Computing singular values of BIO." << std::endl;
     std::cout << "Computing on userdefined problem using circular domain." << std::endl;
