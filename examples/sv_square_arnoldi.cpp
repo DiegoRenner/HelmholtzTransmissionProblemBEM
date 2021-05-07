@@ -3,7 +3,7 @@
  * \brief This target builds a script that computes the singular values
  * of the Galerkin BEM approximated BIO for the
  * second-kind direct BIEs of the Helmholtz
- * transmission problem. The arnoldi algorithm is used to compute the
+ * transmission problem. The arnoldi algorithm from arpack is used to compute the
  * sinuglar values. The scatterer is set to be a square.
  * The results are written to file.
  * The script can be run as follows:
@@ -141,10 +141,10 @@ int main(int argc, char** argv) {
             // Number of eigenvalues of OP to be computed. 0 < NEV < N.
             // https://www.caam.rice.edu/software/ARPACK/UG/node136.html
             unsigned count = 2*numpanels-1;
-            double list[count];
-            for (unsigned i = 0; i < count; i++){
-                list[i] = i;
-            }
+            //double list[count];
+            //for (unsigned i = 0; i < count; i++){
+            //    list[i] = i;
+            //}
 
             // compute singular value
             //res = direct::sv(T,list,count);

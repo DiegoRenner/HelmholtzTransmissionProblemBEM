@@ -16,14 +16,12 @@ namespace arnoldi {
                        const unsigned count,
                        const double acc){
         const unsigned N = T.cols();
-        //std::cout << k << std::endl;
         /*const unsigned N = T.cols();
         complex_t* start = new complex_t [2*N];
         double norm = 0.;
         for (int i = 0; i < 2*N; i++) {
             start[i] = st_vec_storage.get_closest(k)[i];
         }*/
-
 
         // define number of columns for convenience
         Eigen::MatrixXcd T_herm = T.conjugate().transpose();
@@ -65,15 +63,10 @@ namespace arnoldi {
             // abs inconsistent across platforms, can cast to int
             res[i] = std::abs(1/prob.Eigenvalue(2*count-2*i-1).real());
         }
-        // DEBUG
-        /*std::ofstream file_out_u;
-        file_out_u.open("eps_iter_p2.dat", std::ios_base::app);
-        file_out_u.close();
-        // END
-        st_vec_storage.add_vec(k,start);
-        delete start;*/
+        /*st_vec_storage.add_vec(k,start);
+        delete start;
+        st_vec_storage.status();*/
         iter_counter_restart = prob.GetIter();
-        //st_vec_storage.status();
         return res;
     }
 
@@ -112,15 +105,14 @@ namespace arnoldi {
                 PutVectorEig.block(0,0,N,1) = lu_herm.solve(GetVectorEig.block(N,0,N,1));
                 PutVectorEig.block(N,0,N,1) = lu.solve(GetVectorEig.block(0,0,N,1));
                 eig_to_arpp(PutVectorEig, prob.PutVector());
+                iter_counter_matvec++;
             }
         }
-
         // write results into our common data structure
         prob.FindEigenvectors();
         Eigen::VectorXd res_vals(count);
         Eigen::MatrixXcd res_vectors(2*N, count);
         arpp_to_eig(prob, res_vals, res_vectors);
-
 
         Eigen::MatrixXcd W_der = Eigen::MatrixXcd::Zero(2 * N, 2 * N);
         W_der.block(0, N, N, N) = T_der;
@@ -142,6 +134,7 @@ namespace arnoldi {
                 res(i, 1) = (x.dot(W_der * x)).real();
             }
         }
+        iter_counter_restart = prob.GetIter();
         return res;
     }
 
@@ -180,6 +173,7 @@ namespace arnoldi {
                 PutVectorEig.block(0,0,N,1) = lu_herm.solve(GetVectorEig.block(N,0,N,1));
                 PutVectorEig.block(N,0,N,1) = lu.solve(GetVectorEig.block(0,0,N,1));
                 eig_to_arpp(PutVectorEig, prob.PutVector());
+                iter_counter_matvec++;
             }
         }
 
@@ -258,6 +252,7 @@ namespace arnoldi {
                 res(i, 2) = -ev_der2.real();
             }
         }
+        iter_counter_restart = prob.GetIter();
         return res;
     }
 

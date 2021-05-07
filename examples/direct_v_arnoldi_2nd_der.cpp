@@ -1,28 +1,5 @@
 /**
- * \file sv_circle.cpp
- * \brief This target builds a script that computes the singular values
- * of the Galerkin BEM approximated BIO for the
- * second-kind direct BIEs of the Helmholtz
- * transmission problem.
- * The scatterer is set to be a circle.
- * The results are written to file.
- * The script can be run as follows:
- *
- * <tt>
- * /path/to/sv_circle \<radius of circle\> \<refraction inside\>
- *      \<refraction outside\> \<initial wavenumber\>
- *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>.
- * </tt>
- *
- * The resulting file will contain the value of \f$k\f$ in the first column.
- * The rest of the columns contain the singular values from 
- * smallest to largest for this \f$k\f$.
- * The user will be updated through the command line about the
- * progress of the algorithm
- * if \f$ \verb|-DCMDL| \f$ is set.
- *
- * This File is a part of the HelmholtzTransmissionProblemBEM library.
- */
+ * \file direct_v_arnoldi_2nd_der.cpp
 #include <complex>
 #include <iostream>
 #include <fstream>

@@ -25,7 +25,16 @@ void arpp_to_eig(ARrcCompStdEig<double>& in, Eigen::VectorXd& out_vals, Eigen::M
     Eigen::VectorXcd temp_vec(out_vectors.rows());
     arpp_to_eig(in.RawEigenvector(0), temp_vec);
     out_vectors.col(0) = temp_vec;
-    for (unsigned i = 2; i < 2*count; i+=4){
+    unsigned I;
+    if (count%2==0){
+        I = 2*(count-1);
+        out_vals[(count-1)] = 1/in.Eigenvalue(2*(count-1)).real();
+        arpp_to_eig(in.RawEigenvector(count-1), temp_vec);
+        out_vectors.col(count-1) = temp_vec;
+    } else {
+        I = 2*(count);
+    }
+    for (unsigned i = 2; i < I; i+=4){
         out_vals[i/2] = 1/in.Eigenvalue(i).real();
         out_vals[i/2+1] = 1/in.Eigenvalue(i+1).real();
         arpp_to_eig(in.RawEigenvector(i), temp_vec);
