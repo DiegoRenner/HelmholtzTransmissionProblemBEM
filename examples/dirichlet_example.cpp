@@ -12,7 +12,8 @@
  * The user will be updated over the residual error in 
  * the euclidean norm of the computed FEM-space 
  * interpolation coefficients to the known FEM-space 
- * interpolation coefficients for the current number of panels through the command line.
+ * interpolation coefficients for the current number of panels through the command line
+ * and other convergence metrics.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
@@ -25,6 +26,7 @@
 #include "gen_sol.hpp"
 #include "mass_matrix.hpp"
 
+// define shorthand for complex data type and imaginary unit
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
 int main() {
@@ -37,7 +39,7 @@ int main() {
     unsigned order = 11;
     // define #panels with which to compute BIOs
     unsigned n_runs = 7;
-    double numpanels[n_runs];
+    unsigned numpanels[n_runs];
     numpanels[0] = 50;
     for (int i=1; i<n_runs; i++){
         numpanels[i] = 2*numpanels[i-1];
@@ -51,8 +53,8 @@ int main() {
         return sol::fund_sol_neu(k,x1,x2,ipt[0],ipt[1]);
     };
 	// define FEM-sapces for result validation later on
-    DiscontinuousSpace<0> discont_space;
     // Inform user of started computation.
+    DiscontinuousSpace<0> discont_space;
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "Solving Dirichlet problem for increasing grid sizes." << std::endl;
     std::cout << "Using first-kind direct BIEs." << std::endl;
@@ -69,12 +71,60 @@ int main() {
         Eigen::VectorXcd res_known = discont_space.Interpolate_helmholtz(fund_sol_neu,mesh);
         // compute mass matrix for projection onto orthonormal basis functions
         Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh,discont_space,discont_space,order);
-        // update user on residual error between computed and known FEM-space 
-		// interpolation coefficients that have been projected onto orthornomal basis
+
+        // setup mesh and QR for computing residuals
+        PanelVector panels_coarse = mesh.getPanels();
+        unsigned N = 20;
+        QuadRule GaussQR = getGaussQR(N,0.,1.);
+
+        // compute residual w.r.t. computed and exact solution
+        complex_t res_val = 0.0;
+        for (int j=0; j < numpanels[i]; j++){
+            //compute index for shapefunction on coarser mesh
+            //dividing j by the number of points the finer mesh has within one panel of the coarser mesh
+            for (int m=0; m < N; m++){
+                //rescaling quadrature rule to finer mesh
+                //contribution of first shape fct.
+                complex_t temp = (res[j] * discont_space.evaluateShapeFunction(0, GaussQR.x(m))
+                                  -
+                                  //exact solution
+                                  fund_sol_neu(panels_coarse[j]->operator[](GaussQR.x(m)).x(), panels_coarse[j]->operator[](GaussQR.x(m)).y()));
+                //squared norm multiplied by scaling factors
+                res_val += (temp*(temp.real()-ii*temp.imag())) * GaussQR.w(m) * panels_coarse[j]->length();
+            }
+        }
+
+        // compute residual w.r.t. best solution in FEM space and exact solution
+        complex_t res_val1 = 0.0;
+        for (int j=0; j < numpanels[i]; j++){
+            //compute index for shapefunction on coarser mesh
+            //dividing j by the number of points the finer mesh has within one panel of the coarser mesh
+            for (int m=0; m < N; m++){
+                //rescaling quadrature rule to finer mesh
+                //contribution of first shape fct.
+                complex_t temp = (res_known[j] * discont_space.evaluateShapeFunction(0, GaussQR.x(m))
+                                  -
+                                  //exact solution
+                                  fund_sol_neu(panels_coarse[j]->operator[](GaussQR.x(m)).x(), panels_coarse[j]->operator[](GaussQR.x(m)).y()));
+                //squared norm multiplied by scaling factors
+                res_val1 += (temp*(temp.real()-ii*temp.imag())) * GaussQR.w(m) * panels_coarse[j]->length();
+            }
+        }
+        // update user on residual error between computed and known FEM-space
+        // interpolation coefficients that have been projected onto orthornomal basis
+        // also output total error from found to exact solution and from known best solution
+        // in FEM space to exact solution
         std::cout << "#######################################################" << std::endl;
+        std::cout << res.transpose() << std::endl;
+        std::cout << res_known.transpose() << std::endl;
         std::cout << "Computed Neumann data on " << numpanels[i] << " panels." << std::endl;
         std::cout << "Residual error of FEM-space interpolation coefficients:" << std::endl;
         std::cout << sqrt(((res-res_known)).dot(M*(res-res_known))).real() << std::endl;
+        std::cout << "Residual error w.r.t. computed and exact solution" << std::endl;
+        std::cout << sqrt(abs(res_val)) << std::endl;
+        std::cout << "Residual error w.r.t. best solution in FEM space and exact solution" << std::endl;
+        std::cout << sqrt(abs(res_val1)) << std::endl;
+
         std::cout << "#######################################################" << std::endl;
         std::cout << std::endl;
     }

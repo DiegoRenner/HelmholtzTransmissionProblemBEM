@@ -69,14 +69,13 @@ namespace arnoldi {
         iter_counter_restart = prob.GetIter();
         return res;
     }
-
+    // TODO: resort EVs & vectors after finding Eigenvectors
     Eigen::MatrixXd sv_1st_der(const Eigen::MatrixXcd &T,
                                const Eigen::MatrixXcd &T_der,
                                const unsigned count,
                                const double acc){
-            // get dimensions of operator
+        // get dimensions of operator
         const unsigned N = T.cols();
-        // build Wielandt matrix
         Eigen::MatrixXcd T_herm = T.conjugate().transpose();
         // precomputation for finding EVs with arpack++
         Eigen::FullPivLU<Eigen::MatrixXcd> lu = T.fullPivLu();
@@ -108,8 +107,10 @@ namespace arnoldi {
                 iter_counter_matvec++;
             }
         }
+
         // write results into our common data structure
         prob.FindEigenvectors();
+        prob.FindEigenvalues();
         Eigen::VectorXd res_vals(count);
         Eigen::MatrixXcd res_vectors(2*N, count);
         arpp_to_eig(prob, res_vals, res_vectors);
@@ -138,12 +139,13 @@ namespace arnoldi {
         return res;
     }
 
+    // TODO: resort EVs & vectors after finding Eigenvectors
     Eigen::MatrixXd sv_2nd_der(const Eigen::MatrixXcd &T,
                                const Eigen::MatrixXcd &T_der,
                                const Eigen::MatrixXcd &T_der2,
                                const unsigned count,
                                const double acc){
-            // get dimensions of operator
+        // get dimensions of operator
         const unsigned N = T.cols();
         Eigen::MatrixXcd T_herm = T.conjugate().transpose();
         // precomputation for finding EVs with arpack++
@@ -178,7 +180,6 @@ namespace arnoldi {
         }
 
         // write results into our common data structure
-        std::cout << prob.ArnoldiBasisFound() << std::endl;
         prob.FindEigenvectors();
         Eigen::VectorXd res_vals(count);
         Eigen::MatrixXcd res_vectors(2*N, count);

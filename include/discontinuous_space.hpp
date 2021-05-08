@@ -71,7 +71,7 @@
             PanelVector panels = mesh.getPanels();
             // Filling the coefficients
             for (unsigned i = 0; i < coeffs_size; ++i) {
-                Eigen::Vector2d pt = panels[i]->operator()(0);
+                Eigen::Vector2d pt = panels[i]->operator[](0.);
                 coeffs(i) = func(pt(0), pt(1));
             }
             return coeffs;

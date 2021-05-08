@@ -34,6 +34,7 @@ void arpp_to_eig(ARrcCompStdEig<double>& in, Eigen::VectorXd& out_vals, Eigen::M
     } else {
         I = 2*(count);
     }
+
     for (unsigned i = 2; i < I; i+=4){
         out_vals[i/2] = 1/in.Eigenvalue(i).real();
         out_vals[i/2+1] = 1/in.Eigenvalue(i+1).real();

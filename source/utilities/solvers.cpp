@@ -20,14 +20,14 @@ namespace bvp {
             ContinuousSpace<1> cont_space;
             DiscontinuousSpace<0> discont_space;
             // compute interpolation coefficients for dirichlet data
-            Eigen::VectorXcd u_dir_N = cont_space.Interpolate_helmholtz(u_dir, mesh);
+            Eigen::VectorXcd u_dir_N = discont_space.Interpolate_helmholtz(u_dir, mesh);
             // compute operators for first kind direct Dirichlet problem BIE
             Eigen::MatrixXcd M =
                     mass_matrix::GalerkinMatrix(mesh,discont_space,cont_space,order);
             Eigen::MatrixXcd K =
-                    double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k,1);
+                    double_layer_helmholtz::GalerkinMatrix(mesh, discont_space, cont_space, order, k,1);
             Eigen::MatrixXcd V =
-                    single_layer_helmholtz::GalerkinMatrix(mesh,discont_space,order,k,1);
+                    single_layer_helmholtz::GalerkinMatrix(mesh,cont_space,order,k,1);
             // build rhs for solving
             Eigen::VectorXcd rhs = (0.5*M-K)*u_dir_N;
             // solve for coefficients
@@ -35,6 +35,7 @@ namespace bvp {
             Eigen::VectorXcd sol = dec.solve(rhs);
             return sol;
         }
+
         Eigen::VectorXcd solve_neumann(const ParametrizedMesh &mesh,
                                        const std::function<complex_t(double, double)> u_neu,
                                        const unsigned int order,
@@ -48,7 +49,7 @@ namespace bvp {
             Eigen::VectorXcd u_neu_N = discont_space.Interpolate_helmholtz(u_neu, mesh);
             // compute operators for first kind direct Neumann problem BIE
             Eigen::MatrixXcd M =
-                    mass_matrix::GalerkinMatrix(mesh,discont_space,cont_space,order);
+                    mass_matrix::GalerkinMatrix(mesh,cont_space,discont_space,order);
             Eigen::MatrixXcd K =
                     double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, 1);
             Eigen::MatrixXcd W =

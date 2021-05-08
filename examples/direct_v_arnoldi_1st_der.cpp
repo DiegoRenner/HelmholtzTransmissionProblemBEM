@@ -11,7 +11,7 @@
  * The script can be run as follows:
  *
  * <tt>
- * /path/to/direct_v_arnoldi \<radius of circle\> \<number of SV derivatives to be computed\>
+ * /path/to/direct_v_arnoldi_1st_der \<radius of circle\> \<number of SV derivatives to be computed\>
  * \<accurracy of arnoldi algorithm\>.
  * </tt>
  *
@@ -37,7 +37,7 @@
 #include "singular_values.hpp"
 #include "singular_values_arnoldi.hpp"
 
-// define shorthand for time benchmarking tools, complex data type and immaginary unit
+// define shorthand for time benchmarking tools, complex data type and imaginary unit
 using namespace std::chrono;
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
@@ -119,19 +119,19 @@ int main(int argc, char** argv) {
             auto duration_direct = duration_cast<milliseconds>(end_direct-start_direct);
             // compute singular value using the Arnoldi algorithm
             auto start_arnoldi = high_resolution_clock::now();
-            res_arnoldi = arnoldi::sv_1st_der(T, T_der, count);
+            res_arnoldi = arnoldi::sv_1st_der(T, T_der, count,acc);
             auto end_arnoldi = high_resolution_clock::now();
             auto duration_arnoldi = duration_cast<milliseconds>(end_arnoldi-start_arnoldi);
 
             // write singular values computed by Eigen to file
             file_out.open(file_vals_eig, std::ios_base::app);
             file_out << k_temp.real() << " ";
-            file_out << res_direct.block(0, 0, count, 1).transpose() << std::endl;
+            file_out << res_direct.block(0, 1, count, 1).transpose() << std::endl;
             file_out.close();
             // write singular values computed by Arnoldi algorithm to file
             file_out.open(file_vals_arpp, std::ios_base::app);
             file_out << k_temp.real() << " ";
-            file_out << res_arnoldi.block(0, 0, count, 1).transpose() << std::endl;
+            file_out << res_arnoldi.block(0, 1, count, 1).transpose() << std::endl;
             file_out.close();
             // write timings to file
             file_out.open(file_timings, std::ios_base::app);
