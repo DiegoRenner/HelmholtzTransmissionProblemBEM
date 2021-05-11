@@ -9,13 +9,16 @@ in the base directory or
 cmake ..
 ~~~
 in a subdirectory for an out-of-source build.
-This should automatically install the Eigen library for matrix computations if it is not already available.
-The same goes for the [complex_bessel library](https://github.com/joeydumont/complex_bessel)
+This should automatically generate a target with which the Eigen library for matrix computations can be built by running
+~~~
+make Eigen
+~~~
+if it is not already available.
+The [complex_bessel library](https://github.com/joeydumont/complex_bessel)
 that is used for passing complex arguments to the Hankel and Bessel functions 
-aswell as the [arpackpp library](https://github.com/m-reuter/arpackpp) which gives a <tt>c++</tt>
-interface to the [arpack library](https://github.com/opencollab/arpack-ng).
-<tt>arpack</tt> and <tt>lapack</tt> need to be installed separately and can usually be done so
-with your distributions packagemanager.
+aswell as the [arpackpp library](https://github.com/m-reuter/arpackpp) which gives a <tt>c++</tt> interface to the [arpack library](https://github.com/opencollab/arpack-ng) are installed automatically and don't need to be built.
+<tt>arpack</tt> and <tt>lapack</tt> need to be installed separately and can usually be done so with your distributions packagemanager.
+
 For <tt>arch</tt> based distros:
 ~~~
 sudo pacman -S arpack
@@ -28,7 +31,17 @@ sudo apt install liblapack3
 ~~~
 
 To generate the documentation <tt>latex</tt> and <tt>doxygen</tt> have to be installed as well.
-Running CMake also configures <tt>make</tt> targets.
+For <tt>arch</tt> based distros:
+~~~
+sudo pacman -S texlive-most
+sudo pacman -S doxygen
+~~~
+For <tt>debian</tt> based distros:
+~~~
+sudo apt install texlive-full
+sudo apt install doxygen
+~~~
+Running CMake also configures some examples of how to use the library as <tt>make</tt> targets.
 These can then be built by running 
 
 ~~~
@@ -44,6 +57,38 @@ We commonly refer to the wavenumber by k.
 #### <tt>doxygen_HelmholtzTransmissionProblemBEM</tt>
 This target generates a documentation of the library in the <tt>doxygen/generated_doc</tt> directory.
 The documentation can be browsed using any common browser.
+
+#### <tt>debugging_SVs</tt>
+This target builds a script that computes the Eigenvalues of the BIO for Helmholtz Transmission Problem. The results are written to file. The script can be run as follows:
+~~~
+ /path/to/debugging_SVs
+~~~
+The output file will contain a section for each set mesh resolution and each of those sections will contain one section each for every BIO where all Eigenvalues for different wavenumbers will be listed in columns. The Eigenvalues are computed using the facts stated in Lemma 3.22. [TODO: find refernce]
+
+#### <tt>direct_v_arnoldi</tt>
+This target builds a script that computes the singular values of the Galerkin BEM approximated BIO for the second-kind direct BIEs of the Helmholtz transmission problem, once using the Arnoldi algorithm and once using s direct solver. The scatterer is set to be a circle. The results are written to file. The script can be run as follows: 
+~~~
+/path/to/direct_v_arnoldi <radius of circle> <number of SVs to be computed> <accurracy of arnoldi algorithm>. 
+~~~
+ The script will generate four files: file_vals_eig_<number of SVs to be computed>_<accurracy of arnoldi algorithm>.dat, file_vals_arpp_<number of SVs to be computed>_<accurracy of arnoldi algorithm>.dat, file_timings_<number of SVs to be computed>_<accurracy of arnoldi algorithm>.dat, file_iter_<number of SVs to be computed>_<accurracy of arnoldi algorithm>.dat. These will contain the SVs computed using the direct solver, the SVs computed using the Arnoldi algorithm, the time taken by the direct solver and the Arnoldi algorithm, and the number of iterations the Arnoldi algorithm took to converge respectively.
+#### <tt>direct_v_arnoldi_1st_der</tt>
+This target builds a script that computes the first derivative of the singular values of the Galerkin BEM approximated BIO for the second-kind direct BIEs of the Helmholtz transmission problem, once using the Arnoldi algorithm and once using s direct solver. The scatterer is set to be a circle. The results are written to file. The script can be run as follows: 
+~~~
+ /path/to/direct_v_arnoldi_1st_der <radius of circle> <number of SV derivatives to be computed>
+ <accurracy of arnoldi algorithm>.
+~~~
+ The script will generate four files:
+ file_vals_eig_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_1stDer.dat,
+ file_vals_arpp_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_1stDer.dat,
+ file_timings_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_1stDer.dat,
+ file_iter_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_1stDer.dat.
+ These will contain the derivatives computed using the direct solver,
+ the derivatives computed using the Arnoldi algorithm,
+ the time taken by the direct solver and the Arnoldi algorithm,
+ and the number of iterations the Arnoldi algorithm took to converge respectively.
+
+#### <tt>direct_v_arnoldi_2nd_der</tt>
+This target builds a script that computes the second derivative of the singular values of the Galerkin BEM approximated BIO for the second-kind direct BIEs of the Helmholtz transmission problem, once using the Arnoldi algorithm and once using s direct solver. The scatterer is set to be a circle. The results are written to file. The script can be run as follows: <tt> /path/to/direct_v_arnoldi_2nd_der <radius of circle> <number of SV derivatives to be computed> <accurracy of arnoldi algorithm>. </tt> The script will generate four files: file_vals_eig_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_2ndDer.dat, file_vals_arpp_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_2ndDer.dat, file_timings_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_2ndDer.dat, file_iter_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_2ndDer.dat. These will contain the derivatives computed using the direct solver, the derivatives computed using the Arnoldi algorithm, the time taken by the direct solver and the Arnoldi algorithm, and the number of iterations the Arnoldi algorithm took to converge respectively.
 
 #### <tt>dirichlet_example</tt>
 This target builds a script that computes the solution to a Dirichlet problem
@@ -84,7 +129,7 @@ The user also will get updates on the current best approximation for a minima an
 
 #### <tt>roots_brent_circle</tt>
 This target builds a script that computes minimas in the smallest singular value of the
-Galerkin BEM approximated solutions operator for the sedond-kind direct BIEs of the Helmholtz
+Galerkin BEM approximated solutions operator for the second-kind direct BIEs of the Helmholtz
 transmission problem using the Van Wijngaarden-Dekker-Brent method.
 The scatterer is set to be a circle.
 The results are written to disk.
@@ -161,36 +206,93 @@ The user will be updated through the command line about the progress of the algo
 This target builds a script that computes the singular values
 of the Galerkin BEM approximated BIO for the
 second-kind direct BIEs of the Helmholtz
-transmission problem.
+transmission problem. The direct algorithm from Eigen is used to compute the
+sinuglar values.
 The scatterer is set to be a circle.
 The results are written to file.
 The script can be run as follows:
+
 ~~~
-/path/to/library/bin/sv_circle <radius of circle> 
-    <refraction inside> <refraction outside> <initial wavenumber>
-    <#panels> <order of quadrature rule> <outputfile>.
+/path/to/sv_circle <radius of circle> <refraction inside>
+     <refraction outside> <initial wavenumber> <final wavenumber>
+     <#panels> <order of quadrature rule> <outputfile>.
 ~~~
-The resulting file will contain the value of k in the first column.
-The rest of the columns contain the singular values from smallest to largest for this k.
-The user will be updated through the command line about the progress of the algorithm if <tt>-DCMDL</tt> is set.
+
+The resulting file will contain the value of f$kf$ in the first column.
+The rest of the columns contain the singular values from
+smallest to largest for this f$kf$.
+The user will be updated through the command line about the
+progress of the algorithm
+if f$ verb|-DCMDL| f$ is set.
+
+#### <tt>sv_circle_arnoldi</tt>
+This target builds a script that computes the singular values
+of the Galerkin BEM approximated BIO for the
+second-kind direct BIEs of the Helmholtz
+transmission problem. The arnoldi algorithm from arpack is used to compute the
+sinuglar values. The scatterer is set to be a circle.
+The results are written to file.
+The script can be run as follows:
+
+~~~
+/path/to/sv_circle <radius of circle> <refraction inside>
+     <refraction outside> <initial wavenumber> <final wavenumber>
+     <#points to evaluate> <scan complex wavenumbers> <#panels>
+     <order of quadrature rule> <accuracy of arnoldi algorithm>.
+~~~
+
+The resulting file will contain the value of f$kf$ in the first column.
+The rest of the columns contain the singular values from
+smallest to largest for this f$kf$.
+The user will be updated through the command line about the
+progress of the algorithm
+if f$ verb|-DCMDL| f$ is set.
 
 #### <tt>sv_square</tt>
 This target builds a script that computes the singular values
 of the Galerkin BEM approximated BIO for the
 second-kind direct BIEs of the Helmholtz
-transmission problem.
+transmission problem. The direct algorithm from Eigen is used to compute the
+sinuglar values.
 The scatterer is set to be a square.
 The results are written to file.
 The script can be run as follows:
-~~~
-/path/to/library/bin/sv_circle <half of side length of square> 
-    <refraction inside> <refraction outside> <initial wavenumber>
-    <#panels> <order of quadrature rule> <outputfile>.
-~~~
-The resulting file will contain the value of k in the first column.
-The rest of the columns contain the singular values from smallest to largest for this k.
-The user will be updated through the command line about the progress of the algorithm if <tt>-DCMDL</tt> is set.
 
+~~~
+/path/to/sv_square <half of side length of square> <refraction inside>
+     <refraction outside> <initial wavenumber>
+     <#panels> <order of quadrature rule> <outputfile>.
+~~~
+
+The resulting file will contain the value of f$kf$ in the first column.
+The rest of the columns contain the singular values from
+smallest to largest for this f$kf$.
+The user will be updated through the command line about the
+progress of the algorithm
+if f$ verb|-DCMDL| f$ is set.
+
+#### <tt>sv_square_arnoldi</tt>
+This target builds a script that computes the singular values
+of the Galerkin BEM approximated BIO for the
+second-kind direct BIEs of the Helmholtz
+transmission problem. The arnoldi algorithm from arpack is used to compute the
+sinuglar values. The scatterer is set to be a square.
+The results are written to file.
+The script can be run as follows:
+
+~~~
+/path/to/sv_circle <radius of circle> <refraction inside>
+     <refraction outside> <initial wavenumber> <final wavenumber>
+     <#points to evaluate> <scan complex wavenumbers> <#panels>
+     <order of quadrature rule> <accuracy of arnoldi algorithm>.
+~~~
+
+The resulting file will contain the value of f$kf$ in the first column.
+The rest of the columns contain the singular values from
+smallest to largest for this f$kf$.
+The user will be updated through the command line about the
+progress of the algorithm
+if f$ verb|-DCMDL| f$ is set.
 
 #### <tt>sv_derivative_verification_circle</tt>
 This target builds a script that verifies the derivatives of the singular

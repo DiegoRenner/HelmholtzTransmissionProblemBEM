@@ -2,7 +2,7 @@
  * \file roots_brent_circle.cpp
  * \brief This target builds a script that computes minimas in 
  * the smallest singular value of the
- * Galerkin BEM approximated solutions operator for the sedond-kind direct 
+ * Galerkin BEM approximated solutions operator for the second-kind direct
  * BIEs of the Helmholtz
  * transmission problem using the Van Wijngaarden-Dekker-Brent method.
  * The scatterer is set to be a circle.

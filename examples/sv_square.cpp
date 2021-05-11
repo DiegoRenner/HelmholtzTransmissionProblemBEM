@@ -22,6 +22,7 @@
  * progress of the algorithm
  * if \f$ \verb|-DCMDL| \f$ is set.
  *
+ * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
 #include <complex>
 #include <iostream>
@@ -112,7 +113,7 @@ int main(int argc, char** argv) {
             }
 
             // compute singular value
-            res = sv(T,list,count);
+            res = direct::sv(T,list,count);
 
             // write singular values to file
             file_out.open(argv[7], std::ios_base::app);
