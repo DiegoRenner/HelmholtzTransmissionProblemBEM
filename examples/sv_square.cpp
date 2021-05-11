@@ -31,8 +31,10 @@
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 
+// define shorthand for complex data type and imaginary unit
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
+
 int main(int argc, char** argv) {
 
     // define radius of circle refraction index and initial wavenumber

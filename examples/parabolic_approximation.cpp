@@ -30,8 +30,11 @@
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 
+// define shorthand for complex data type and imaginary unit
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
+
+// tolerance when verifying root
 double epsilon = 1e-3;
 
 int main(int argc, char** argv) {
@@ -62,18 +65,18 @@ int main(int argc, char** argv) {
     // define functions for evaluating singular values and their derivatives
     auto sv_eval = [&] (double k_in) {
         Eigen::MatrixXcd T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-        return sv(T_in, list, count);
+        return direct::sv(T_in, list, count);
     };
     auto sv_eval_der = [&] (double k_in) {
         Eigen::MatrixXcd T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
         Eigen::MatrixXcd T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
-        return sv_1st_der(T_in, T_der_in, list, count).block(0,1,count,1);
+        return direct::sv_1st_der(T_in, T_der_in, list, count).block(0,1,count,1);
     };
     auto sv_eval_der2 = [&] (double k_in) {
         Eigen::MatrixXcd T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
         Eigen::MatrixXcd T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
         Eigen::MatrixXcd T_der2_in = gen_sol_op_2nd_der(mesh, order, k_in , c_o, c_i);
-        Eigen::MatrixXd res = sv_2nd_der(T_in, T_der_in, T_der2_in, list, count).block(0,2,count,1);
+        Eigen::MatrixXd res = direct::sv_2nd_der(T_in, T_der_in, T_der2_in, list, count).block(0,2,count,1);
         return res;
     };
     // Inform user of started computation.

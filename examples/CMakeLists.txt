@@ -19,7 +19,6 @@ add_executable(direct_v_arnoldi_1st_der direct_v_arnoldi_1st_der.cpp)
 add_executable(direct_v_arnoldi_2nd_der direct_v_arnoldi_2nd_der.cpp)
 add_executable(sv_circle_arnoldi sv_circle_arnoldi.cpp)
 add_executable(sv_square_arnoldi sv_square_arnoldi.cpp)
-add_executable(using_starting_vectors using_starting_vectors.cpp)
 add_executable(debugging_SVs debugging_SVs.cpp)
 
 
@@ -36,14 +35,13 @@ target_link_libraries(sv_derivative_full parametrizations find_zeros complex_bes
 target_link_libraries(sv_circle parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
 target_link_libraries(sv_square parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
 target_link_libraries(parabolic_approximation parametrizations find_zeros complex_bessel compute_SV_der gen_sol_op)
-target_link_libraries(direct_v_arnoldi parametrizations find_zeros complex_bessel compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack st_vec_storage)
+target_link_libraries(direct_v_arnoldi parametrizations find_zeros complex_bessel compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack )
 target_link_libraries(direct_v_arnoldi_1st_der parametrizations find_zeros complex_bessel
-        compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack st_vec_storage)
+        compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack)
 target_link_libraries(direct_v_arnoldi_2nd_der parametrizations find_zeros complex_bessel
-        compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack st_vec_storage)
+        compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack)
 target_link_libraries(sv_circle_arnoldi parametrizations
-        find_zeros complex_bessel compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack st_vec_storage)
+        find_zeros complex_bessel compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack)
 target_link_libraries(sv_square_arnoldi parametrizations
-        find_zeros complex_bessel compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack st_vec_storage)
-target_link_libraries(using_starting_vectors parametrizations find_zeros complex_bessel compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack st_vec_storage)
+        find_zeros complex_bessel compute_SV_der compute_SV_der_arnoldi gen_sol_op blas lapack arpack)
 target_link_libraries(debugging_SVs parametrizations gen_sol_op complex_bessel )

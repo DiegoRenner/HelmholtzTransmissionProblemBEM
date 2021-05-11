@@ -32,8 +32,10 @@
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 
+// define shorthand for complex data type and imaginary unit
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
+
 int main(int argc, char** argv) {
 
     // define radius of circle refraction index and initial wavenumber
@@ -80,7 +82,8 @@ int main(int argc, char** argv) {
     std::cout << "Computing singular values of BIO." << std::endl;
     std::cout << "Computing on userdefined problem using circular domain." << std::endl;
     std::cout << std::endl;
-	#endif
+    #endif
+
     for (unsigned j = 0; j < n_points_x; j++) {
         for (unsigned k = 0; k < n_points_y; k++) {
             Eigen::MatrixXd res(2*numpanels,3);

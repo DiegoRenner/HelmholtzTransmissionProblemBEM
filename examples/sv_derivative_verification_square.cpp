@@ -34,10 +34,13 @@
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 
+// define shorthand for complex data type and imaginary unit
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
+
 // tolerance for computing derivative by extrapolation
 double epsilon = 1e-6;
+
 int main(int argc, char** argv) {
 
     // define side length of square refraction index and initial wavenumber
@@ -131,7 +134,7 @@ int main(int argc, char** argv) {
                 }
 
                 // compute singular value, derivative and 2nd derivative
-                res = sv_2nd_der(T,T_der,T_der2,list,count);
+                res = direct::sv_2nd_der(T,T_der,T_der2,list,count);
 
                 // define functions for computing derivatives by extrapolation
                 auto sv_eval = [&] (double k_in) {
@@ -143,7 +146,7 @@ int main(int argc, char** argv) {
                     } else {
                        T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
                     }
-                    return sv(T_in, list, count)(m);
+                    return direct::sv(T_in, list, count)(m);
                 };
                 auto sv_eval_der = [&] (double k_in) {
                     Eigen::MatrixXcd T_in;
@@ -158,12 +161,12 @@ int main(int argc, char** argv) {
                         T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
                         T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
                     }
-                    return sv_1st_der(T_in, T_der_in, list, count)(m,1);
+                    return direct::sv_1st_der(T_in, T_der_in, list, count)(m,1);
                 };
 
                 // compute derivatives by extrapolation
-                double sv_ext_der1 =  der_by_ext(sv_eval,k_temp.real(),epsilon,epsilon,h_x*epsilon);
-                double sv_ext_der2 =  der_by_ext(sv_eval_der,k_temp.real(),epsilon,epsilon,h_x*epsilon);
+                double sv_ext_der1 =  direct::der_by_ext(sv_eval,k_temp.real(),epsilon,epsilon,h_x*epsilon);
+                double sv_ext_der2 =  direct::der_by_ext(sv_eval_der,k_temp.real(),epsilon,epsilon,h_x*epsilon);
 
                 // write results to file
                 filename.open(argv[7], std::ios_base::app);

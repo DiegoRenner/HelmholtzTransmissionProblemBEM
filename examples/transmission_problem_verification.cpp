@@ -33,10 +33,11 @@
 #include "mass_matrix.hpp"
 #include <chrono>
 
+// define shorthand for time benchmarking tools, complex data type and immaginary unit
 using namespace std::chrono;
-
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
+
 int main(int argc, char** argv) {
 
     // define radius of circle refraction index and initial wavenumber

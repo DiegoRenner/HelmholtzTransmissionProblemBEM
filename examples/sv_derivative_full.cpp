@@ -40,9 +40,13 @@
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 
+// define shorthand for complex data type and imaginary unit
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
+
+// tolerance when verifying/finding root
 double epsilon = 1e-3;//numeric_limits<double>::epsilon();
+
 int main(int argc, char** argv) {
 
     // define radius of circle refraction index and initial wavenumber
@@ -105,7 +109,7 @@ int main(int argc, char** argv) {
             }
 
             // compute singular value, derivative and 2nd derivative
-            res = sv_2nd_der(T,T_der,T_der2,list,count);
+            res = direct::sv_2nd_der(T,T_der,T_der2,list,count);
 
             // define functions for computing roots
             auto sv_eval_der = [&] (double k_in) {
@@ -121,7 +125,7 @@ int main(int argc, char** argv) {
                     T_in = gen_sol_op(mesh, order, k_in, c_o, c_i);
                     T_der_in = gen_sol_op_1st_der(mesh, order, k_in, c_o, c_i);
                 }
-                return sv_1st_der(T_in, T_der_in, list, count)(m,1);
+                return direct::sv_1st_der(T_in, T_der_in, list, count)(m,1);
             };
             auto sv_eval_both = [&] (double k_in) {
                 Eigen::MatrixXcd T_in;
@@ -140,7 +144,7 @@ int main(int argc, char** argv) {
                     T_der_in = gen_sol_op_1st_der(mesh, order, k_in, c_o, c_i);
                     T_der2_in = gen_sol_op_2nd_der(mesh, order, k_in, c_o, c_i);
                 }
-                Eigen::MatrixXd res = sv_2nd_der(T_in, T_der_in, T_der2_in, list, count).block(m,1,1,2);
+                Eigen::MatrixXd res = direct::sv_2nd_der(T_in, T_der_in, T_der2_in, list, count).block(m,1,1,2);
                 return res;
             };
 

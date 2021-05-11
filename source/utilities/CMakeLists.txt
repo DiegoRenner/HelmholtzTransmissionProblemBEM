@@ -16,9 +16,4 @@ add_library(find_zeros STATIC find_roots.cpp)
 
 add_library(arpp_eig_interface STATIC arpp_eig_interface.cpp)
 
-add_library(st_vec STATIC st_vec.cpp)
-
-add_library(st_vec_storage STATIC st_vec_storage.cpp)
-target_link_libraries(st_vec_storage st_vec)
-
 add_library(generate_solution STATIC gen_sol.cpp)

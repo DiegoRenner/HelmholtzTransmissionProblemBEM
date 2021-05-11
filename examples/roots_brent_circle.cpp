@@ -39,11 +39,14 @@
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 
+// define shorthand for time benchmarking tools, complex data type and immaginary unit
 using namespace std::chrono;
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
-// define tolerance when searching for root
+
+// tolerance when verifying/finding root
 double epsilon = 1e-3;
+
 int main(int argc, char** argv) {
 
     // define radius of circle refraction index and initial wavenumber
