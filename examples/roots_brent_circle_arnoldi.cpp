@@ -77,8 +77,8 @@ int main(int argc, char** argv) {
     std::string base_order = "../data/file_roots_brent_circle_arnoldi_";
     std::string suffix = ".dat";
     std::string divider = "_";
-    std::string file_minimas = base_order.append(argv[2])
-                           + divider.append(argv[8]) + suffix;
+    std::string file_minimas = base_order.append(argv[2]) + divider.append(argv[5])
+                               + divider.append(argv[8]) + suffix;
     // clear existing file
     std::ofstream file_out;
     file_out.open(file_minimas, std::ofstream::out | std::ofstream::trunc);
