@@ -65,9 +65,15 @@ int main(int argc, char** argv){
     unsigned order = atoi(argv[7]);
     unsigned m = 0;
 
+    // generate output filename with set parameters
+    std::string base_order = "../data/file_roots_newton_circle_direct_";
+    std::string suffix = ".dat";
+    std::string divider = "_";
+    std::string file_minimas = base_order.append(argv[2])
+                               + suffix;
     // clear existing file
     std::ofstream file_out;
-    file_out.open(argv[8], std::ofstream::out | std::ofstream::trunc);
+    file_out.open(file_minimas, std::ofstream::out | std::ofstream::trunc);
     file_out.close();
 
     // Inform user of started computation.
@@ -99,7 +105,7 @@ int main(int argc, char** argv){
                 T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
                 auto end = high_resolution_clock::now();
                 duration_ops += duration_cast<milliseconds>(end-start);
-                return sv(T_in, list, count)(m);
+                return direct::sv(T_in, list, count)(m);
             };
             auto sv_eval_both = [&] (double k_in) {
                 auto start = high_resolution_clock::now();
@@ -109,7 +115,7 @@ int main(int argc, char** argv){
                 T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
                 T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
                 T_der2_in = gen_sol_op_2nd_der(mesh, order, k_in , c_o, c_i);
-                Eigen::MatrixXd res = sv_2nd_der(T_in, T_der_in, T_der2_in, list, count).block(m,1,1,2);
+                Eigen::MatrixXd res = direct::sv_2nd_der(T_in, T_der_in, T_der2_in, list, count).block(m,1,1,2);
                 auto end = high_resolution_clock::now();
                 duration_ops += duration_cast<milliseconds>(end-start);
                 return res;
@@ -120,7 +126,7 @@ int main(int argc, char** argv){
                 Eigen::MatrixXcd T_der_in;
                 T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
                 T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
-                double res = sv_1st_der(T_in, T_der_in, list, count)(m,1);
+                double res = direct::sv_1st_der(T_in, T_der_in, list, count)(m,1);
                 auto end = high_resolution_clock::now();
                 duration_ops += duration_cast<milliseconds>(end-start);
                 return res;

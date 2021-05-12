@@ -1,10 +1,11 @@
 /**
- * \file roots_brent_circle.cpp
+ * \file roots_brent_circle_arnoldi.cpp
  * \brief This target builds a script that computes minimas in 
  * the smallest singular value of the
  * Galerkin BEM approximated solutions operator for the second-kind direct
  * BIEs of the Helmholtz
  * transmission problem using the Van Wijngaarden-Dekker-Brent method.
+ * The singular values and their derivatives are computed using the Arnoldi algorithm.
  * The scatterer is set to be a circle.
  * The results are written to disk.
  * The script can be run as follows:
@@ -35,7 +36,7 @@
 #include <fstream>
 #include <chrono>
 #include "parametrized_circular_arc.hpp"
-#include "singular_values.hpp"
+#include "singular_values_arnoldi.hpp"
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 
@@ -69,8 +70,11 @@ int main(int argc, char** argv) {
     unsigned order = atoi(argv[7]);
     unsigned m = 0;
 
+    // define accurracy of arnoldi algorithm
+    double acc = atof(argv[8]);
+
     // generate output filename with set parameters
-    std::string base_order = "../data/file_roots_brent_circle_direct_";
+    std::string base_order = "../data/file_roots_brent_circle_arnoldi_";
     std::string suffix = ".dat";
     std::string divider = "_";
     std::string file_minimas = base_order.append(argv[2])
@@ -108,7 +112,7 @@ int main(int argc, char** argv) {
                 auto start = high_resolution_clock::now();
                 Eigen::MatrixXcd T_in;
                 T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-                double res = direct::sv(T_in, list, count)(m);
+                double res = arnoldi::sv(T_in, count, acc)(m);
                 auto end = high_resolution_clock::now();
                 duration_ops += duration_cast<milliseconds>(end-start);
                 return res;
@@ -119,7 +123,7 @@ int main(int argc, char** argv) {
                 Eigen::MatrixXcd T_der_in;
                 T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
                 T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
-                double res = direct::sv_1st_der(T_in, T_der_in, list, count)(m,1);
+                double res = arnoldi::sv_1st_der(T_in, T_der_in, count, acc)(m,1);
                 auto end = high_resolution_clock::now();
                 duration_ops += duration_cast<milliseconds>(end-start);
                 return res;

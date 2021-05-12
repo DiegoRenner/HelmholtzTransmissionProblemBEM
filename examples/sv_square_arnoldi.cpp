@@ -94,8 +94,7 @@ int main(int argc, char** argv) {
     // define accuracy of arnoldi algorithm
     double acc = atof(argv[10]);
 
-
-
+    // generate output filename with set parameters
     std::string base_order = "../data/file_SVs_square_";
     std::string suffix = ".dat";
     std::string divider = "_";

@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
     ContinuousSpace<1> cont_space;
 
     // initialize file to wirte to
-    std::string file_SV_debugging = "../data/file_SV_debugging.txt";
+    std::string file_SV_debugging = "../data/file_SV_debugging.dat";
     std::ofstream file_out;
     // clear file if it already exists
     file_out.open(file_SV_debugging, std::ofstream::out | std::ofstream::trunc);

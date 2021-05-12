@@ -1,24 +1,23 @@
 /**
- * \file roots_brent_circle.cpp
- * \brief This target builds a script that computes minimas in 
- * the smallest singular value of the
- * Galerkin BEM approximated solutions operator for the second-kind direct
- * BIEs of the Helmholtz
- * transmission problem using the Van Wijngaarden-Dekker-Brent method.
- * The scatterer is set to be a circle.
+ * \file roots_newton_square.cpp
+ * \brief This target builds a sript that computes minimas in the smallest singular value of the
+ * Galerkin BEM approximated solutions operator for the second-kind direct BIEs of the Helmholtz
+ * transmission problem using the Newton-Raphson method.
+ * The singular values and their derivatives are computed using the Arnoldi algorithm.
+ * The scatterer is set to be a square.
  * The results are written to disk.
  * The script can be run as follows:
  *
  * <tt>
- *  /path/to/roots_brent_circle \<radius of circle\> \<refraction inside\>
+ *  /path/to/roots_newton_circle \<half side length of square\> \<refraction inside\>
  *     \<refraction outside\> \<initial wavenumber\> \<\#grid points for root search\>
  *     \<\#panels\> \<order of quadrature rule\> \<outputfile\>.
  * </tt>
  *
  * The resulting file will contain the left boundary of the 
  * interval used to compute the root in the first column. 
- * Then in the next three columns will be the point, the 
- * function value and the derivative at which the root was found.
+ * Then in the next three columns will be the point, 
+ * the function value and the derivative at which the root was found.
  * The last column will contain the number of iterations used to find the root.
  * If no root was found the last four columns will be set to \f$\verb|NAN|\f$.
  * The singular vaues and their derivatives are computed using the direct
@@ -34,7 +33,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
-#include "parametrized_circular_arc.hpp"
+#include "parametrized_line.hpp"
 #include "singular_values.hpp"
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
@@ -44,10 +43,10 @@ using namespace std::chrono;
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
 
-// tolerance when verifying/finding root
+// tolerance when verifying root
 double epsilon = 1e-3;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv){
 
     // define radius of circle refraction index and initial wavenumber
     double eps = atof(argv[1]);
@@ -60,37 +59,67 @@ int main(int argc, char** argv) {
     unsigned n_points_y = 1;
     unsigned numpanels;
     numpanels = atoi(argv[6]);
-    double h_x = 10.0/n_points_x;
-    double h_y = 10.0/n_points_y;
-    ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
-    ParametrizedMesh mesh(curve.split(numpanels));
+    double h_x = 100.0/n_points_x;
+    double h_y = 100.0/n_points_y;
+    // compute mesh for numpanels
+    using PanelVector = PanelVector;
+    // corner points for the square
+    Eigen::RowVectorXd x1(2);
+    x1 << 0,0; // point (0,0)
+    Eigen::RowVectorXd x2(2);
+    x2 << eps, 0; // point (1,0)
+    Eigen::RowVectorXd x3(2);
+    x3 << eps, eps; // point (1,0.5)
+    Eigen::RowVectorXd x4(2);
+    x4 << 0, eps; // point (0,1.5)
+    // parametrized line segments forming the edges of the polygon
+    ParametrizedLine line1(x1, x2);
+    ParametrizedLine line2(x2, x3);
+    ParametrizedLine line3(x3, x4);
+    ParametrizedLine line4(x4, x1);
+    // splitting the parametrized lines into panels for a mesh to be used for
+    // BEM (Discretization).
+    PanelVector line1panels = line1.split(numpanels/4);
+    PanelVector line2panels = line2.split(numpanels/4);
+    PanelVector line3panels = line3.split(numpanels/4);
+    PanelVector line4panels = line4.split(numpanels/4);
+    PanelVector panels;
+    // storing all the panels in order so that they form a polygon
+    panels.insert(panels.end(), line1panels.begin(), line1panels.end());
+    panels.insert(panels.end(), line2panels.begin(), line2panels.end());
+    panels.insert(panels.end(), line3panels.begin(), line3panels.end());
+    panels.insert(panels.end(), line4panels.begin(), line4panels.end());
+    // construction of a ParametrizedMesh object from the vector of panels
+    ParametrizedMesh mesh(panels);
 
     // define order of quadrature rule used to compute matrix entries and which singular value to evaluate
     unsigned order = atoi(argv[7]);
     unsigned m = 0;
 
     // generate output filename with set parameters
-    std::string base_order = "../data/file_roots_brent_circle_direct_";
+    std::string base_order = "../data/file_roots_newton_square_direct_";
     std::string suffix = ".dat";
     std::string divider = "_";
     std::string file_minimas = base_order.append(argv[2])
-                           + suffix;
+                               + suffix;
     // clear existing file
     std::ofstream file_out;
     file_out.open(file_minimas, std::ofstream::out | std::ofstream::trunc);
     file_out.close();
+    // clear existing file
 
     // Inform user of started computation.
 	#ifdef CMDL
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "Finding resonances using Brent's method." << std::endl;
-    std::cout << "Computing on userdefined problem using circular domain." << std::endl;
+    std::cout << "Computing on userdefined problem using square domain." << std::endl;
     std::cout << std::endl;
 	#endif
-    // loop over values of wavenumber
+
+    // loop over values of wavenumber 
     for (unsigned j = 0; j < n_points_x; j++) {
         for (unsigned k = 0; k < n_points_y; k++) {
-            auto duration_ops = milliseconds::zero();
+            auto duration_ops = milliseconds ::zero();
             auto duration = milliseconds::zero();
 
             // define wavenumber for current loop
@@ -108,7 +137,19 @@ int main(int argc, char** argv) {
                 auto start = high_resolution_clock::now();
                 Eigen::MatrixXcd T_in;
                 T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-                double res = direct::sv(T_in, list, count)(m);
+                auto end = high_resolution_clock::now();
+                duration_ops += duration_cast<milliseconds>(end-start);
+                return direct::sv(T_in, list, count)(m);
+            };
+            auto sv_eval_both = [&] (double k_in) {
+                auto start = high_resolution_clock::now();
+                Eigen::MatrixXcd T_in;
+                Eigen::MatrixXcd T_der_in;
+                Eigen::MatrixXcd T_der2_in;
+                T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
+                T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
+                T_der2_in = gen_sol_op_2nd_der(mesh, order, k_in , c_o, c_i);
+                Eigen::MatrixXd res = direct::sv_2nd_der(T_in, T_der_in, T_der2_in, list, count).block(m,1,1,2);
                 auto end = high_resolution_clock::now();
                 duration_ops += duration_cast<milliseconds>(end-start);
                 return res;
@@ -125,26 +166,27 @@ int main(int argc, char** argv) {
                 return res;
             };
 
-            // search for root
             bool root_found = false;
-            unsigned num_iter = 0;
+            unsigned num_iter=0;
             auto start = high_resolution_clock::now();
+	    
+			// search for root
 			#ifdef CMDL
             std::cout << "#######################################################" << std::endl;
 			#endif
-            double root = zbrent(sv_eval_der,k_temp.real(), k_temp.real()+h_x,epsilon,root_found,num_iter);
+            double root =  rtsafe(sv_eval_der,sv_eval_both,k_temp.real(), k_temp.real()+h_x,epsilon,root_found,num_iter);
             auto end = high_resolution_clock::now();
             duration += duration_cast<milliseconds>(end-start);
-
-            // write result to file
-            file_out.open(argv[8], std::ios_base::app);
-            file_out << k_temp.real();//<< " " << duration.count() << " " << duration_ops.count();
-
-	    // write interval searched to command line
+	    
 			#ifdef CMDL
+			// write interval searched to command line
             std::cout << "Interval searched: [" << k_temp.real() 
 	    	<< "," << k_temp.real()+h_x << "]" << std::endl;
 			#endif
+
+            // write result to file
+            file_out.open(argv[8], std::ios_base::app);
+            file_out << k_temp.real();// << " " << duration.count() << " " << duration_ops.count();
 
             // check if root was found
             if (root_found) {
@@ -152,8 +194,8 @@ int main(int argc, char** argv) {
                 // check if it's actually a root and not a crossing
                 if (abs(val_at_root) < epsilon) {
                     file_out << " " << root << " " << val_at_root << " " << sv_eval(root) << " " << num_iter << std::endl;
-		    // write found roots to command line
 				#ifdef CMDL
+				// write found roots to command line
 				std::cout << "A root was found at: " << root << std::endl;
 				std::cout << "The value of the first derivative here is: " << val_at_root << std::endl;
 				std::cout << "Number of iterations taken: " << num_iter << std::endl;
@@ -167,7 +209,7 @@ int main(int argc, char** argv) {
             file_out.close();
 			#ifdef CMDL
             std::cout << "#######################################################" << std::endl;
-            std::cout << std::endl;
+			std::cout << std::endl;
 			#endif
         }
     }
