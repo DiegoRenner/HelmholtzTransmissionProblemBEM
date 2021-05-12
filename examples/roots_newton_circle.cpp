@@ -1,6 +1,6 @@
 /**
  * \file roots_newton_circle.cpp
- * \brief This target builds a sript that computes minimas in the smallest singular value of the
+ * \brief This target builds a script that computes minimas in the smallest singular value of the
  * Galerkin BEM approximated solutions operator for the second-kind direct BIEs of the Helmholtz
  * transmission problem using the Newton-Raphson method.
  * The scatterer is set to be a circle.

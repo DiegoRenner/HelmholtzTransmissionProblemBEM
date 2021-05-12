@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
     std::string suffix = ".dat";
     std::string divider = "_";
     std::string file_minimas = base_order.append(argv[2])
-                           + suffix;
+                           + divider.append(argv[8]) + suffix;
     // clear existing file
     std::ofstream file_out;
     file_out.open(file_minimas, std::ofstream::out | std::ofstream::trunc);

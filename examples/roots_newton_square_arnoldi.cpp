@@ -1,6 +1,6 @@
 /**
- * \file roots_newton_square.cpp
- * \brief This target builds a sript that computes minimas in the smallest singular value of the
+ * \file roots_newton_square_arnoldi.cpp
+ * \brief This target builds a script that computes minimas in the smallest singular value of the
  * Galerkin BEM approximated solutions operator for the second-kind direct BIEs of the Helmholtz
  * transmission problem using the Newton-Raphson method.
  * The singular values and their derivatives are computed using the Arnoldi algorithm.
@@ -34,7 +34,7 @@
 #include <fstream>
 #include <chrono>
 #include "parametrized_line.hpp"
-#include "singular_values.hpp"
+#include "singular_values_arnoldi.hpp"
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 
@@ -96,17 +96,19 @@ int main(int argc, char** argv){
     unsigned order = atoi(argv[7]);
     unsigned m = 0;
 
+    // define accurracy of arnoldi algorithm
+    double acc = atof(argv[8]);
+
     // generate output filename with set parameters
-    std::string base_order = "../data/file_roots_newton_square_direct_";
+    std::string base_order = "../data/file_roots_newton_square_arnoldi_";
     std::string suffix = ".dat";
     std::string divider = "_";
     std::string file_minimas = base_order.append(argv[2])
-                               + suffix;
+                               + divider.append(argv[8]) + suffix;
     // clear existing file
     std::ofstream file_out;
     file_out.open(file_minimas, std::ofstream::out | std::ofstream::trunc);
     file_out.close();
-    // clear existing file
 
     // Inform user of started computation.
 	#ifdef CMDL
@@ -127,10 +129,6 @@ int main(int argc, char** argv){
 
             // set which singular values to evaluate, smallest only
             unsigned count = 1;
-            double list[count];
-            for (unsigned i = 0; i < count; i++){
-                list[i] = i;
-            }
 
             // define functions that return singular value and it's derivative
             auto sv_eval = [&] (double k_in) {
@@ -139,7 +137,7 @@ int main(int argc, char** argv){
                 T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
                 auto end = high_resolution_clock::now();
                 duration_ops += duration_cast<milliseconds>(end-start);
-                return direct::sv(T_in, list, count)(m);
+                return arnoldi::sv(T_in, count, acc)(m);
             };
             auto sv_eval_both = [&] (double k_in) {
                 auto start = high_resolution_clock::now();
@@ -149,7 +147,7 @@ int main(int argc, char** argv){
                 T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
                 T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
                 T_der2_in = gen_sol_op_2nd_der(mesh, order, k_in , c_o, c_i);
-                Eigen::MatrixXd res = direct::sv_2nd_der(T_in, T_der_in, T_der2_in, list, count).block(m,1,1,2);
+                Eigen::MatrixXd res = arnoldi::sv_2nd_der(T_in, T_der_in, T_der2_in, count, acc).block(m,1,1,2);
                 auto end = high_resolution_clock::now();
                 duration_ops += duration_cast<milliseconds>(end-start);
                 return res;
@@ -160,7 +158,7 @@ int main(int argc, char** argv){
                 Eigen::MatrixXcd T_der_in;
                 T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
                 T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
-                double res = direct::sv_1st_der(T_in, T_der_in, list, count)(m,1);
+                double res = arnoldi::sv_1st_der(T_in, T_der_in, count, acc)(m,1);
                 auto end = high_resolution_clock::now();
                 duration_ops += duration_cast<milliseconds>(end-start);
                 return res;
