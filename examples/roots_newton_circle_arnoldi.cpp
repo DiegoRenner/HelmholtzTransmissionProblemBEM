@@ -57,8 +57,8 @@ int main(int argc, char** argv){
     unsigned n_points_y = 1;
     unsigned numpanels;
     numpanels = atoi(argv[6]);
-    double h_x = 100.0/n_points_x;
-    double h_y = 100.0/n_points_y;
+    double h_x = 10.0/n_points_x;
+    double h_y = 10.0/n_points_y;
     ParametrizedCircularArc curve(Eigen::Vector2d(0,0),eps,0,2*M_PI);
     ParametrizedMesh mesh(curve.split(numpanels));
 
