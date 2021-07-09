@@ -1,0 +1,17 @@
+{
+    "jobs" : [
+        {
+            "mode": "solveBIE",
+            "kind": "first",
+            "type": "direct",
+            "input": "neumann",
+            "domain": "circle",
+            "radius": 0.25,
+            "wavenumber": 1.0,
+            "n_runs": 7,
+            "init_panels": 50,
+            "eval_point": [0.125, 0.0],
+            "order": 11
+        }
+        ]
+}

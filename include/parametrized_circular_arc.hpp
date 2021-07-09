@@ -33,9 +33,11 @@ public:
   ParametrizedCircularArc(Eigen::Vector2d center, double r, double phi_start,
                           double phi_end);
 
-  /**
-   * See documentation in AbstractParametrizedCurve
-   */
+    ParametrizedCircularArc();
+
+    /**
+     * See documentation in AbstractParametrizedCurve
+     */
   Eigen::Vector2d operator()(double) const;
   Eigen::Vector2d operator[](double) const;
   Eigen::Vector2d swapped_op(double) const;
@@ -62,23 +64,23 @@ public:
    */
   double length() const;
 
-private:
+//private:
   /**
-   * Private const field for storing the center
+   * Private field for storing the center
    */
-  const Eigen::Vector2d center_;
+  Eigen::Vector2d center_;
   /**
-   * Private const field for storing the radius
+   * Private field for storing the radius
    */
-  const double radius_;
+  double radius_;
   /**
-   * Private const field for storing the phi_start
+   * Private field for storing the phi_start
    */
-  const double phi_start_;
+  double phi_start_;
   /**
-   * Private const field for storing the phi_end
+   * Private field for storing the phi_end
    */
-  const double phi_end_;
+  double phi_end_;
 }; // class ParametrizedCircularArc
 
 #endif // PARAMETRIZEDCIRCULARARCHPP

@@ -14,8 +14,12 @@
 #include <Eigen/Dense>
 #define _USE_MATH_DEFINES // for Pi
 
+    ParametrizedCircularArc::ParametrizedCircularArc(): center_(Eigen::Vector2d(0.0,0.0)), radius_(0.25), phi_start_(0.0), phi_end_(2*M_PI) {
+
+    }
     ParametrizedCircularArc::ParametrizedCircularArc(Eigen::Vector2d center,
-                                                     double r, double phi_start,
+                                                     double r,
+                                                     double phi_start,
                                                      double phi_end)
             : center_(center), radius_(r), phi_start_(phi_start), phi_end_(phi_end) {
         // Asserting that the circular arc does not overlap itself
@@ -106,3 +110,4 @@
     double ParametrizedCircularArc::length() const {
         return radius_ * (phi_end_ - phi_start_);
     }
+

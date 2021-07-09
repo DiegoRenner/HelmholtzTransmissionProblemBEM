@@ -1,0 +1,2 @@
+add_library(first_kind_direct_dirichlet STATIC first_kind_direct_dirichlet.cpp)
+target_link_libraries(first_kind_direct_dirichlet parametrizations generate_solution solvers complex_bessel)

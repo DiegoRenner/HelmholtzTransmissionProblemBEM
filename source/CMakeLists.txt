@@ -6,6 +6,8 @@ add_subdirectory(quadrature)
 
 add_subdirectory(utilities)
 
+add_subdirectory(modules)
+
 add_library(single_layer STATIC single_layer.cpp)
 target_link_libraries(single_layer parametrizations)
 add_library(single_layer_der STATIC single_layer_der.cpp)
