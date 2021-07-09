@@ -9,8 +9,8 @@ rc('text', usetex=True)
 #iter_path = [None]*8
 #for i in range(0,5):
     #u_path[i] = os.path.join("../data_bckp_21-06-09-20-19/file_vals_1e-" + str(pow(2,-(i-4))) +".dat")
-u_path = os.path.join("../data_bckp_21-07-09_11-15-44/file_SVs_circle_50_1e-16_single.dat")
-roots_path = os.path.join("../data_bckp_21-06-09-20-19/file_roots_brent_circle_arnoldi_20_100_1e-8.dat")
+u_path = os.path.join("../data_bckp_21-07-09_11-15-44/file_SVs_circle_50_1e0_single.dat")
+roots_path = os.path.join("../data_bckp_21-06-09-20-19/file_roots_brent_circle_arnoldi_20_20_1e-8.dat")
     #iter_path[i] = os.path.join("../data/file_iter_1e-" + str(pow(2,-(i-4))) +".dat")
 #for i in range(0,3):
 #    u_path[5+i] = os.path.join("../data/file_vals_1e" + str(i) +".dat")
@@ -35,18 +35,18 @@ roots=roots[~np.isnan(roots).any(axis=1)]
 
 #for i in range(0,5):
 #    if i%4==0:
-#        fig = plt.figure()
+fig = plt.figure()
 #        fig.suptitle("Comparing Minima")
 #    plt.subplot(2,2,(i)%4+1)
 #    if i%2==0:
-#        plt.ylabel("smallest singular value")
+plt.ylabel("smallest singular value and roots")
 #    if i%4>1:
-#        plt.xlabel("wavenumber k")
+plt.xlabel("wavenumber k")
 plt.plot(u[:,0], u[:,1])
 print(u[:,0])
 plt.plot(roots[:,1], roots[:,3], "o",color="red")
 
-    plt.title(r"Roots found ")
+plt.title(r"Minima found using 200 panels for operators and 20 panels for root search via Brent")
     #print(r"accuracy $=10^{-" + str(i) + "}$")
     #print(r"Minimum at: " + str(roots[:,5*i+1]) + "\n"
     #    "Average #restarts: " + str(np.mean(iter[:,3*i+1])) + "\n"
@@ -77,6 +77,7 @@ plt.tight_layout()
 #        plt.show()
 #        plt.close(fig)
 #
+plt.savefig("../figures/minima_search_example.pdf")
 plt.show()
-#plt.close(fig)
+plt.close(fig)
 
