@@ -45,7 +45,10 @@ typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
 
 // tolerance when verifying root
-double epsilon = 1e-3;
+double epsilon_ver = 1e-3;
+// tolerance when finding root
+double epsilon_fin = 1e-6;
+
 int main(int argc, char** argv) {
 
     // define radius of circle refraction index and initial wavenumber
@@ -159,7 +162,7 @@ int main(int argc, char** argv) {
 			#ifdef CMDL
             std::cout << "#######################################################" << std::endl;
 			#endif
-            double root = zbrent(sv_eval_der,k_temp.real(), k_temp.real()+h_x,epsilon,root_found,num_iter);
+            double root = zbrent(sv_eval_der,k_temp.real(), k_temp.real()+h_x,epsilon_fin,root_found,num_iter);
             auto end = high_resolution_clock::now();
             duration += duration_cast<milliseconds>(end-start);
 
@@ -177,7 +180,7 @@ int main(int argc, char** argv) {
             if (root_found) {
                 double val_at_root = sv_eval_der(root);
                 // check if it's actually a root and not a crossing
-                if (abs(val_at_root) < epsilon) {
+                if (abs(val_at_root) < epsilon_ver) {
                     file_out << " " << root << " " << val_at_root << " " << sv_eval(root) << " " << num_iter << std::endl;
 				#ifdef CMDL
 				// write found roots to command line
