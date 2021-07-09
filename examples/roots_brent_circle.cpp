@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
             if (root_found) {
                 double val_at_root = sv_eval_der(root);
                 // check if it's actually a root and not a crossing
-                if (abs(val_at_root) < epsilon_ver) {
+                if (std::abs(val_at_root) < epsilon_ver) {
                     file_out << " " << root << " " << val_at_root << " " << sv_eval(root) << " " << num_iter << std::endl;
 		    // write found roots to command line
 				#ifdef CMDL
