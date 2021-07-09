@@ -10,7 +10,7 @@
  * The output file will contain a section for each set mesh resolution
  * and each of those sections will contain one section each for every BIO
  * where all Eigenvalues for different wavenumbers will be listed in columns.
- * The Eigenvalues are computed using the facts stated in Lemma 3.22. [TODO: find refernce]
+ * The Eigenvalues are computed using the facts stated in Lemma 3.22. [TODO: find reference]
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
