@@ -49,7 +49,7 @@ void FirstKindDirectDirichlet::run() {
     auto fund_sol_neu = [&] (double x1, double x2){
         return sol::fund_sol_neu(k,x1,x2,ipt[0],ipt[1]);
     };
-    // define FEM-sapces for result validation later on
+    // define FEM-spaces for result validation later on
     // Inform user of started computation.
     DiscontinuousSpace<0> discont_space;
     std::cout << "-------------------------------------------------------" << std::endl;
@@ -64,7 +64,7 @@ void FirstKindDirectDirichlet::run() {
         // compute Neumann data from Dirichlet data using 1st kind BIE
         Eigen::VectorXcd res = bvp::direct_first_kind::solve_dirichlet(
                 mesh, fund_sol_dir, order, k);
-        // compute interpolation coefficients of known solution Neumann data in FEM-sapce
+        // compute interpolation coefficients of known solution Neumann data in FEM-space
         Eigen::VectorXcd res_known = discont_space.Interpolate_helmholtz(fund_sol_neu,mesh);
         // compute mass matrix for projection onto orthonormal basis functions
         Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh,discont_space,discont_space,order);
