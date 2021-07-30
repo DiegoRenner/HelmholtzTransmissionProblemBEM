@@ -147,6 +147,19 @@ int main(int argc, char** argv) {
                 duration_ops += duration_cast<milliseconds>(end-start);
                 return res;
             };
+            auto sv_eval_both = [&] (double k_in) {
+                auto start = high_resolution_clock::now();
+                Eigen::MatrixXcd T_in;
+                Eigen::MatrixXcd T_der_in;
+                Eigen::MatrixXcd T_der2_in;
+                T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
+                T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
+                T_der2_in = gen_sol_op_2nd_der(mesh, order, k_in , c_o, c_i);
+                Eigen::MatrixXd res = arnoldi::sv_2nd_der(T_in, T_der_in, T_der2_in, count, acc).block(m,1,1,2);
+                auto end = high_resolution_clock::now();
+                duration_ops += duration_cast<milliseconds>(end-start);
+                return res;
+            };
             auto sv_eval_der = [&] (double k_in) {
                 auto start = high_resolution_clock::now();
                 Eigen::MatrixXcd T_in;
@@ -182,10 +195,10 @@ int main(int argc, char** argv) {
 
             // check if root was found
             if (root_found) {
-                double val_at_root = sv_eval_der(root);
+                Eigen::Vector2d val_at_root = sv_eval_both(root);
                 // check if it's actually a root and not a crossing
-                if (std::abs(val_at_root) < epsilon_ver) {
-                    file_out << " " << root << " " << val_at_root << " " << sv_eval(root) << " " << num_iter << std::endl;
+                if (std::abs(val_at_root[0]) < epsilon_ver) {
+                    file_out << " " << root << " " << sv_eval(root) << " " << val_at_root.transpose() << " " << num_iter << std::endl;
 				#ifdef CMDL
 				// write found roots to command line
 				std::cout << "A root was found at: " << root << std::endl;
@@ -193,10 +206,10 @@ int main(int argc, char** argv) {
 				std::cout << "Number of iterations taken: " << num_iter << std::endl;
 				#endif
                 } else {
-                    file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
+                    file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
                 }
             } else{
-                file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
+                file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
             }
             file_out.close();
 			#ifdef CMDL

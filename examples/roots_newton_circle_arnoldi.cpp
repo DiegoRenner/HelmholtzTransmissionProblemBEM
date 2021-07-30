@@ -157,10 +157,10 @@ int main(int argc, char** argv){
 
             // check if root was found
             if (root_found) {
-                double val_at_root = sv_eval_der(root);
+                Eigen::Vector2d val_at_root = sv_eval_both(root);
                 // check if it's actually a root and not a crossing
-                if (std::abs(val_at_root) < epsilon_fin) {
-                    file_out << " " << root << " " << val_at_root << " " << sv_eval(root) << " " << num_iter << std::endl;
+                if (std::abs(val_at_root[0]) < epsilon_fin) {
+                    file_out << " " << root << " " << sv_eval(root) << " " << val_at_root.transpose() << " " << num_iter << std::endl;
 				#ifdef CMDL
 				// write found roots to command line
 				std::cout << "A root was found at: " << root << std::endl;
@@ -168,10 +168,10 @@ int main(int argc, char** argv){
 				std::cout << "Number of iterations taken: " << num_iter << std::endl;
 				#endif 
                 } else {
-                    file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
+                    file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
                 }
             } else{
-                file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
+                file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
             }
             file_out.close();
 			#ifdef CMDL
