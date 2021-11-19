@@ -187,7 +187,7 @@ int main(int argc, char** argv){
             // write result to file
             file_out.open(file_minimas, std::ios_base::app);
             for (auto it = roots.begin(); it != roots.end(); ++it){
-                file_out << *it << " " << sv_eval_both(*it) << std::endl;
+                file_out << *it << " " << sv_eval(*it) << " " << sv_eval_both(*it) << std::endl;
             }
             file_out.close();
 			#ifdef CMDL
