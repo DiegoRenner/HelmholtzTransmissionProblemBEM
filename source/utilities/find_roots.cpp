@@ -4,12 +4,15 @@
 #include <ostream>
 #include <cmath>
 #include "find_roots.hpp"
+#include <vector>
+#include <algorithm>
 
 #define MAXIT 1000
 #define EPS std::numeric_limits<double>::epsilon()
 
 
 using namespace std;
+typedef std::complex<double> complex_t;
 double zbrent( const function<double(double)> f,
                double x1,
                double x2,
@@ -25,9 +28,9 @@ double zbrent( const function<double(double)> f,
     cout << fb << endl;
     // sanity checks
     if ((fa > 0.0 && fb > 0.0) || (fa < 0.0 && fb < 0.0)) {
-		#ifdef CMDL
+#ifdef CMDL
         cout << "Root must be bracketed in zbrent" << endl;
-		#endif
+#endif
         return 0.0;
     }
     fc=fb;
@@ -103,9 +106,9 @@ double zbrent( const function<double(double)> f,
         // one new function evaluation per iteration
         fb = f(b);
     }
-	#ifdef CMDL
+#ifdef CMDL
     cout << "Maximum number of iterations exceeded in zbrent" << endl;
-	#endif
+#endif
     // should never be reached
     return 0.0;
 }
@@ -125,9 +128,9 @@ double rtsafe( std::function<double(double)> fct,
     fh = fct(x2);
     // sanity checks
     if ((fl > 0.0 && fh > 0.0) || (fl < 0.0 && fh < 0.0)) {
-		#ifdef CMDL
+#ifdef CMDL
         std::cout << "Root must be bracketed in rtsafe" << std::endl;
-		#endif
+#endif
         if (fl > fh){
             return x1;
         }else{
@@ -201,13 +204,403 @@ double rtsafe( std::function<double(double)> fct,
         else
             xh=rts;
     }
-	#ifdef CMDL
+#ifdef CMDL
     std::cout << "Maximum number of iterations exceeded in rtsafe" << std::endl;
-	#endif
+#endif
     // should never be reached
     return 0.0;
 };
 
+ostream& operator<<(ostream& os, std::vector<double> in){
+
+    for (auto it = in.begin(); it != in.end(); ++it){
+        os << *it << " ";
+    }
+    os << std::endl;
+
+    return os;
+}
+
+std::vector<double> findZeros( std::function<double(double)> fct,
+                               std::function<Eigen::MatrixXd(double)> fct_both,
+                               double a,
+                               double b,
+                               double init_len,
+                               double k){
+
+    std::cout << std::endl;
+    std::cout << "findZeros called" << std::endl;
+    std::cout << "a = " << a << std::endl;
+    std::cout << "b = " << b << std::endl;
+    // initialize storage for all real zeros found
+    std::vector<double> zeros;
+
+    // evaluate function and it's derivative at boundaries
+    Eigen::MatrixXd tempM = fct_both(a);
+    double f_a = tempM(0,0);
+    double df_a = tempM(0,1);
+    tempM = fct_both(b);
+    double f_b = tempM(0,0);
+    double df_b = tempM(0,1);
+    std::cout << "f(a) = " << f_a << std::endl;
+    std::cout << "f(b) = " << f_b << std::endl;
+
+    // set tolerances
+    // jump detection
+    double sigma = 10.0;
+    // interpolation tolerance
+    double eta = 0.1;
+    // interval tolerances
+    double tau_abs = 0.00001;
+    double tau_rel = 0.0001;
+    // early stopping, unused
+    double tau = 1e-6;
+    // minimal shrinkage parameter
+    double mu = 0.1;
+    double mu_splitting = 0.1/(1+k);
+
+    // early stopping, might loose zeros when checking like this here
+    // std::cout << f_a << " " << f_b << std::endl;
+    /*if (std::abs(f_a) < tau){
+        zeros.push_back(a);
+        return zeros;
+    }
+    if (std::abs(f_b) < tau){
+        zeros.push_back(b);
+        return zeros;
+    }*/
+
+    // check for sign change
+    if (f_a*f_b <= 0){
+
+        // jump detection
+        double val = std::abs((f_b-f_a)/(b - a));
+        double tol = sigma*std::max(std::abs(df_a),std::abs(df_b));
+        if (val > tol){
+            std::cout << "jump detected" << std::endl;
+            return zeros;
+        }
+
+        // minima detecting
+        double val1 = std::abs(b - a);
+        double tol1 = tau_rel*std::min(std::abs(a), std::abs(b));
+        double val2  = std::abs(b - a);
+        double tol2  = tau_abs;
+        if (val1 <= tol1 || val2 <= tol2){
+            std::cout << "sign change + small interval + no jump detected" << std::endl;
+            zeros.push_back(0.5*(a + b));
+            return zeros;
+        }
+    }
+
+    // hermite polynom using h functions
+    auto h_00 = [&] (double t) {
+        return (1+2*t)*std::pow(1-t,2);
+    };
+    auto h_10 = [&] (double t) {
+        return t*std::pow(1-t,2);
+    };
+    auto h_01 = [&] (double t) {
+        return std::pow(t,2)*(3-2*t);
+    };
+    auto h_11 = [&] (double t) {
+        return std::pow(t,2)*(t-1);
+    };
+
+    double f_l = f_a - df_a;
+    double f_r = f_b + df_b;
+
+    auto p = [&] (double x) {
+        double t = (x - a) / (b - a);
+        return h_00(t)*f_a + h_10(t) * (b - a) * df_a
+               + h_01(t)*f_b
+               + h_11(t) * (b - a) * df_b;
+    };
+
+    // hermite polynom using explicit coefficients
+    double d_p = f_a;
+    double c_p = (b-a)*df_a;
+
+    Eigen::Matrix2d A;
+    A << 1, 1, 3, 2;
+    Eigen::Vector2d rhs;
+    rhs << f_b-f_a-(b-a)*df_a, (b-a)*df_b - (b-a)*df_a;
+
+    Eigen::Vector2d res = A.householderQr().solve(rhs);
+    double a_p = res[0];
+    double b_p = res[1];
+    std::cout << "Coefficients of Hermite Polynomial: " << std::endl;
+    std::cout << a_p << " " << b_p << " " << c_p << " " << d_p << std::endl;
+
+    // compute zeros of hermite interpolating function
+    std::vector<double> pot_zeros;
+    if ( std::abs(a_p) > 1000*EPS){
+        pot_zeros = general_cubic_formula(a_p, b_p, c_p, d_p, a, b);
+    } else {
+        if (std::abs(b_p) > 1000*EPS){
+            double a_p2 = 1.0;
+            double b_p2 = c_p/(b_p);
+            double c_p2 = d_p/(b_p);
+            std::cout << "fall back to quadratic case" << std::endl;
+            std::cout << "New coefficients: " << std::endl;
+            std::cout << a_p2 << " " << b_p2 << " " << c_p2 << std::endl;
+            pot_zeros = zerosquadpolstab(b_p2,c_p2,a,b);
+
+        } else {
+            if (std::abs(c_p) > 1000*EPS){
+                std::cout << "fall back to linear case" << std::endl;
+                if (-d_p/c_p > 0 && -d_p/c_p < 1){
+                    std::cout << "Zero found: " << std::endl;
+                    std::cout << -d_p/c_p << std::endl;
+                    pot_zeros.push_back((1+d_p/c_p)*a - (d_p/c_p)*b);
+                }
+            }
+        }
+    }
+    std::cout << "Zeros of Hermite Polynomial: " << pot_zeros;
+
+    // If there are potential zeros, use them to split the interval and rerun the algorithm.
+    if (pot_zeros.end() != pot_zeros.begin()){
+        pot_zeros.insert(pot_zeros.begin(), a);
+        pot_zeros.push_back(b);
+        std::sort(pot_zeros.begin(), pot_zeros.end());
+
+        // another point for early stopping, maybe more reasonable but dangerous as well
+        /*int size_prev = pot_zeros.size();
+        pot_zeros.erase( unique( pot_zeros.begin(), pot_zeros.end() ), pot_zeros.end() );
+        int size = pot_zeros.size();
+        if ( size_prev > size ) {
+            for (auto it = pot_zeros.begin(); it != (pot_zeros.end());) {
+                if (std::abs(fct(*it)) < 10*EPS){
+                    zeros.push_back(*it);
+                    pot_zeros.erase(it);
+                    //std::remove(pot_zeros.begin(), pot_zeros.end(), it);
+                    //std::cout << "size" << " " << pot_zeros.size() << std::endl;
+                    if( pot_zeros.size() < 2){
+                        return zeros;
+                    }
+                } else {
+                    ++it;
+                }
+
+            }
+        }*/
+        min_shrinkage(mu, pot_zeros, init_len);
+        for (auto it = pot_zeros.begin(); it != (pot_zeros.end()-1); ++it){
+            std::vector<double> temp = findZeros(fct, fct_both, *it, *(it + 1), init_len, k);
+            zeros.insert(zeros.end(),temp.begin(),temp.end());
+        }
+
+    } else {
+
+        if ( std::abs(a_p) > 1000*EPS){
+            double a_p2 = 1.0;
+            double b_p2 = 2*b_p/(3*a_p);
+            double c_p2 = c_p/(3*a_p);
+            pot_zeros = zerosquadpolstab(b_p2,c_p2,a,b);
+        } else {
+            if (std::abs(b_p) > 1000 * EPS) {
+                double b_p2 = 1.0;
+                double c_p2 = c_p / (2 * b_p);
+                double pot_zero = -c_p2;
+                std::cout << "fall back to linear case" << std::endl;
+                if (pot_zero > 0 && pot_zero < 1) {
+                    std::cout << "Zero found: " << std::endl;
+                    std::cout << pot_zero << std::endl;
+                    pot_zeros.push_back((1 - pot_zero) * a + (pot_zero) * b);
+                }
+            }
+        }
+
+        for (auto it = pot_zeros.begin(); it != pot_zeros.end();){
+            double val_01 = (*it-a)/(b-a);
+            double val_at_min = a_p*pow(val_01,3) + b_p*pow(val_01,2) + c_p*(val_01) + d_p;
+            double der2_at_min = 6*a_p*(val_01) + 2*b_p;
+            std::cout << val_01 << " " << val_at_min << " " << der2_at_min << std::endl;
+            if(!(der2_at_min*val_at_min >= 0)){
+                std::cout << "Erased Value: " << *it << std::endl;
+                pot_zeros.erase(it);
+            } else if (!(std::abs(val_at_min)<eta*std::min(std::abs(f_a),std::abs(f_b)))) {
+                pot_zeros.erase(it);
+            } else {
+                ++it;
+            }
+        }
+
+        if (pot_zeros.end() != pot_zeros.begin()){
+            pot_zeros.insert(pot_zeros.begin(), a);
+            pot_zeros.push_back(b);
+            std::sort(pot_zeros.begin(), pot_zeros.end());
+
+            // only needed for early stopping
+            /*int size_prev = pot_zeros.size();
+            pot_zeros.erase( unique( pot_zeros.begin(), pot_zeros.end() ), pot_zeros.end() );*/
+
+            // check if min or max, WRONG!
+            //for (auto it = pot_zeros.begin(); it != pot_zeros.end();){
+            //    if (fct_both(*it)(0,1) < 0.0){
+            //        std::cout << *it << std::endl;
+            //        std::cout << fct_both(*it)(0,1) << std::endl;
+            //        pot_zeros.erase(it);
+            //    } else {
+            //        ++it;
+            //    }
+            //}
+            //another potentially dangerous point for early stopping
+            /*int size = pot_zeros.size();
+            if ( size_prev > size ) {
+                for (auto it = pot_zeros.begin(); it != (pot_zeros.end());) {
+                    //std::cout << *it << std::endl;
+                    if (std::abs(fct(*it)) < 10*EPS){
+                        zeros.push_back(*it);
+                        pot_zeros.erase(it);
+                    } else  {
+                        ++it;
+                    }
+
+                }
+            }*/
+        }
+        pot_zeros.push_back(a);
+        pot_zeros.push_back(b);
+        if (pot_zeros.size() > 2){
+            min_shrinkage(mu, pot_zeros, init_len);
+            for (auto it = pot_zeros.begin(); it != (pot_zeros.end()-1); ++it){
+                std::vector<double> temp = findZeros(fct, fct_both, *it, *(it + 1), init_len, k);
+                zeros.insert(zeros.end(),temp.begin(),temp.end());
+            }
+        } else if (std::abs(*std::prev(pot_zeros.end())-*pot_zeros.begin()) > mu_splitting * init_len){
+            double midpoint = *pot_zeros.begin() + std::abs(*std::prev(pot_zeros.end())-*pot_zeros.begin())/2.0;
+            std::vector<double> temp1 = findZeros(fct, fct_both, pot_zeros.front(), midpoint, init_len, k);
+            std::vector<double> temp2 = findZeros(fct, fct_both, midpoint, pot_zeros.back(), init_len, k);
+            zeros.insert(zeros.end(),temp1.begin(),temp1.end());
+            zeros.insert(zeros.end(),temp2.begin(),temp2.end());
+        }
+    }
+
+    return zeros;
+};
+
+void min_shrinkage(double mu, std::vector<double> &pot_zeros, double init_len){
+    std::cout << "Applying minimal shrinkage condition to vector:" << std::endl;
+    std::cout << pot_zeros;
+    double min_len = std::abs(pot_zeros.back() - pot_zeros.front());
+    for (auto it = pot_zeros.begin(); it != (pot_zeros.end()-1); ++it){
+        if (std::abs(*(it+1)-*it) < mu*min_len) {
+            if ((it + 1) != std::prev(pot_zeros.end())){
+                *(it + 1) = *it + mu * min_len;
+            } else {
+                *(it) = *(it + 1) - mu * min_len;
+                //it = it-2;
+            }
+        }
+    }
+    std::cout << "Result:" << std::endl;
+    std::cout << pot_zeros;
+}
+
+std::vector<double> zerosquadpolstab( double b, double c, double x0, double x1) {
+    std::vector<double> pot_zeros01(0);
+    double D = std::pow(b,2) - 4*c ; // discriminant
+    std::cout << "zerosquadpolstab was called"<< std::endl;
+    if ( D < -10*EPS)
+        std::cout << "but no real zeros exist"<< std::endl;
+    else{
+        if ( D < 0) {
+            D = 0;
+        }
+        double wD = std::sqrt(D) ;
+        if (std::abs(D) <10*EPS){
+            // Use discriminant formula only for zero far away from 0
+            // in order to avoid cancellation. For the other zero
+            // use Vieta’s formula.
+            if ( b >= 0 ) {
+                double t = 0.5 * (-b - wD) ;
+                pot_zeros01.push_back(t);
+            } else {
+                double t = 0.5 * (-b + wD);
+                pot_zeros01.push_back(c / t);
+            }
+
+        } else {
+            // Use discriminant formula only for zero far away from 0
+            // in order to avoid cancellation. For the other zero
+            // use Vieta’s formula.
+            if ( b >= 0 ) {
+                double t = 0.5 * (-b - wD) ;
+                pot_zeros01.push_back(t);
+                pot_zeros01.push_back(c / t);
+            } else {
+                double t = 0.5 * (-b + wD);
+                pot_zeros01.push_back(c / t);
+                pot_zeros01.push_back(t);
+            }
+        }
+    }
+    std::vector<double> pot_zeros(0);
+    for (auto it = pot_zeros01.begin(); it != pot_zeros01.end(); ++it){
+        double pot_zero01 = *it;
+        double pot_zero = (1-pot_zero01) * x0 + (pot_zero01) * x1;
+        if (pot_zero <= x1 && pot_zero >= x0 && (std::find(pot_zeros01.begin(), pot_zeros01.end(), pot_zero) == pot_zeros01.end())){
+            //std::cout << pot_zero << std::endl;
+            //std::cout << std::abs(a*std::pow(pot_zero,3) + b*std::pow(pot_zero,2) + c*pot_zero + d) << std::endl;
+            // Catch close from below as well!
+            //double val_at_zero = std::pow(pot_zero01,2) + b*pot_zero01 + c;
+            //if (std::abs(val_at_zero)< 1e-4 &&
+            //       (((2*pot_zero01 + b >= 0) && (val_at_zero > 0))|| ((2*pot_zero01 + b <= 0) && (val_at_zero <= 0)))){
+            pot_zeros.push_back(pot_zero);
+            //}
+        }
+    }
+    std::cout << "Result:" << std::endl;
+    std::cout << pot_zeros;
+    return pot_zeros;
+}
+
+std::vector<double> general_cubic_formula(double a, double b, double c, double d, double x0, double x1){
+    complex_t epsilon = (complex_t(-1) + std::sqrt(complex_t(-3.0,0.0)))/2.0;
+    complex_t delta_0 = std::pow(b, 2) - 3 * a * c;
+    complex_t delta_1 = 2*std::pow(b, 3) - 9 * a * b * c
+                        + 27 * std::pow(a, 2) * d;
+    auto C = [&] (){
+        complex_t temp = complex_t(std::pow((delta_1 + std::pow(std::pow(delta_1,2) - complex_t(4.0)*std::pow(delta_0,3),0.5))/complex_t(2.0),1.0/3.0));
+        if (std::abs(temp) > 1e-16){
+            return temp;
+        }
+        else {
+            return complex_t(std::pow((delta_1 - std::pow(std::pow(delta_1,2) - complex_t(4.0)*std::pow(delta_0,3),0.5))/complex_t(2.0),1.0/3.0));
+        }
+    };
+
+    std::cout << epsilon << " " << delta_0 << " " << delta_1 << " " << C() << std::endl;
+
+    // can't handle a = 0
+    auto zeros_fct = [&] (int k) {
+        return complex_t(-1/(3 * a)) * (complex_t(b) + pow(epsilon, k) * C() + complex_t(delta_0) / (C() * complex_t(std::pow(epsilon, k))));
+    };
+
+
+    // find potential candidates for actual zeros
+    std::vector<double> pot_zeros;
+    for (unsigned  k=0; k<3; k++){
+        complex_t pot_zero01_complex = zeros_fct(k);
+        std::cout << pot_zero01_complex << std::endl;
+        // unstable detection!!
+        if (pot_zero01_complex.imag() < 1e-10){
+            double pot_zero01 = zeros_fct(k).real();
+            double pot_zero = (1-pot_zero01) * x0 + (pot_zero01) * x1;
+            if (pot_zero <= x1 && pot_zero >= x0 && (std::find(pot_zeros.begin(), pot_zeros.end(), pot_zero) == pot_zeros.end())){
+                std::cout << pot_zero << std::endl;
+                std::cout << std::abs(a*std::pow(pot_zero,3) + b*std::pow(pot_zero,2) + c*pot_zero + d) << std::endl;
+                // unstable detection!!
+                if (std::abs(a*std::pow(pot_zero01,3) + b*std::pow(pot_zero01,2) + c*pot_zero01 + d) < 1e-4){
+                    pot_zeros.push_back(pot_zero);}
+            }
+        }
+    }
+    //std::cout << std::endl;
+    return pot_zeros;
+}
 Eigen::VectorXd parabolic_approximation(const std::function<Eigen::VectorXd(double)> f,
                                         const std::function<Eigen::VectorXd(double)> f_der,
                                         const std::function<Eigen::VectorXd(double)> f_der2,
