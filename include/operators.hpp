@@ -1,0 +1,81 @@
+/**
+ * \file find_roots.hpp
+ * \brief This file defines different root finding methods applied
+ * to find the minimas in the smallest singular value
+ * of the Helmholtz transmission problem solutions operator.
+ *
+ * This File is a part of the HelmholtzTransmissionProblemBEM library.
+ * It incoporates some functions taken from the book
+ * "Numerical Recipes in C".
+ * These have been marked in their documentation.
+ */
+#ifndef OPERATORS_HPP
+#define OPERATORS_HPP
+
+#include <vector>
+#include <iomanip>
+#include <ostream>
+#include "data.hpp"
+
+using namespace std;
+
+inline ostream& operator<<(ostream& os, data data_val){
+    os << data_val.grid_point << " ";
+    os << data_val.value << " ";
+    os << data_val.derivative << " ";
+    os << data_val.flag_val;
+    return os;
+};
+template<typename type> ostream& operator<<(ostream& os, std::vector<type> in){
+    for (auto it = in.begin(); it != in.end(); ++it){
+        os << *it << " ";
+    }
+    return os;
+};
+
+class formatted_output
+{
+private:
+    int width;
+    ostream& stream_obj;
+
+public:
+    formatted_output(ostream& obj, int w): width(w), stream_obj(obj) {};
+
+    template<typename T>
+    formatted_output& operator<<(const T& output)
+    {
+        stream_obj << setw(width) << output;
+
+        return *this;
+    }
+
+    formatted_output& operator<<(ostream& (*func)(ostream&))
+    {
+        func(stream_obj);
+        return *this;
+    }
+};
+
+inline ostream& operator<<(ostream& os, std::vector<data> in){
+
+    formatted_output output(os, 15);
+    output << "Grid Points" << "Value" << "Derivative" << "Flag Value" << std::endl;
+    for (auto it = in.begin(); it != in.end(); ++it){
+        output << (*it).grid_point;
+        output << (*it).value;
+        output << (*it).derivative;
+        output << (*it).flag_val;
+        output << std::endl;
+    }
+    return os;
+};
+
+struct ordering {
+    bool operator()(data one, data two) {
+        return one.grid_point < two.grid_point;
+    };
+};
+
+
+#endif //OPERATORS
