@@ -36,6 +36,7 @@
 #include "singular_values_arnoldi.hpp"
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
+#include "operators.hpp"
 
 // define shorthand for time benchmarking tools, complex data type and immaginary unit
 using namespace std::chrono;
@@ -73,7 +74,7 @@ int main(int argc, char** argv){
     double acc = atof(argv[8]);
 
     // generate output filename with set parameters
-    std::string base_name = "../data/file_roots_mixed_circle_arnoldi_";
+    std::string base_name = "../data/file_roots_seq_circle_arnoldi_";
     std::string suffix = ".dat";
     std::string divider = "_";
     std::string file_minimas = base_name.append(argv[2]).append(divider).append(argv[5])
@@ -86,17 +87,15 @@ int main(int argc, char** argv){
     // Inform user of started computation.
 	#ifdef CMDL
     std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "Finding resonances using mixed methods." << std::endl;
+    std::cout << "Finding resonances using sequential algorithm." << std::endl;
     std::cout << "Computing on userdefined problem using circular domain." << std::endl;
     std::cout << std::endl;
 	#endif
-    for (unsigned j = 0; j < n_points_x; j++) {
-        for (unsigned k = 0; k < n_points_y; k++) {
             auto duration_ops = milliseconds ::zero();
             auto duration = milliseconds::zero();
 
-            // define wavenumber for current loop
-            complex_t k_temp = (k_0+j*h_x+ii*double(k)*h_y);
+            // initialize for function calls counter
+            unsigned N_fct_calls = 0;
 
             // set which singular values to evaluate, smallest only
             unsigned count = 1;
@@ -111,6 +110,7 @@ int main(int argc, char** argv){
                 return arnoldi::sv(T_in, count, acc)(m);
             };
             auto sv_eval_both = [&] (double k_in) {
+                N_fct_calls += 1;
                 auto start = high_resolution_clock::now();
                 Eigen::MatrixXcd T_in;
                 Eigen::MatrixXcd T_der_in;
@@ -142,29 +142,31 @@ int main(int argc, char** argv){
 			#ifdef CMDL
             std::cout << "#######################################################" << std::endl;
 			#endif
-            std::vector<double> roots = findZeros(sv_eval_both,k_temp.real(),k_temp.real()+h_x, h_x);
+    std::vector<std::vector<data>> records;
+    std::function<void(std::vector<data>)> recorder = [&records](std::vector<data> entry)->void{records.push_back(entry);};
+            std::vector<double> roots = findZeros_seq(sv_eval_both,k_0.real(),k_0.real()+10.0, n_points_x,recorder);
             auto end = high_resolution_clock::now();
             duration += duration_cast<milliseconds>(end-start);
 
-            #ifdef CMDL
-            // write interval searched to command line
-            std::cout << "Interval searched: [" << k_temp.real()
-                      << "," << k_temp.real()+h_x << "]" << std::endl;
-            #endif
 
             // define functions that return singular value and it's derivative
             file_out.open(file_minimas, std::ios_base::app);
-            for (auto it = roots.begin(); it != roots.end(); ++it){
-                file_out << *it << " " << sv_eval(*it) << " " << sv_eval_both(*it) << std::endl;
-            }
-            file_out.close();
-
-			#ifdef CMDL
+    file_out << "Initial grid: " << std::endl;
+    file_out << *records.begin() << std::endl;
+    file_out << std::endl;
+    for (auto it = records.begin()+1; it != records.end(); ++it){
+        int i = it-records.begin();
+        file_out << "Grid after " << i << " iteration(s): " << std::endl;
+        file_out << *it;
+        file_out << std::endl;
+    }
+    file_out << "#function calls: "  << N_fct_calls << std::endl;
+    file_out << "Roots found: " << roots << std::endl;
+    file_out.close();
+#ifdef CMDL
             std::cout << "#######################################################" << std::endl;
             std::cout << std::endl;
 			#endif
-        }
-    }
     return 0;
 }
 

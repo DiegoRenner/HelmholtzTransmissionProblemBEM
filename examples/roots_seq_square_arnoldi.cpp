@@ -113,89 +113,91 @@ int main(int argc, char** argv){
     file_out.close();
 
     // Inform user of started computation.
-	#ifdef CMDL
+#ifdef CMDL
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "Finding resonances using mixed methods." << std::endl;
     std::cout << "Computing on userdefined problem using square domain." << std::endl;
     std::cout << std::endl;
-	#endif
+#endif
 
     // loop over values of wavenumber 
-    for (unsigned j = 0; j < n_points_x; j++) {
-        for (unsigned k = 0; k < n_points_y; k++) {
-            auto duration_ops = milliseconds ::zero();
-            auto duration = milliseconds::zero();
+    auto duration_ops = milliseconds ::zero();
+    auto duration = milliseconds::zero();
 
-            // define wavenumber for current loop
-            complex_t k_temp = (k_0+j*h_x+ii*double(k)*h_y);
+    // initialize for function calls counter
+    unsigned N_fct_calls = 0;
 
-            // set which singular values to evaluate, smallest only
-            unsigned count = 1;
+    // set which singular values to evaluate, smallest only
+    unsigned count = 1;
 
-            // define functions that return singular value and it's derivative
-            auto sv_eval = [&] (double k_in) {
-                auto start = high_resolution_clock::now();
-                Eigen::MatrixXcd T_in;
-                T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-                auto end = high_resolution_clock::now();
-                duration_ops += duration_cast<milliseconds>(end-start);
-                return arnoldi::sv(T_in, count, acc)(m);
-            };
-            auto sv_eval_both = [&] (double k_in) {
-                auto start = high_resolution_clock::now();
-                Eigen::MatrixXcd T_in;
-                Eigen::MatrixXcd T_der_in;
-                Eigen::MatrixXcd T_der2_in;
-                T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-                T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
-                T_der2_in = gen_sol_op_2nd_der(mesh, order, k_in , c_o, c_i);
-                Eigen::MatrixXd res = arnoldi::sv_2nd_der(T_in, T_der_in, T_der2_in, count, acc).block(m,1,1,2);
-                auto end = high_resolution_clock::now();
-                duration_ops += duration_cast<milliseconds>(end-start);
-                return res;
-            };
-            auto sv_eval_der = [&] (double k_in) {
-                auto start = high_resolution_clock::now();
-                Eigen::MatrixXcd T_in;
-                Eigen::MatrixXcd T_der_in;
-                T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-                T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
-                double res = arnoldi::sv_1st_der(T_in, T_der_in, count, acc)(m,1);
-                auto end = high_resolution_clock::now();
-                duration_ops += duration_cast<milliseconds>(end-start);
-                return res;
-            };
+    // define functions that return singular value and it's derivative
+    auto sv_eval = [&] (double k_in) {
+        auto start = high_resolution_clock::now();
+        Eigen::MatrixXcd T_in;
+        T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
+        auto end = high_resolution_clock::now();
+        duration_ops += duration_cast<milliseconds>(end-start);
+        return arnoldi::sv(T_in, count, acc)(m);
+    };
+    auto sv_eval_both = [&] (double k_in) {
+        N_fct_calls += 1;
+        auto start = high_resolution_clock::now();
+        Eigen::MatrixXcd T_in;
+        Eigen::MatrixXcd T_der_in;
+        Eigen::MatrixXcd T_der2_in;
+        T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
+        T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
+        T_der2_in = gen_sol_op_2nd_der(mesh, order, k_in , c_o, c_i);
+        Eigen::MatrixXd res = arnoldi::sv_2nd_der(T_in, T_der_in, T_der2_in, count, acc).block(m,1,1,2);
+        auto end = high_resolution_clock::now();
+        duration_ops += duration_cast<milliseconds>(end-start);
+        return res;
+    };
+    auto sv_eval_der = [&] (double k_in) {
+        auto start = high_resolution_clock::now();
+        Eigen::MatrixXcd T_in;
+        Eigen::MatrixXcd T_der_in;
+        T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
+        T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
+        double res = arnoldi::sv_1st_der(T_in, T_der_in, count, acc)(m,1);
+        auto end = high_resolution_clock::now();
+        duration_ops += duration_cast<milliseconds>(end-start);
+        return res;
+    };
 
-            bool root_found = false;
-            unsigned num_iter=0;
-            auto start = high_resolution_clock::now();
-	    
-			// search for root
-			#ifdef CMDL
-            std::cout << "#######################################################" << std::endl;
-			#endif
-            std::vector<double> roots = findZeros(sv_eval_both,k_temp.real(),k_temp.real()+h_x, h_x);
-            auto end = high_resolution_clock::now();
-            duration += duration_cast<milliseconds>(end-start);
-	    
-			#ifdef CMDL
-			// write interval searched to command line
-            std::cout << "Interval searched: [" << k_temp.real() 
-	    	<< "," << k_temp.real()+h_x << "]" << std::endl;
-			#endif
+    bool root_found = false;
+    unsigned num_iter=0;
+    auto start = high_resolution_clock::now();
 
-            // write result to file
-            file_out.open(file_minimas, std::ios_base::app);
-            for (auto it = roots.begin(); it != roots.end(); ++it){
-                file_out << *it << " " << sv_eval(*it) << " " << sv_eval_both(*it) << std::endl;
-            }
-            file_out.close();
-			#ifdef CMDL
-            std::cout << "#######################################################" << std::endl;
-			std::cout << std::endl;
-			#endif
-        }
+    // search for root
+#ifdef CMDL
+    std::cout << "#######################################################" << std::endl;
+#endif
+    std::vector<std::vector<data>> records;
+    std::function<void(std::vector<data>)> recorder = [&records](std::vector<data> entry)->void{records.push_back(entry);};
+    std::vector<double> roots = findZeros_seq(sv_eval_both,k_0.real(),k_0.real()+10.0, n_points_x,recorder);
+    auto end = high_resolution_clock::now();
+    duration += duration_cast<milliseconds>(end-start);
+
+
+    // write result to file
+    file_out.open(file_minimas, std::ios_base::app);
+    file_out << "Initial grid: " << std::endl;
+    file_out << *records.begin() << std::endl;
+    file_out << std::endl;
+    for (auto it = records.begin()+1; it != records.end(); ++it){
+        int i = it-records.begin();
+        file_out << "Grid after " << i << " iteration(s): " << std::endl;
+        file_out << *it;
+        file_out << std::endl;
     }
+    file_out << "#function calls: "  << N_fct_calls << std::endl;
+    file_out << "Roots found: " << roots << std::endl;
+    file_out.close();
+#ifdef CMDL
+    std::cout << "#######################################################" << std::endl;
+    std::cout << std::endl;
+#endif
     return 0;
 }
 
