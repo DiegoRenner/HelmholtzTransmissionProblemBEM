@@ -12,7 +12,8 @@ target_link_libraries(compute_SV_der_arnoldi arpp_eig_interface)
 add_library(gen_sol_op STATIC gen_sol_op.cpp)
 target_link_libraries(gen_sol_op sol_op sol_op_der sol_op_der2)
 
-add_library(find_zeros STATIC find_roots.cpp)
+
+add_library(find_roots STATIC find_roots.cpp)
 
 add_library(arpp_eig_interface STATIC arpp_eig_interface.cpp)
 
