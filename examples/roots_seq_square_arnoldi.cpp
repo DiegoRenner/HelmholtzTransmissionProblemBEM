@@ -102,7 +102,7 @@ int main(int argc, char** argv){
     double acc = atof(argv[8]);
 
     // generate output filename with set parameters
-    std::string base_name = "../data/file_roots_mixed_square_arnoldi_";
+    std::string base_name = "../data/file_roots_seq_square_arnoldi_";
     std::string suffix = ".dat";
     std::string divider = "_";
     std::string file_minimas = base_name.append(argv[2]).append(divider).append(argv[5])
