@@ -73,7 +73,12 @@ inline ostream& operator<<(ostream& os, std::vector<data> in){
 
 struct ordering {
     bool operator()(data one, data two) {
-        return one.grid_point < two.grid_point;
+        bool ret;
+        if (std::abs(one.grid_point-two.grid_point) < std::max(std::abs(one.grid_point),std::abs(two.grid_point))*1e-16){
+            return one.flag_val > two.flag_val;
+        } else {
+            return one.grid_point < two.grid_point;
+        }
     };
 };
 
