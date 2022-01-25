@@ -30,7 +30,7 @@ namespace arnoldi {
         Eigen::PartialPivLU<Eigen::MatrixXcd> lu = T.partialPivLu();
         Eigen::PartialPivLU<Eigen::MatrixXcd> lu_herm = T_herm.partialPivLu();
         std::string which = std::to_string(2*count) + "L";
-        ARrcCompStdEig<double> prob(2 * N, 2 * count, "LM", 0, acc, std::numeric_limits<unsigned int>::max(), NULL);
+        ARrcCompStdEig<double> prob(2 * N, 2 * count, "LM", 0, acc, std::numeric_limits<int>::max(), NULL);
 
         // iterate until entire space is searched
         while (!prob.ArnoldiBasisFound()) {
@@ -80,7 +80,7 @@ namespace arnoldi {
         // precomputation for finding EVs with arpack++
         Eigen::FullPivLU<Eigen::MatrixXcd> lu = T.fullPivLu();
         Eigen::FullPivLU<Eigen::MatrixXcd> lu_herm = T_herm.fullPivLu();
-        ARrcCompStdEig<double> prob(2 * N, 2*count, "LM",0,acc,std::numeric_limits<unsigned int>::max(),
+        ARrcCompStdEig<double> prob(2 * N, 2*count, "LM",0,acc,std::numeric_limits<int>::max(),
                                     NULL);
 
         // iterate until entire space is searched
@@ -151,7 +151,7 @@ namespace arnoldi {
         // precomputation for finding EVs with arpack++
         Eigen::FullPivLU<Eigen::MatrixXcd> lu = T.fullPivLu();
         Eigen::FullPivLU<Eigen::MatrixXcd> lu_herm = T_herm.fullPivLu();
-        ARrcCompStdEig<double> prob(2 * N, 2*count, "LM",0,acc,std::numeric_limits<unsigned int>::max(),
+        ARrcCompStdEig<double> prob(2 * N, 2*count, "LM",0,acc,std::numeric_limits<int>::max(),
                                     NULL);
 
         // iterate until entire space is searched
