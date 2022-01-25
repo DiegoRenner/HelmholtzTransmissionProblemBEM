@@ -679,121 +679,125 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                 std::cout << "df(b) = " << df_beta << std::endl;
 
 // check for sign change
-                if (f_alpha * f_beta <= 0){
+                if (f_alpha * f_beta <= 0) {
 
 // jump detection
                     double val = std::abs((f_beta - f_alpha) / (beta - alpha));
-                    double tol = sigma*std::max(std::abs(df_alpha), std::abs(df_beta));
-                    if (val > tol){
+                    double tol = sigma * std::max(std::abs(df_alpha), std::abs(df_beta));
+                    double val1 = std::abs(beta - alpha);
+                    double tol1 = tau_rel * std::min(std::abs(alpha), std::abs(beta));
+                    double val2 = std::abs(beta - alpha);
+                    double tol2 = tau_abs;
+                    if (val > tol) {
                         std::cout << "jump detected" << std::endl;
-                        S[i-1].flag_val = nozero;
+                        S[i - 1].flag_val = nozero;
                         N_active -= 1;
                     }
 
 // minima detecting
-                    double val1 = std::abs(beta - alpha);
-                    double tol1 = tau_rel*std::min(std::abs(alpha), std::abs(beta));
-                    double val2  = std::abs(beta - alpha);
-                    double tol2  = tau_abs;
-                    if (val1 <= tol1 || val2 <= tol2){
+                    else if (val1 <= tol1 || val2 <= tol2) {
                         std::cout << "sign change + small interval + no jump detected" << std::endl;
-                        S[i-1].flag_val = zerofound;
+                        S[i - 1].flag_val = zerofound;
                         N_active -= 1;
-                    }
-                }
-
-                // hermite polynom using explicit coefficients
-                double d_p = f_alpha;
-                double c_p = (beta-alpha) * df_alpha;
-
-                Eigen::Matrix2d A;
-                A << 1, 1, 3, 2;
-                Eigen::Vector2d rhs;
-                rhs << f_beta - f_alpha - (beta - alpha) * df_alpha, (beta - alpha) * df_beta - (beta - alpha) * df_alpha;
-
-                Eigen::Vector2d res = A.householderQr().solve(rhs);
-                double a_p = res[0];
-                double b_p = res[1];
-                std::cout << "Coefficients of Hermite Polynomial: " << std::endl;
-                std::cout << a_p << " " << b_p << " " << c_p << " " << d_p << std::endl;
-
-                // compute zeros of hermite interpolating function
-                if ( std::abs(a_p) > 1000*EPS){
-                    pot_zeros = general_cubic_formula(a_p, b_p, c_p, d_p, alpha, beta);
-                } else {
-                    if (std::abs(b_p) > 1000*EPS){
-                        double a_p2 = 1.0;
-                        double b_p2 = c_p/(b_p);
-                        double c_p2 = d_p/(b_p);
-                        std::cout << "fall back to quadratic case" << std::endl;
-                        std::cout << "New coefficients: " << std::endl;
-                        std::cout << a_p2 << " " << b_p2 << " " << c_p2 << std::endl;
-                        pot_zeros = zerosquadpolstab(b_p2,c_p2,alpha,beta);
-
                     } else {
-                        if (std::abs(c_p) > 1000*EPS){
-                            std::cout << "fall back to linear case" << std::endl;
-                            if (-d_p/c_p > 0 && -d_p/c_p < 1){
-                                std::cout << "Zero found: " << std::endl;
-                                std::cout << -d_p/c_p << std::endl;
-                                pot_zeros.push_back((1+d_p/c_p)*alpha - (d_p/c_p)*beta);
-                            }
-                        }
-                    }
-                }
-                std::cout << "Zeros of Hermite Polynomial: " << pot_zeros << std::endl;
 
-                if (pot_zeros.end() == pot_zeros.begin()) {
-                    if (std::abs(a_p) > 1000 * EPS) {
-                        double a_p2 = 1.0;
-                        double b_p2 = 2 * b_p / (3 * a_p);
-                        double c_p2 = c_p / (3 * a_p);
-                        pot_zeros = zerosquadpolstab(b_p2, c_p2, alpha, beta);
-                    } else {
-                        if (std::abs(b_p) > 1000 * EPS) {
-                            double b_p2 = 1.0;
-                            double c_p2 = c_p / (2 * b_p);
-                            double pot_zero = -c_p2;
-                            std::cout << "fall back to linear case" << std::endl;
-                            if (pot_zero > 0 && pot_zero < 1) {
-                                std::cout << "Zero found: " << std::endl;
-                                std::cout << pot_zero << std::endl;
-                                pot_zeros.push_back((1 - pot_zero) * alpha + (pot_zero) * beta);
-                            }
-                        }
-                    }
-                    std::cout << "Extrema of Hermite Polynomial: " << pot_zeros << std::endl;
 
-                    for (auto it = pot_zeros.begin(); it != pot_zeros.end();) {
-                        double val_01 = (*it - alpha) / (beta - alpha);
-                        double val_at_min = a_p * pow(val_01, 3) + b_p * pow(val_01, 2) + c_p * (val_01) + d_p;
-                        double der2_at_min = 6 * a_p * (val_01) + 2 * b_p;
-                        if (!(der2_at_min * val_at_min >= 0)) {
-                            std::cout << "Removed Value " << *it << " due to being positive Max/ negative Min."
-                                      << std::endl;
-                            pot_zeros.erase(it);
-                        } else if (!(std::abs(val_at_min) < eta * std::min(std::abs(f_alpha), std::abs(f_beta)))) {
-                            std::cout << "Removed Value " << *it << " due to not being close enough to zero."
-                                      << std::endl;
-                            pot_zeros.erase(it);
+                        // hermite polynom using explicit coefficients
+                        double d_p = f_alpha;
+                        double c_p = (beta - alpha) * df_alpha;
+
+                        Eigen::Matrix2d A;
+                        A << 1, 1, 3, 2;
+                        Eigen::Vector2d rhs;
+                        rhs << f_beta - f_alpha - (beta - alpha) * df_alpha, (beta - alpha) * df_beta -
+                                                                             (beta - alpha) * df_alpha;
+
+                        Eigen::Vector2d res = A.householderQr().solve(rhs);
+                        double a_p = res[0];
+                        double b_p = res[1];
+                        std::cout << "Coefficients of Hermite Polynomial: " << std::endl;
+                        std::cout << a_p << " " << b_p << " " << c_p << " " << d_p << std::endl;
+
+                        // compute zeros of hermite interpolating function
+                        if (std::abs(a_p) > 1000 * EPS) {
+                            pot_zeros = general_cubic_formula(a_p, b_p, c_p, d_p, alpha, beta);
                         } else {
-                            ++it;
+                            if (std::abs(b_p) > 1000 * EPS) {
+                                double a_p2 = 1.0;
+                                double b_p2 = c_p / (b_p);
+                                double c_p2 = d_p / (b_p);
+                                std::cout << "fall back to quadratic case" << std::endl;
+                                std::cout << "New coefficients: " << std::endl;
+                                std::cout << a_p2 << " " << b_p2 << " " << c_p2 << std::endl;
+                                pot_zeros = zerosquadpolstab(b_p2, c_p2, alpha, beta);
+
+                            } else {
+                                if (std::abs(c_p) > 1000 * EPS) {
+                                    std::cout << "fall back to linear case" << std::endl;
+                                    if (-d_p / c_p > 0 && -d_p / c_p < 1) {
+                                        std::cout << "Zero found: " << std::endl;
+                                        std::cout << -d_p / c_p << std::endl;
+                                        pot_zeros.push_back((1 + d_p / c_p) * alpha - (d_p / c_p) * beta);
+                                    }
+                                }
+                            }
                         }
+                        std::cout << "Zeros of Hermite Polynomial: " << pot_zeros << std::endl;
+
+                        if (pot_zeros.end() == pot_zeros.begin()) {
+                            if (std::abs(a_p) > 1000 * EPS) {
+                                double a_p2 = 1.0;
+                                double b_p2 = 2 * b_p / (3 * a_p);
+                                double c_p2 = c_p / (3 * a_p);
+                                pot_zeros = zerosquadpolstab(b_p2, c_p2, alpha, beta);
+                            } else {
+                                if (std::abs(b_p) > 1000 * EPS) {
+                                    double b_p2 = 1.0;
+                                    double c_p2 = c_p / (2 * b_p);
+                                    double pot_zero = -c_p2;
+                                    std::cout << "fall back to linear case" << std::endl;
+                                    if (pot_zero > 0 && pot_zero < 1) {
+                                        std::cout << "Zero found: " << std::endl;
+                                        std::cout << pot_zero << std::endl;
+                                        pot_zeros.push_back((1 - pot_zero) * alpha + (pot_zero) * beta);
+                                    }
+                                }
+                            }
+                            std::cout << "Extrema of Hermite Polynomial: " << pot_zeros << std::endl;
+
+                            for (auto it = pot_zeros.begin(); it != pot_zeros.end();) {
+                                double val_01 = (*it - alpha) / (beta - alpha);
+                                double val_at_min = a_p * pow(val_01, 3) + b_p * pow(val_01, 2) + c_p * (val_01) + d_p;
+                                double der2_at_min = 6 * a_p * (val_01) + 2 * b_p;
+                                if (!(der2_at_min * val_at_min >= 0)) {
+                                    std::cout << "Removed Value " << *it << " due to being positive Max/ negative Min."
+                                              << std::endl;
+                                    pot_zeros.erase(it);
+                                } else if (!(std::abs(val_at_min) <
+                                             eta * std::min(std::abs(f_alpha), std::abs(f_beta)))) {
+                                    std::cout << "Removed Value " << *it << " due to not being close enough to zero."
+                                              << std::endl;
+                                    pot_zeros.erase(it);
+                                } else {
+                                    ++it;
+                                }
+                            }
+                        }
+                        if (pot_zeros.end() == pot_zeros.begin()) {
+                            if (std::abs(beta - alpha) > mu_splitting * sub_interval_len + 1e-16) {
+                                std::cout << "Adding midpoint" << std::endl;
+                                double midpoint = alpha + std::abs(alpha - beta) / 2.0;
+                                pot_zeros.push_back(midpoint);
+                            } else if (pot_zeros.end() == pot_zeros.begin()) {
+                                S[i - 1].flag_val = nozero;
+                                N_active -= 1;
+                            }
+                        }
+                        std::cout << "Potential zeros: " << std::endl;
+                        std::cout << pot_zeros << std::endl;
+                        std::cout << std::endl;
                     }
                 }
-                if (pot_zeros.end() == pot_zeros.begin()) {
-                    if (std::abs(beta - alpha) > mu_splitting * sub_interval_len+ 1e-16) {
-                        std::cout << "Adding midpoint" << std::endl;
-                        double midpoint = alpha + std::abs(alpha - beta) / 2.0;
-                        pot_zeros.push_back(midpoint);
-                    } else if (pot_zeros.end() == pot_zeros.begin()) {
-                        S[i - 1].flag_val = nozero;
-                        N_active -= 1;
-                    }
-                }
-                std::cout << "Potential zeros: " << std::endl;
-                std::cout << pot_zeros << std::endl;
-                std::cout << std::endl;
             }
             zeros.insert(zeros.end(), pot_zeros.begin(), pot_zeros.end());
         }
