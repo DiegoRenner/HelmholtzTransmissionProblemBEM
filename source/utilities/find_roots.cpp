@@ -499,19 +499,19 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
     double mu_splitting = 0.1;
     // interval parameter for early detection (relation to tau_abs important inorder to guarantee possible detection)
     double gamma_rel_0 = 0.0001;
-    double gamma_rel_1 = tau_abs/3;
+    double gamma_rel_1 = tau_abs / 3;
 
     // initialize search grid, function values, derivatives and flags
     std::vector<data> S;
-    double interval_len = std::abs(b-a);
-    double sub_interval_len = interval_len/m;
-    for (unsigned int i = 0; i <= m; i++){
-        Eigen::MatrixXd tempM = fct_both(a + i*sub_interval_len);
-        data data_field = {a + i*sub_interval_len, tempM(0,0), tempM(0,1),active};
+    double interval_len = std::abs(b - a);
+    double sub_interval_len = interval_len / m;
+    for (unsigned int i = 0; i <= m; i++) {
+        Eigen::MatrixXd tempM = fct_both(a + i * sub_interval_len);
+        data data_field = {a + i * sub_interval_len, tempM(0, 0), tempM(0, 1), active};
         S.push_back(data_field);
     }
     S.back().flag_val = nozero;
-    int N_active = S.size()-1;
+    int N_active = S.size() - 1;
     std::cout << "Data initialized as:" << std::endl;
     std::cout << S << std::endl;
     rec(S);
@@ -520,7 +520,7 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
         // initialize storage for all real zeros found
         std::vector<double> zeros;
         std::vector<double> abs_values;
-        for ( auto it = S.begin(); it != S.end(); ++it ){
+        for (auto it = S.begin(); it != S.end(); ++it) {
             abs_values.push_back(std::abs((*it).value));
         }
         std::cout << "absolute values" << std::endl;
@@ -528,15 +528,15 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
         double M = *std::max_element(abs_values.begin(), abs_values.end());
         std::vector<int> Z;
 
-        for (auto it = abs_values.begin(); it != abs_values.end(); ++it){
-            if ( *it < M*tau ){
-                int i = it-abs_values.begin();
-                if ( i == 0 && S.at(i).flag_val == active ){
+        for (auto it = abs_values.begin(); it != abs_values.end(); ++it) {
+            if (*it < M * tau) {
+                int i = it - abs_values.begin();
+                if (i == 0 && S.at(i).flag_val == active) {
                     Z.push_back(i);
-                } else if ( i == abs_values.size()-1 && S.at(i-1).flag_val == active ){
+                } else if (i == abs_values.size() - 1 && S.at(i - 1).flag_val == active) {
                     Z.push_back(i);
-                } else if ( i > 0 && i < abs_values.size() ){
-                    if ( S.at(i-1).flag_val == active && S.at(i).flag_val == active ){
+                } else if (i > 0 && i < abs_values.size()) {
+                    if (S.at(i - 1).flag_val == active && S.at(i).flag_val == active) {
                         Z.push_back(i);
                     }
                 }
@@ -546,116 +546,66 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
         std::cout << Z << std::endl;
 
 
-        for (auto it = Z.end()-1; it != Z.begin()-1; --it){
+        for (auto it = Z.end() - 1; it != Z.begin() - 1; --it) {
             double temp_zero = S[*it].grid_point;
             double kappa_l;
             double kappa_r;
-            if (*it == 0){
+            if (*it == 0) {
                 kappa_l = temp_zero;
                 kappa_r = temp_zero +
-                          std::min(0.5*gamma_rel_0*sub_interval_len,gamma_rel_1*std::abs(S[*it+1].value-temp_zero));
+                          std::min(0.5 * gamma_rel_0 * sub_interval_len,
+                                   gamma_rel_1 * std::abs(S[*it + 1].value - temp_zero));
                 Eigen::MatrixXd tempM = fct_both(kappa_r);
                 double f_kappa_l = S[*it].value;
-                double f_kappa_r = tempM(0,0);
+                double f_kappa_r = tempM(0, 0);
                 double df_kappa_l = S[*it].derivative;
-                double df_kappa_r = tempM(0,1);
-                if (f_kappa_l * f_kappa_r <= 0){
-
-// jump detection
-                    double val = std::abs((f_kappa_r - f_kappa_l) / (kappa_r - kappa_l));
-                    double tol = sigma*std::max(std::abs(df_kappa_l), std::abs(df_kappa_r));
-                    if (val > tol){
-                        std::cout << "jump detected in early detection" << std::endl;
-                        data data_field = {kappa_r, f_kappa_r, df_kappa_r, active};
-                        S.insert(S.begin() + *it + 1, data_field);
-                        S[0].flag_val = nozero;
-                    }
+                double df_kappa_r = tempM(0, 1);
+                data data_field = {kappa_r, f_kappa_r, df_kappa_r, active};
+                S.insert(S.begin() + *it + 1, data_field);
+                S[0].flag_val = active;
+                N_active += 1;
 
 // minima detecting
-                    double val1 = std::abs(kappa_r - kappa_l);
-                    double tol1 = tau_rel*std::min(std::abs(kappa_l), std::abs(kappa_r));
-                    double val2  = std::abs(kappa_r - kappa_l);
-                    double tol2  = tau_abs;
-                    if (val1 <= tol1 || val2 <= tol2){
-                        std::cout << "sign change + small interval + no jump detected in early detection" << std::endl;
-                        data data_field = {kappa_r, f_kappa_r, df_kappa_r, active};
-                        S.insert(S.begin() + *it + 1, data_field);
-                        S[0].flag_val = zerofound;
-                    }
-                }
-
-            } else if (*it == S.size()-1){
+            } else if (*it == S.size() - 1) {
                 kappa_l = temp_zero -
-                          std::min(0.5*gamma_rel_0*sub_interval_len,gamma_rel_1*std::abs(temp_zero-S[*it-1].value));
+                          std::min(0.5 * gamma_rel_0 * sub_interval_len,
+                                   gamma_rel_1 * std::abs(temp_zero - S[*it - 1].value));
                 kappa_r = temp_zero;
                 Eigen::MatrixXd tempM = fct_both(kappa_l);
-                double f_kappa_l = tempM(0,0);
+                double f_kappa_l = tempM(0, 0);
                 double f_kappa_r = S[*it].value;
-                double df_kappa_l = tempM(0,1);
+                double df_kappa_l = tempM(0, 1);
                 double df_kappa_r = S[*it].derivative;
-                if (f_kappa_l * f_kappa_r <= 0){
-
-// jump detection
-                    double val = std::abs((f_kappa_r - f_kappa_l) / (kappa_r - kappa_l));
-                    double tol = sigma*std::max(std::abs(df_kappa_l), std::abs(df_kappa_r));
-                    if (val > tol){
-                        std::cout << "jump detected in early detection" << std::endl;
-                        data data_field = {kappa_l, f_kappa_l, df_kappa_l, nozero};
-                        S.insert(S.begin() + *it, data_field);
-                    }
+                data data_field = {kappa_l, f_kappa_l, df_kappa_l, active};
+                S.insert(S.begin() + *it, data_field);
+                N_active += 1;
 
 // minima detecting
-                    double val1 = std::abs(kappa_r - kappa_l);
-                    double tol1 = tau_rel*std::min(std::abs(kappa_l), std::abs(kappa_r));
-                    double val2  = std::abs(kappa_r - kappa_l);
-                    double tol2  = tau_abs;
-                    if (val1 <= tol1 || val2 <= tol2){
-                        std::cout << "sign change + small interval + no jump detected in early detection" << std::endl;
-                        data data_field = {kappa_l, f_kappa_l, df_kappa_l, zerofound};
-                        S.insert(S.begin() + *it, data_field);
-                    }
-                }
 
-            } else {
-                kappa_l = temp_zero -
-                          std::min(0.5*gamma_rel_0*sub_interval_len,gamma_rel_1*std::abs(temp_zero-S[*it-1].value));
-                kappa_r = temp_zero +
-                          std::min(0.5*gamma_rel_0*sub_interval_len,gamma_rel_1*std::abs(S[*it+1].value-temp_zero));
-                Eigen::MatrixXd tempM = fct_both(kappa_l);
-                double f_kappa_l = tempM(0,0);
-                double df_kappa_l = tempM(0,1);
-                tempM = fct_both(kappa_r);
-                double f_kappa_r = tempM(0,0);
-                double df_kappa_r = tempM(0,1);
-                if (f_kappa_l * f_kappa_r <= 0){
+        } else {
+            kappa_l = temp_zero -
+                      std::min(0.5 * gamma_rel_0 * sub_interval_len,
+                               gamma_rel_1 * std::abs(temp_zero - S[*it - 1].value));
+            kappa_r = temp_zero +
+                      std::min(0.5 * gamma_rel_0 * sub_interval_len,
+                               gamma_rel_1 * std::abs(S[*it + 1].value - temp_zero));
+            Eigen::MatrixXd tempM = fct_both(kappa_l);
+            double f_kappa_l = tempM(0, 0);
+            double df_kappa_l = tempM(0, 1);
+            tempM = fct_both(kappa_r);
+            double f_kappa_r = tempM(0, 0);
+            double df_kappa_r = tempM(0, 1);
 // jump detection
-                    double val = std::abs((f_kappa_r - f_kappa_l) / (kappa_r - kappa_l));
-                    double tol = sigma*std::max(std::abs(df_kappa_l), std::abs(df_kappa_r));
-                    if (val > tol){
-                        std::cout << "jump detected in early detection" << std::endl;
-                        data data_field = {kappa_l, f_kappa_l, df_kappa_l, nozero};
-                        S.erase(S.begin() + *it);
-                        S.insert(S.begin() + *it, data_field);
-                        data_field = {kappa_r, f_kappa_r, df_kappa_r, active};
-                        S.insert(S.begin() + *it + 1, data_field);
-                    }
+            data data_field = {kappa_l, f_kappa_l, df_kappa_l, active};
+            S.erase(S.begin() + *it);
+            S.insert(S.begin() + *it, data_field);
+            data_field = {kappa_r, f_kappa_r, df_kappa_r, active};
+            S.insert(S.begin() + *it + 1, data_field);
+            N_active += 1;
 
 // minima detecting
-                    double val1 = std::abs(kappa_r - kappa_l);
-                    double tol1 = tau_rel*std::min(std::abs(kappa_l), std::abs(kappa_r));
-                    double val2  = std::abs(kappa_r - kappa_l);
-                    double tol2  = tau_abs;
-                    if (val1 <= tol1 || val2 <= tol2){
-                        std::cout << "sign change + small interval + no jump detected in early detection: " << kappa_l << std::endl;
-                        data data_field = {kappa_l, f_kappa_l, df_kappa_l, zerofound};
-                        S.erase(S.begin() + *it);
-                        S.insert(S.begin() + *it, data_field);
-                        data_field = {kappa_r, f_kappa_r, df_kappa_r, active};
-                        S.insert(S.begin() + *it + 1, data_field);
-                    }
-                }
-            }
         }
+    }
         std::cout << "Data after modifications: " << std::endl;
         std::cout << S << std::endl;
 
