@@ -479,7 +479,7 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                                   double a,
                                   double b,
                                   unsigned int m,
-                                  RECORDER rec){
+                                  RECORDER rec) {
 
     std::cout << std::endl;
     std::cout << "findZeros_seq called" << std::endl;
@@ -496,7 +496,7 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
     double tau = 1e-6;
     // minimal shrinkage parameter
     double mu = 0.1;
-    double mu_splitting = 0.1/(1+std::abs(a));
+    double mu_splitting = 0.1;
     // interval parameter for early detection (relation to tau_abs important inorder to guarantee possible detection)
     double gamma_rel_0 = 0.0001;
     double gamma_rel_1 = tau_abs/3;
@@ -782,7 +782,7 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                         }
                     }
                     if (pot_zeros.end() == pot_zeros.begin()) {
-                        if (std::abs(beta - alpha) > mu_splitting * sub_interval_len + 1e-16) {
+                        if (std::abs(beta - alpha) > mu_splitting/(1.0+std::abs(alpha)) * sub_interval_len + 1e-16) {
                             std::cout << "Adding midpoint" << std::endl;
                             double midpoint = alpha + std::abs(alpha - beta) / 2.0;
                             pot_zeros.push_back(midpoint);
