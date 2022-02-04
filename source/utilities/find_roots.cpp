@@ -553,8 +553,8 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
             if (*it == 0) {
                 kappa_l = temp_zero;
                 kappa_r = temp_zero +
-                          std::min(0.5 * gamma_rel_0 * sub_interval_len,
-                                   gamma_rel_1 * std::abs(S[*it + 1].value - temp_zero));
+                          std::min(tau_abs,
+                                   0.5*std::abs(S[*it + 1].grid_point - temp_zero));
                 Eigen::MatrixXd tempM = fct_both(kappa_r);
                 double f_kappa_l = S[*it].value;
                 double f_kappa_r = tempM(0, 0);
@@ -567,8 +567,8 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
 
             } else if (*it == S.size() - 1) {
                 kappa_l = temp_zero -
-                          std::min(0.5 * gamma_rel_0 * sub_interval_len,
-                                   gamma_rel_1 * std::abs(temp_zero - S[*it - 1].value));
+                          std::min(tau_abs,
+                                   0.5*std::abs(temp_zero - S[*it - 1].grid_point));
                 kappa_r = temp_zero;
                 Eigen::MatrixXd tempM = fct_both(kappa_l);
                 double f_kappa_l = tempM(0, 0);
@@ -579,28 +579,25 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                 S.insert(S.begin() + *it, data_field);
                 N_active += 1;
 
-// minima detecting
-
-        } else {
-            kappa_l = temp_zero -
-                      std::min(0.5 * gamma_rel_0 * sub_interval_len,
-                               gamma_rel_1 * std::abs(temp_zero - S[*it - 1].value));
-            kappa_r = temp_zero +
-                      std::min(0.5 * gamma_rel_0 * sub_interval_len,
-                               gamma_rel_1 * std::abs(S[*it + 1].value - temp_zero));
-            Eigen::MatrixXd tempM = fct_both(kappa_l);
-            double f_kappa_l = tempM(0, 0);
-            double df_kappa_l = tempM(0, 1);
-            tempM = fct_both(kappa_r);
-            double f_kappa_r = tempM(0, 0);
-            double df_kappa_r = tempM(0, 1);
-// jump detection
-            data data_field = {kappa_l, f_kappa_l, df_kappa_l, active};
-            S.erase(S.begin() + *it);
-            S.insert(S.begin() + *it, data_field);
-            data_field = {kappa_r, f_kappa_r, df_kappa_r, active};
-            S.insert(S.begin() + *it + 1, data_field);
-            N_active += 1;
+            } else {
+                kappa_l = temp_zero -
+                          std::min(0.4*tau_abs,
+                                   0.5*std::abs(temp_zero - S[*it - 1].grid_point));
+                kappa_r = temp_zero +
+                          std::min(0.4*tau_abs,
+                                   0.5*std::abs(S[*it + 1].grid_point - temp_zero));
+                Eigen::MatrixXd tempM = fct_both(kappa_l);
+                double f_kappa_l = tempM(0, 0);
+                double df_kappa_l = tempM(0, 1);
+                tempM = fct_both(kappa_r);
+                double f_kappa_r = tempM(0, 0);
+                double df_kappa_r = tempM(0, 1);
+                data data_field = {kappa_l, f_kappa_l, df_kappa_l, active};
+                S.erase(S.begin() + *it);
+                S.insert(S.begin() + *it, data_field);
+                data_field = {kappa_r, f_kappa_r, df_kappa_r, active};
+                S.insert(S.begin() + *it + 1, data_field);
+                N_active += 1;
 
             }
         }
