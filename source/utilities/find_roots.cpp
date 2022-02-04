@@ -490,8 +490,8 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
     // interpolation tolerance
     double eta = 0.1;
     // interval tolerances
-    double tau_abs = 0.00001;
-    double tau_rel = 0.0001;
+    double tau_abs = 0.0001;
+    double tau_rel = 0.001;
     // early stopping, unused
     double tau = 1e-6;
     // minimal shrinkage parameter
