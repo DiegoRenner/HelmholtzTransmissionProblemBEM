@@ -565,7 +565,6 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                 S[0].flag_val = active;
                 N_active += 1;
 
-// minima detecting
             } else if (*it == S.size() - 1) {
                 kappa_l = temp_zero -
                           std::min(0.5 * gamma_rel_0 * sub_interval_len,
@@ -603,9 +602,8 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
             S.insert(S.begin() + *it + 1, data_field);
             N_active += 1;
 
-// minima detecting
+            }
         }
-    }
         std::cout << "Data after modifications: " << std::endl;
         std::cout << S << std::endl;
 
@@ -614,7 +612,7 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
             std::vector<double> pot_zeros;
             if ( S[i-1].flag_val == active ) {
 
-// gather function and it's derivative at boundaries
+                // gather function and it's derivative at boundaries
                 double alpha = S[i-1].grid_point;
                 double beta = S[i].grid_point;
                 double f_alpha = S[i-1].value;
@@ -628,28 +626,26 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                 std::cout << "df(a) = " << df_alpha << std::endl;
                 std::cout << "df(b) = " << df_beta << std::endl;
 
-// check for sign change
+                // check for sign change
                 double val = std::abs((f_beta - f_alpha) / (beta - alpha));
                 double tol = sigma * std::max(std::abs(df_alpha), std::abs(df_beta));
                 double val1 = std::abs(beta - alpha);
                 double tol1 = tau_rel * std::min(std::abs(alpha), std::abs(beta));
                 double val2 = std::abs(beta - alpha);
                 double tol2 = tau_abs;
+                // jump detection
                 if (f_alpha * f_beta <= 0 && val > tol) {
-
-// jump detection
                     std::cout << "jump detected" << std::endl;
+                    std::cout << std::endl;
                     S[i - 1].flag_val = nozero;
                     N_active -= 1;
-
-// minima detecting
+                // minima detecting
                 }else if (f_alpha * f_beta <= 0 && (val1 <= tol1 || val2 <= tol2)) {
                     std::cout << "sign change + small interval + no jump detected" << std::endl;
+                    std::cout << std::endl;
                     S[i - 1].flag_val = zerofound;
                     N_active -= 1;
                 } else {
-
-
                     // hermite polynom using explicit coefficients
                     double d_p = f_alpha;
                     double c_p = (beta - alpha) * df_alpha;
@@ -667,10 +663,10 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                     std::cout << a_p << " " << b_p << " " << c_p << " " << d_p << std::endl;
 
                     // compute zeros of hermite interpolating function
-                    if (std::abs(a_p) > 1000 * EPS) {
+                    if (std::abs(a_p) > 1e3 * EPS) {
                         pot_zeros = general_cubic_formula(a_p, b_p, c_p, d_p, alpha, beta);
                     } else {
-                        if (std::abs(b_p) > 1000 * EPS) {
+                        if (std::abs(b_p) > 1e3 * EPS) {
                             double a_p2 = 1.0;
                             double b_p2 = c_p / (b_p);
                             double c_p2 = d_p / (b_p);
@@ -680,7 +676,7 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                             pot_zeros = zerosquadpolstab(b_p2, c_p2, alpha, beta);
 
                         } else {
-                            if (std::abs(c_p) > 1000 * EPS) {
+                            if (std::abs(c_p) > 1e3 * EPS) {
                                 std::cout << "fall back to linear case" << std::endl;
                                 if (-d_p / c_p > 0 && -d_p / c_p < 1) {
                                     std::cout << "Zero found: " << std::endl;
@@ -693,13 +689,13 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                     std::cout << "Zeros of Hermite Polynomial: " << pot_zeros << std::endl;
 
                     if (pot_zeros.end() == pot_zeros.begin()) {
-                        if (std::abs(a_p) > 1000 * EPS) {
+                        if (std::abs(a_p) > 1e3 * EPS) {
                             double a_p2 = 1.0;
                             double b_p2 = 2 * b_p / (3 * a_p);
                             double c_p2 = c_p / (3 * a_p);
                             pot_zeros = zerosquadpolstab(b_p2, c_p2, alpha, beta);
                         } else {
-                            if (std::abs(b_p) > 1000 * EPS) {
+                            if (std::abs(b_p) > 1e3 * EPS) {
                                 double b_p2 = 1.0;
                                 double c_p2 = c_p / (2 * b_p);
                                 double pot_zero = -c_p2;
@@ -730,15 +726,15 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                                 ++it;
                             }
                         }
-                    }
-                    if (pot_zeros.end() == pot_zeros.begin()) {
-                        if (std::abs(beta - alpha) > mu_splitting/(1.0+std::abs(alpha)) * sub_interval_len + 1e-16) {
-                            std::cout << "Adding midpoint" << std::endl;
-                            double midpoint = alpha + std::abs(alpha - beta) / 2.0;
-                            pot_zeros.push_back(midpoint);
-                        } else if (pot_zeros.end() == pot_zeros.begin()) {
-                            S[i - 1].flag_val = nozero;
-                            N_active -= 1;
+                        if (pot_zeros.end() == pot_zeros.begin()) {
+                            if (std::abs(beta - alpha) > mu_splitting/(1.0+std::abs(alpha)) * sub_interval_len) {
+                                std::cout << "Adding midpoint" << std::endl;
+                                double midpoint = alpha + std::abs(alpha - beta) / 2.0;
+                                pot_zeros.push_back(midpoint);
+                            } else if (pot_zeros.end() == pot_zeros.begin()) {
+                                S[i - 1].flag_val = nozero;
+                                N_active -= 1;
+                            }
                         }
                     }
                     std::cout << "Potential zeros: " << std::endl;
@@ -797,12 +793,10 @@ std::vector<double> zerosquadpolstab( double b, double c, double x0, double x1) 
     std::vector<double> pot_zeros01(0);
     double D = std::pow(b,2) - 4*c ; // discriminant
     std::vector<double> pot_zeros(0);
-    if ( D < -10*EPS){
+    if ( D < 0){
         return pot_zeros;
     } else {
-        if ( D < 0) {
-            D = 0;
-        }
+        // two cases for avoiding double zeros
         double wD = std::sqrt(D) ;
         if (std::abs(D) <10*EPS){
             // Use discriminant formula only for zero far away from 0
