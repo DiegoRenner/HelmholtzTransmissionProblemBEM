@@ -486,7 +486,7 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
 
     // set tolerances
     // jump detection
-    double sigma = 10.0;
+    double sigma = 20;
     // interpolation tolerance
     double eta = 0.1;
     // interval tolerances
