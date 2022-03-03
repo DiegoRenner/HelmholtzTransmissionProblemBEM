@@ -486,7 +486,7 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
 
     // set tolerances
     // jump detection
-    double sigma = 20;
+    double sigma = 40;
     // interpolation tolerance
     double eta = 0.1;
     // interval tolerances
@@ -660,10 +660,16 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                     std::cout << a_p << " " << b_p << " " << c_p << " " << d_p << std::endl;
 
                     // compute zeros of hermite interpolating function
-                    if (std::abs(a_p) > 1e3 * EPS) {
+                    Eigen::VectorXd order_temp = Eigen::VectorXd::Zero(4);
+                    order_temp << a_p, b_p, c_p, d_p;
+                    order_temp = order_temp.cwiseAbs();
+                    std::cout << order_temp.maxCoeff() << std::endl;
+                    double order = order_temp.maxCoeff();
+                    std::cout << order << std::endl;
+                    if (std::abs(a_p) > order * EPS) {
                         pot_zeros = general_cubic_formula(a_p, b_p, c_p, d_p, alpha, beta);
                     } else {
-                        if (std::abs(b_p) > 1e3 * EPS) {
+                        if (std::abs(b_p) > order * EPS) {
                             double a_p2 = 1.0;
                             double b_p2 = c_p / (b_p);
                             double c_p2 = d_p / (b_p);
@@ -673,7 +679,7 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                             pot_zeros = zerosquadpolstab(b_p2, c_p2, alpha, beta);
 
                         } else {
-                            if (std::abs(c_p) > 1e3 * EPS) {
+                            if (std::abs(c_p) > order * EPS) {
                                 std::cout << "fall back to linear case" << std::endl;
                                 if (-d_p / c_p > 0 && -d_p / c_p < 1) {
                                     std::cout << "Zero found: " << std::endl;
@@ -686,13 +692,13 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                     std::cout << "Zeros of Hermite Polynomial: " << pot_zeros << std::endl;
 
                     if (pot_zeros.end() == pot_zeros.begin()) {
-                        if (std::abs(a_p) > 1e3 * EPS) {
+                        if (std::abs(a_p) > order * EPS) {
                             double a_p2 = 1.0;
                             double b_p2 = 2 * b_p / (3 * a_p);
                             double c_p2 = c_p / (3 * a_p);
                             pot_zeros = zerosquadpolstab(b_p2, c_p2, alpha, beta);
                         } else {
-                            if (std::abs(b_p) > 1e3 * EPS) {
+                            if (std::abs(b_p) > order * EPS) {
                                 double b_p2 = 1.0;
                                 double c_p2 = c_p / (2 * b_p);
                                 double pot_zero = -c_p2;
