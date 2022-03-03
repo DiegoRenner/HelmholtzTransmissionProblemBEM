@@ -82,5 +82,15 @@ struct ordering {
     };
 };
 
+inline Eigen::VectorXd stdToEig(std::vector<double> in ){
+    Eigen::VectorXd out = Eigen::VectorXd::Zero(in.size());
+    int i = 0;
+    for ( auto it = in.begin(); it != in.end(); ++it){
+       out[i] = *it;
+       ++i;
+    }
+    return out;
+}
+
 
 #endif //OPERATORS
