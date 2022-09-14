@@ -1,9 +1,13 @@
-//
-// Created by diego on 7/8/21.
-//
+/**
+ * \file first_kind_dirichlet.hpp
+ * \brief this file declares a class that can parse and run a
+ * config file for a first kind dirichlet BIE.
+ *
+ * This File is a part of the HelmholtzTransmissionProblemBEM library.
+ */
 
-#ifndef HELMHOLTZTRANSMISSIONPROBLEM_FIRST_KIND_DIRECT_DIRICHLET_H
-#define HELMHOLTZTRANSMISSIONPROBLEM_FIRST_KIND_DIRECT_DIRICHLET_H
+#ifndef HELMHOLTZTRANSMISSIONPROBLEM_FIRST_KIND_DIRECT_DIRICHLET_HPP
+#define HELMHOLTZTRANSMISSIONPROBLEM_FIRST_KIND_DIRECT_DIRICHLET_HPP
 
 #include <complex>
 #include <iostream>
@@ -29,4 +33,4 @@ private:
 };
 
 
-#endif //HELMHOLTZTRANSMISSIONPROBLEM_FIRST_KIND_DIRECT_DIRICHLET_H
+#endif //HELMHOLTZTRANSMISSIONPROBLEM_FIRST_KIND_DIRECT_DIRICHLET_HPP

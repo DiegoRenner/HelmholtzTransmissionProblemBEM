@@ -1,12 +1,20 @@
-//
-// Created by diego on 7/7/21.
-//
+/**
+ * \file run_config.cpp
+ * \brief This target builds a script that runs a configuration
+ * as defined in config.json. It is meant to make running jobs
+ * in this library more straightforward.In the future one might be able
+ * to just setup a config file instead of writing your own script.
+ * This is still in development.
+ *
+ * This File is a part of the HelmholtzTransmissionProblemBEM library.
+ */
+
 #include <json/value.h>
 #include <json/reader.h>
 #include <json/writer.h>
 #include <fstream>
 #include <iostream>
-#include "first_kind_direct_dirichlet.h"
+#include "first_kind_direct_dirichlet.hpp"
 
 int main(int argc, char** argv){
     std::ifstream config_file("../examples/config.json");
