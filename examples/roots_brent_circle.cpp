@@ -5,8 +5,6 @@
  * Galerkin BEM approximated solutions operator for the second-kind direct
  * BIEs of the Helmholtz
  * transmission problem using the Van Wijngaarden-Dekker-Brent method.
- * The singular values and their derivatives are computed using
- * Eigen's ComplexEigenSolver.
  * The scatterer is set to be a circle.
  * The results are written to disk.
  * The script can be run as follows:
@@ -23,8 +21,8 @@
  * function value and the derivative at which the root was found.
  * The last column will contain the number of iterations used to find the root.
  * If no root was found the last four columns will be set to \f$\verb|NAN|\f$.
- * The singular vaues and their derivatives are computed using the direct
- * Eigen algoithm.
+ * The singular values and their derivatives are computed using the direct
+ * Eigen algorithm.
  * The user will be updated through the command line about the
  * progress of the algorithm
  * if \f$ \verb|-DCMDL| \f$ is set.
