@@ -12,8 +12,8 @@
  * The user will be updated over the residual error in 
  * the euclidean norm of the computed FEM-space 
  * interpolation coefficients to the known FEM-space 
- * interpolation coefficients for the current number of panels through the command line
- * and other convergence metrics.
+ * interpolation coefficients for the current number of panels
+ * and other convergence metrics through the command line.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
