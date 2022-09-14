@@ -16,7 +16,7 @@ make Eigen
 if it is not already available.
 The [complex_bessel library](https://github.com/joeydumont/complex_bessel)
 that is used for passing complex arguments to the Hankel and Bessel functions 
-aswell as the [arpackpp library](https://github.com/m-reuter/arpackpp) which gives a <tt>c++</tt> interface to the [arpack library](https://github.com/opencollab/arpack-ng) are installed automatically and don't need to be built.
+as well as the [arpackpp library](https://github.com/m-reuter/arpackpp) which gives a <tt>c++</tt> interface to the [arpack library](https://github.com/opencollab/arpack-ng) are installed automatically and don't need to be built.
 <tt>arpack</tt> and <tt>lapack</tt> need to be installed separately and can usually be done so with your distributions packagemanager.
 
 For <tt>arch</tt> based distros:
@@ -63,32 +63,32 @@ This target builds a script that computes the Eigenvalues of the BIO for Helmhol
 ~~~
  /path/to/debugging_SVs
 ~~~
-The output file will contain a section for each set mesh resolution and each of those sections will contain one section each for every BIO where all Eigenvalues for different wavenumbers will be listed in columns. The Eigenvalues are computed using the facts stated in Lemma 3.22. [TODO: find refernce]
+The output file will contain a section for each set mesh resolution and each of those sections will contain one section each for every BIO where all Eigenvalues for different wavenumbers will be listed in columns. The Eigenvalues are computed using the facts stated in Lemma 3.22. [TODO: find reference]
 
 #### <tt>direct_v_arnoldi</tt>
 This target builds a script that computes the singular values of the Galerkin BEM approximated BIO for the second-kind direct BIEs of the Helmholtz transmission problem, once using the Arnoldi algorithm and once using s direct solver. The scatterer is set to be a circle. The results are written to file. The script can be run as follows: 
 ~~~
-/path/to/direct_v_arnoldi <radius of circle> <number of SVs to be computed> <accurracy of arnoldi algorithm>. 
+/path/to/direct_v_arnoldi <radius of circle> <number of SVs to be computed> <accuracy of arnoldi algorithm>. 
 ~~~
- The script will generate four files: file_vals_eig_<number of SVs to be computed>_<accurracy of arnoldi algorithm>.dat, file_vals_arpp_<number of SVs to be computed>_<accurracy of arnoldi algorithm>.dat, file_timings_<number of SVs to be computed>_<accurracy of arnoldi algorithm>.dat, file_iter_<number of SVs to be computed>_<accurracy of arnoldi algorithm>.dat. These will contain the SVs computed using the direct solver, the SVs computed using the Arnoldi algorithm, the time taken by the direct solver and the Arnoldi algorithm, and the number of iterations the Arnoldi algorithm took to converge respectively.
+ The script will generate four files: file_vals_eig_<number of SVs to be computed>_<accuracy of arnoldi algorithm>.dat, file_vals_arpp_<number of SVs to be computed>_<accuracy of arnoldi algorithm>.dat, file_timings_<number of SVs to be computed>_<accuracy of arnoldi algorithm>.dat, file_iter_<number of SVs to be computed>_<accuracy of arnoldi algorithm>.dat. These will contain the SVs computed using the direct solver, the SVs computed using the Arnoldi algorithm, the time taken by the direct solver and the Arnoldi algorithm, and the number of iterations the Arnoldi algorithm took to converge respectively.
 #### <tt>direct_v_arnoldi_1st_der</tt>
 This target builds a script that computes the first derivative of the singular values of the Galerkin BEM approximated BIO for the second-kind direct BIEs of the Helmholtz transmission problem, once using the Arnoldi algorithm and once using s direct solver. The scatterer is set to be a circle. The results are written to file. The script can be run as follows: 
 ~~~
  /path/to/direct_v_arnoldi_1st_der <radius of circle> <number of SV derivatives to be computed>
- <accurracy of arnoldi algorithm>.
+ <accuracy of arnoldi algorithm>.
 ~~~
  The script will generate four files:
- file_vals_eig_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_1stDer.dat,
- file_vals_arpp_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_1stDer.dat,
- file_timings_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_1stDer.dat,
- file_iter_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_1stDer.dat.
+ file_vals_eig_<number of SV derivatives to be computed>_<accuracy of arnoldi algorithm>_1stDer.dat,
+ file_vals_arpp_<number of SV derivatives to be computed>_<accuracy of arnoldi algorithm>_1stDer.dat,
+ file_timings_<number of SV derivatives to be computed>_<accuracy of arnoldi algorithm>_1stDer.dat,
+ file_iter_<number of SV derivatives to be computed>_<accuracy of arnoldi algorithm>_1stDer.dat.
  These will contain the derivatives computed using the direct solver,
  the derivatives computed using the Arnoldi algorithm,
  the time taken by the direct solver and the Arnoldi algorithm,
  and the number of iterations the Arnoldi algorithm took to converge respectively.
 
 #### <tt>direct_v_arnoldi_2nd_der</tt>
-This target builds a script that computes the second derivative of the singular values of the Galerkin BEM approximated BIO for the second-kind direct BIEs of the Helmholtz transmission problem, once using the Arnoldi algorithm and once using s direct solver. The scatterer is set to be a circle. The results are written to file. The script can be run as follows: <tt> /path/to/direct_v_arnoldi_2nd_der <radius of circle> <number of SV derivatives to be computed> <accurracy of arnoldi algorithm>. </tt> The script will generate four files: file_vals_eig_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_2ndDer.dat, file_vals_arpp_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_2ndDer.dat, file_timings_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_2ndDer.dat, file_iter_<number of SV derivatives to be computed>_<accurracy of arnoldi algorithm>_2ndDer.dat. These will contain the derivatives computed using the direct solver, the derivatives computed using the Arnoldi algorithm, the time taken by the direct solver and the Arnoldi algorithm, and the number of iterations the Arnoldi algorithm took to converge respectively.
+This target builds a script that computes the second derivative of the singular values of the Galerkin BEM approximated BIO for the second-kind direct BIEs of the Helmholtz transmission problem, once using the Arnoldi algorithm and once using s direct solver. The scatterer is set to be a circle. The results are written to file. The script can be run as follows: <tt> /path/to/direct_v_arnoldi_2nd_der <radius of circle> <number of SV derivatives to be computed> <accuracy of arnoldi algorithm>. </tt> The script will generate four files: file_vals_eig_<number of SV derivatives to be computed>_<accuracy of arnoldi algorithm>_2ndDer.dat, file_vals_arpp_<number of SV derivatives to be computed>_<accuracy of arnoldi algorithm>_2ndDer.dat, file_timings_<number of SV derivatives to be computed>_<accuracy of arnoldi algorithm>_2ndDer.dat, file_iter_<number of SV derivatives to be computed>_<accuracy of arnoldi algorithm>_2ndDer.dat. These will contain the derivatives computed using the direct solver, the derivatives computed using the Arnoldi algorithm, the time taken by the direct solver and the Arnoldi algorithm, and the number of iterations the Arnoldi algorithm took to converge respectively.
 
 #### <tt>dirichlet_example</tt>
 This target builds a script that computes the solution to a Dirichlet problem
@@ -165,7 +165,7 @@ If no root was found the last four columns will be set to <tt>NAN</tt>.
 The user will be updated through the command line about the progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_newton_circle</tt>
-This target builds a sript that computes minimas in the smallest singular value of the
+This target builds a script that computes minimas in the smallest singular value of the
 Galerkin BEM approximated solutions operator for the second-kind direct BIEs of the Helmholtz
 transmission problem using the Newton-Raphson method.
 The scatterer is set to be a circle.
@@ -184,7 +184,7 @@ If no root was found the last four columns will be set to <tt>NAN</tt>.
 The user will be updated through the command line about the progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_newton_square</tt>
-This target builds a sript that computes minimas in the smallest singular value of the
+This target builds a script that computes minimas in the smallest singular value of the
 Galerkin BEM approximated solutions operator for the second-kind direct BIEs of the Helmholtz
 transmission problem using the Newton-Raphson method.
 The scatterer is set to be a square.
@@ -370,4 +370,3 @@ This output file will contain two columns.
 The first will contain the current panel size.
 The second will contain the residual error in the euclidean norm of the computed FEM-space interpolation coefficients to the known FEM-space interpolation coefficients for the current number of panels.
 The user will be updated through the command line about the progress of the algorithm if <tt>-DCMDL</tt> is set.
-
