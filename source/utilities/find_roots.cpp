@@ -553,7 +553,7 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
             if (*it == 0) {
                 kappa_l = temp_zero;
                 kappa_r = temp_zero +
-                          std::min(tau_abs,
+                          std::min(0.8*tau_abs,
                                    0.5*std::abs(S[*it + 1].grid_point - temp_zero));
                 Eigen::MatrixXd tempM = fct_both(kappa_r);
                 double f_kappa_l = S[*it].value;
@@ -567,7 +567,7 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
 
             } else if (*it == S.size() - 1) {
                 kappa_l = temp_zero -
-                          std::min(tau_abs,
+                          std::min(0.8*tau_abs,
                                    0.5*std::abs(temp_zero - S[*it - 1].grid_point));
                 kappa_r = temp_zero;
                 Eigen::MatrixXd tempM = fct_both(kappa_l);
@@ -863,7 +863,7 @@ std::vector<double> general_cubic_formula(double a, double b, double c, double d
 
     // can't handle a = 0
     auto zeros_fct = [&] (int k) {
-        return complex_t(-1/(3 * a)) * (complex_t(b) + pow(epsilon, k) * C() + complex_t(delta_0) / (C() * complex_t(std::pow(epsilon, k))));
+        return complex_t(-1/(3 * a)) * (complex_t(b) + std::pow(epsilon, k) * C() + complex_t(delta_0) / (C() * complex_t(std::pow(epsilon, k))));
     };
 
 
@@ -877,8 +877,9 @@ std::vector<double> general_cubic_formula(double a, double b, double c, double d
             double pot_zero = (1-pot_zero01) * x0 + (pot_zero01) * x1;
             if (pot_zero <= x1 && pot_zero >= x0 && (std::find(pot_zeros.begin(), pot_zeros.end(), pot_zero) == pot_zeros.end())){
                 // unstable detection!!
-                if (std::abs(a*std::pow(pot_zero01,3) + b*std::pow(pot_zero01,2) + c*pot_zero01 + d) < 1e-4){
-                    pot_zeros.push_back(pot_zero);}
+                //if (std::abs(a*std::pow(pot_zero01,3) + b*std::pow(pot_zero01,2) + c*pot_zero01 + d) < 1e-4){
+                pot_zeros.push_back(pot_zero);
+                //}
             }
         }
     }
