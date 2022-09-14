@@ -4,7 +4,7 @@
  * of the Galerkin BEM approximated BIO for the
  * second-kind direct BIEs of the Helmholtz
  * transmission problem, once using the Arnoldi algorithm
- * and once using s direct solver.
+ * and once using a direct solver.
  * The scatterer is set to be a circle.
  * The results are written to file.
  * The script can be run as follows:
