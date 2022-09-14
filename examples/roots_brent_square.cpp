@@ -5,6 +5,8 @@
  * Galerkin BEM approximated solutions operator for the sedond-kind direct 
  * BIEs of the Helmholtz
  * transmission problem using the Van Wijngaarden-Dekker-Brent method.
+ * The singular values and their derivatives are computed using
+ * Eigen's ComplexEigenSolver.
  * The scatterer is set to be a square.
  * The results are written to disk.
  * The script can be run as follows:
