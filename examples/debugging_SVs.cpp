@@ -1,7 +1,7 @@
 /**
  * \file debugging_SVs.cpp
  * \brief This target builds a script that computes the Eigenvalues
- * of the BIO for Helmholtz Transmission Problem.
+ * of the BIO for the Helmholtz Transmission Problem.
  * The results are written to file.
  * The script can be run as follows:
  * <tt>
