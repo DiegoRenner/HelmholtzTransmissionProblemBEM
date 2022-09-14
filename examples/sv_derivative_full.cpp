@@ -4,7 +4,7 @@
  * their first two derivatives of the Galerkin BEM
  * approximated BIO for the second-kind direct BIEs of the Helmholtz
  * transmission problem.
- * Minimas in the smallest singular value are determined as well
+ * Minima in the smallest singular value are determined as well
  * by use of the Newton-Raphson method.
  * The scatterer is set to be a circle.
  * The results are written to file.

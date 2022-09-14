@@ -3,8 +3,8 @@
  * \brief This target builds a script that computes the singular values
  * of the Galerkin BEM approximated BIO for the
  * second-kind direct BIEs of the Helmholtz
- * transmission problem. The arnoldi algorithm from arpack is used to compute the
- * sinuglar values. The scatterer is set to be a circle.
+ * transmission problem. The Arnoldi algorithm from arpack is used to compute the
+ * singular values. The scatterer is set to be a circle.
  * The results are written to file.
  * The script can be run as follows:
  *

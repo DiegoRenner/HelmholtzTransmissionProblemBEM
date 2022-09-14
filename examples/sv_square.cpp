@@ -4,7 +4,7 @@
  * of the Galerkin BEM approximated BIO for the
  * second-kind direct BIEs of the Helmholtz
  * transmission problem. The direct algorithm from Eigen is used to compute the
- * sinuglar values.
+ * singular values.
  * The scatterer is set to be a square.
  * The results are written to file.
  * The script can be run as follows:

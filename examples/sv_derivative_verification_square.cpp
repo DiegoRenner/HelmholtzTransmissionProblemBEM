@@ -2,7 +2,7 @@
  * \file sv_derivative_verification_square.cpp
  * \brief This target builds a script that verifies the derivatives of the singular
  * values and their derivatives of the Galerkin BEM BIO for the
- * second-kind direct BIEs of the Helmholtz transmsission problem
+ * second-kind direct BIEs of the Helmholtz transmission problem
  * using extrapolation.
  * The scatterer is set to be a square.
  * The results are written to file.
