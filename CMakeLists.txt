@@ -17,7 +17,7 @@ include(${PROJECT_SOURCE_DIR}/cmake/functions/add_all_subdirectories.cmake)
 ###########################################################################
 
 # STORE BINARIES IN ./bin
-#(else CMake cannot find files to link for automatic targets)
+# (else CMake cannot find files to link for automatic targets)
 ###########################################################################
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
