@@ -1,9 +1,5 @@
-//
-// Created by diego on 7/8/21.
-//
-
 #include <complex>
-#include "first_kind_direct_dirichlet.h"
+#include "first_kind_direct_dirichlet.hpp"
 #include "parametrized_mesh.hpp"
 #include "solvers.hpp"
 #include "gen_sol.hpp"

@@ -1,7 +1,3 @@
-//
-// Created by diegorenner on 5/21/20.
-//
-
 #include "gen_sol_op.hpp"
 #include "mass_matrix.hpp"
 #include "continuous_space.hpp"
