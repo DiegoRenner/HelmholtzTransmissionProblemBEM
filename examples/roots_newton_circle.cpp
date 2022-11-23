@@ -22,7 +22,8 @@
  * The singular values and their derivatives are computed using the direct
  * Eigen algorithm.
  * The user will be updated through the command line about the
- * progress of the algorithm.
+ * progress of the algorithm
+ * if \f$ \verb|-DCMDL| \f$ is set.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */

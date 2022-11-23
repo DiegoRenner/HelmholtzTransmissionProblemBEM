@@ -11,7 +11,7 @@
  * The script can be run as follows:
  *
  * <tt>
- * /path/to/sv_circle \<radius of circle\> \<refraction inside\>
+ * /path/to/sv_derivative_full \<radius of circle\> \<refraction inside\>
  *      \<refraction outside\> \<initial wavenumber\>
  *      \<\#panels\> \<order of quadrature rule\> \<outputfile\>.
  * </tt>

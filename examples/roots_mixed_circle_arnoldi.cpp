@@ -22,7 +22,8 @@
  * If no root was found the last four columns will be set to \f$\verb|NAN|\f$.
  * The singular values and their derivatives are computed using the Arnoldi algorithm.
  * The user will be updated through the command line about the
- * progress of the algorithm.
+ * progress of the algorithm
+ * if \f$ \verb|-DCMDL| \f$ is set.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  */
