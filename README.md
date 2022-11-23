@@ -140,10 +140,41 @@ The script can be run as follows:
     <#grid points for root search> <#panels> 
     <order of quadrature rule> <outputfile>.
 ~~~
-The resulting file will contain the left boundary of the interval used to compute the root in the first column. 
-Then in the next three columns will be the point, the function value and the derivative at which the root was found.
+The resulting file will contain the left boundary of the
+interval used to compute the root in the first column.
+Then in the next three columns will be the point, the
+function value and the derivative at which the root was found.
 The last column will contain the number of iterations used to find the root.
-The user will be updated through the command line about the progress of the algorithm if <tt>-DCMDL</tt> is set.
+If no root was found the last four columns will be set to <tt>NAN</tt>.
+The singular values and their derivatives are computed using the direct
+Eigen algorithm.
+The user will be updated through the command line about the
+progress of the algorithm
+if <tt>-DCMDL</tt> is set.
+
+#### <tt>roots_brent_circle_arnoldi</tt>
+This target builds a script that computes minimas in the smallest singular value of the
+Galerkin BEM approximated solutions operator for the second-kind direct BIEs of the Helmholtz
+transmission problem using the Van Wijngaarden-Dekker-Brent method.
+The scatterer is set to be a circle.
+The results are written to disk.
+The script can be run as follows:
+~~~
+/path/to/library/bin/roots_brent_circle <radius of circle> 
+    <refraction inside> <refraction outside> <initial wavenumber> 
+    <#grid points for root search> <#panels> 
+    <order of quadrature rule> <outputfile>.
+~~~
+The resulting file will contain the left boundary of the
+interval used to compute the root in the first column.
+Then in the next three columns will be the point, the
+function value and the derivative at which the root was found.
+The last column will contain the number of iterations used to find the root.
+If no root was found the last four columns will be set to <tt>NAN</tt>.
+The singular values and their derivatives are computed using the Arnoldi algorithm.
+The user will be updated through the command line about the
+progress of the algorithm
+if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_brent_square</tt>
 This target builds a script that computes minimas in the smallest singular value of the
@@ -158,11 +189,91 @@ The script can be run as follows:
     <#grid points for root search> <#panels> 
     <order of quadrature rule> <outputfile>.
 ~~~
-The resulting file will contain the left boundary of the interval used to compute the root in the first column. 
-Then in the next three columns will be the point, the function value and the derivative at which the root was found.
+The resulting file will contain the left boundary of the
+interval used to compute the root in the first column.
+Then in the next three columns will be the point, the
+function value and the derivative at which the root was found.
 The last column will contain the number of iterations used to find the root.
 If no root was found the last four columns will be set to <tt>NAN</tt>.
-The user will be updated through the command line about the progress of the algorithm if <tt>-DCMDL</tt> is set.
+The singular values and their derivatives are computed using the direct
+Eigen algorithm.
+The user will be updated through the command line about the
+progress of the algorithm
+if <tt>-DCMDL</tt> is set.
+
+#### <tt>roots_brent_square_arnoldi</tt>
+This target builds a script that computes minimas in the smallest singular value of the
+Galerkin BEM approximated solutions operator for the sedond-kind direct BIEs of the Helmholtz
+transmission problem using the Van Wijngaarden-Dekker-Brent method.
+The scatterer is set to be a square.
+The results are written to disk.
+The script can be run as follows:
+~~~
+/path/to/library/bin/roots_brent_circle <half side length of square> 
+    <refraction inside> <refraction outside> <initial wavenumber> 
+    <#grid points for root search> <#panels> 
+    <order of quadrature rule> <outputfile>.
+~~~
+The resulting file will contain the left boundary of the
+interval used to compute the root in the first column.
+Then in the next three columns will be the point, the
+function value and the derivative at which the root was found.
+The last column will contain the number of iterations used to find the root.
+If no root was found the last four columns will be set to <tt>NAN</tt>.
+The singular values and their derivatives are computed using the Arnoldi algorithm.
+The user will be updated through the command line about the
+progress of the algorithm
+if <tt>-DCMDL</tt> is set.
+
+#### <tt>roots_mixed_circle_arnoldi</tt>
+This target builds a script that computes minimas in the smallest singular value of the
+Galerkin BEM approximated solutions operator for the second-kind direct BIEs of the Helmholtz
+transmission problem using a precursor to the Algorithm described in Listing 1 of
+ https://www.sam.math.ethz.ch/sam_reports/reports_final/reports2022/2022-38.pdf.
+The scatterer is set to be a circle.
+The results are written to disk.
+The script can be run as follows:
+~~~
+/path/to/library/bin/roots_brent_circle <radius of circle> 
+    <refraction inside> <refraction outside> <initial wavenumber> 
+    <#grid points for root search> <#panels> 
+    <order of quadrature rule> <outputfile>.
+~~~
+The resulting file will contain the left boundary of the
+interval used to compute the root in the first column.
+Then in the next three columns will be the point, the
+function value and the derivative at which the root was found.
+The last column will contain the number of iterations used to find the root.
+If no root was found the last four columns will be set to <tt>NAN</tt>.
+The singular values and their derivatives are computed using the Arnoldi algorithm.
+The user will be updated through the command line about the
+progress of the algorithm
+if <tt>-DCMDL</tt> is set.
+
+#### <tt>roots_mixed_square_arnoldi</tt>
+This target builds a script that computes minimas in the smallest singular value of the
+Galerkin BEM approximated solutions operator for the sedond-kind direct BIEs of the Helmholtz
+transmission problem using a precursor to the Algorithm described in Listing 1 of
+https://www.sam.math.ethz.ch/sam_reports/reports_final/reports2022/2022-38.pdf.
+The scatterer is set to be a square.
+The results are written to disk.
+The script can be run as follows:
+~~~
+/path/to/library/bin/roots_brent_circle <half side length of square> 
+    <refraction inside> <refraction outside> <initial wavenumber> 
+    <#grid points for root search> <#panels> 
+    <order of quadrature rule> <outputfile>.
+~~~
+The resulting file will contain the left boundary of the
+interval used to compute the root in the first column.
+Then in the next three columns will be the point, the
+function value and the derivative at which the root was found.
+The last column will contain the number of iterations used to find the root.
+If no root was found the last four columns will be set to <tt>NAN</tt>.
+The singular values and their derivatives are computed using the Arnoldi algorithm.
+The user will be updated through the command line about the
+progress of the algorithm
+if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_newton_circle</tt>
 This target builds a sript that computes minimas in the smallest singular value of the
@@ -177,11 +288,41 @@ The script can be run as follows:
     <#grid points for root search> <#panels> 
     <order of quadrature rule> <outputfile>.
 ~~~
-The resulting file will contain the left boundary of the interval used to compute the root in the first column. 
-Then in the next three columns will be the point, the function value and the derivative at which the root was found.
+The resulting file will contain the left boundary of the
+interval used to compute the root in the first column.
+Then in the next three columns will be the point,
+the function value and the derivative at which the root was found.
 The last column will contain the number of iterations used to find the root.
 If no root was found the last four columns will be set to <tt>NAN</tt>.
-The user will be updated through the command line about the progress of the algorithm if <tt>-DCMDL</tt> is set.
+The singular values and their derivatives are computed using the direct
+Eigen algorithm.
+The user will be updated through the command line about the
+progress of the algorithm.
+if <tt>-DCMDL</tt> is set.
+
+#### <tt>roots_newton_circle_arnoldi</tt>
+This target builds a sript that computes minimas in the smallest singular value of the
+Galerkin BEM approximated solutions operator for the second-kind direct BIEs of the Helmholtz
+transmission problem using the Newton-Raphson method.
+The scatterer is set to be a circle.
+The results are written to disk.
+The script can be run as follows:
+~~~
+/path/to/library/bin/roots_newton_circle <radius of circle> 
+    <refraction inside> <refraction outside> <initial wavenumber> 
+    <#grid points for root search> <#panels> 
+    <order of quadrature rule> <outputfile>.
+~~~
+The resulting file will contain the left boundary of the
+interval used to compute the root in the first column.
+Then in the next three columns will be the point,
+the function value and the derivative at which the root was found.
+The last column will contain the number of iterations used to find the root.
+If no root was found the last four columns will be set to <tt>NAN</tt>.
+The singular values and their derivatives are computed using the Arnoldi algorithm.
+The user will be updated through the command line about the
+progress of the algorithm.
+if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_newton_square</tt>
 This target builds a sript that computes minimas in the smallest singular value of the
@@ -196,11 +337,91 @@ The script can be run as follows:
     <#grid points for root search> <#panels> 
     <order of quadrature rule> <outputfile>.
 ~~~
-The resulting file will contain the left boundary of the interval used to compute the root in the first column. 
-Then in the next three columns will be the point, the function value and the derivative at which the root was found.
+The resulting file will contain the left boundary of the
+interval used to compute the root in the first column.
+Then in the next three columns will be the point,
+the function value and the derivative at which the root was found.
 The last column will contain the number of iterations used to find the root.
 If no root was found the last four columns will be set to <tt>NAN</tt>.
-The user will be updated through the command line about the progress of the algorithm if <tt>-DCMDL</tt> is set.
+The singular values and their derivatives are computed using the direct
+Eigen algorithm.
+The user will be updated through the command line about the
+progress of the algorithm.
+if <tt>-DCMDL</tt> is set.
+
+#### <tt>roots_newton_square_arnoldi</tt>
+This target builds a sript that computes minimas in the smallest singular value of the
+Galerkin BEM approximated solutions operator for the second-kind direct BIEs of the Helmholtz
+transmission problem using the Newton-Raphson method.
+The scatterer is set to be a square.
+The results are written to disk.
+The script can be run as follows:
+~~~
+/path/to/library/bin/roots_newton_circle <side length of square> 
+    <refraction inside> <refraction outside> <initial wavenumber> 
+    <#grid points for root search> <#panels> 
+    <order of quadrature rule> <outputfile>.
+~~~
+The resulting file will contain the left boundary of the
+interval used to compute the root in the first column.
+Then in the next three columns will be the point,
+the function value and the derivative at which the root was found.
+The last column will contain the number of iterations used to find the root.
+If no root was found the last four columns will be set to <tt>NAN</tt>.
+The singular values and their derivatives are computed using the Arnoldi algorithm.
+The user will be updated through the command line about the
+progress of the algorithm.
+if <tt>-DCMDL</tt> is set.
+
+#### <tt>roots_seq_circle_arnoldi</tt>
+This target builds a script that computes minimas in the smallest singular value of the
+Galerkin BEM approximated solutions operator for the second-kind direct BIEs of the Helmholtz
+transmission problem using the algorithm described in Listing 1 of
+https://www.sam.math.ethz.ch/sam_reports/reports_final/reports2022/2022-38.pdf.
+The scatterer is set to be a circle.
+The results are written to disk.
+The script can be run as follows:
+~~~
+/path/to/library/bin/roots_brent_circle <radius of circle> 
+    <refraction inside> <refraction outside> <initial wavenumber> 
+    <#grid points for root search> <#panels> 
+    <order of quadrature rule> <outputfile>.
+~~~
+The resulting file will contain the left boundary of the
+interval used to compute the root in the first column.
+Then in the next three columns will be the point, the
+function value and the derivative at which the root was found.
+The last column will contain the number of iterations used to find the root.
+If no root was found the last four columns will be set to <tt>NAN</tt>.
+The singular values and their derivatives are computed using the Arnoldi algorithm.
+The user will be updated through the command line about the
+progress of the algorithm
+if <tt>-DCMDL</tt> is set.
+
+#### <tt>roots_seq_square_arnoldi</tt>
+This target builds a script that computes minimas in the smallest singular value of the
+Galerkin BEM approximated solutions operator for the sedond-kind direct BIEs of the Helmholtz
+transmission problem using the algorithm described in Listing 1 of
+https://www.sam.math.ethz.ch/sam_reports/reports_final/reports2022/2022-38.pdf.
+The scatterer is set to be a square.
+The results are written to disk.
+The script can be run as follows:
+~~~
+/path/to/library/bin/roots_brent_circle <half side length of square> 
+    <refraction inside> <refraction outside> <initial wavenumber> 
+    <#grid points for root search> <#panels> 
+    <order of quadrature rule> <outputfile>.
+~~~
+The resulting file will contain the left boundary of the
+interval used to compute the root in the first column.
+Then in the next three columns will be the point, the
+function value and the derivative at which the root was found.
+The last column will contain the number of iterations used to find the root.
+If no root was found the last four columns will be set to <tt>NAN</tt>.
+The singular values and their derivatives are computed using the Arnoldi algorithm.
+The user will be updated through the command line about the
+progress of the algorithm
+if <tt>-DCMDL</tt> is set.
 
 #### <tt>sv_circle</tt>
 This target builds a script that computes the singular values
@@ -218,12 +439,12 @@ The script can be run as follows:
      <#panels> <order of quadrature rule> <outputfile>.
 ~~~
 
-The resulting file will contain the value of f$kf$ in the first column.
+The resulting file will contain the value of <tt>k</tt> in the first column.
 The rest of the columns contain the singular values from
-smallest to largest for this f$kf$.
+smallest to largest for this <tt>k</tt>.
 The user will be updated through the command line about the
 progress of the algorithm
-if f$ verb|-DCMDL| f$ is set.
+if <tt>-DCMDL</tt> is set.
 
 #### <tt>sv_circle_arnoldi</tt>
 This target builds a script that computes the singular values
@@ -241,58 +462,34 @@ The script can be run as follows:
      <order of quadrature rule> <accuracy of arnoldi algorithm>.
 ~~~
 
-The resulting file will contain the value of f$kf$ in the first column.
+The resulting file will contain the value of <tt>k</tt> in the first column.
 The rest of the columns contain the singular values from
-smallest to largest for this f$kf$.
+smallest to largest for this <tt>k</tt>.
 The user will be updated through the command line about the
 progress of the algorithm
-if f$ verb|-DCMDL| f$ is set.
+if <tt>-DCMDL</tt> is set.
 
-#### <tt>sv_square</tt>
-This target builds a script that computes the singular values
-of the Galerkin BEM approximated BIO for the
-second-kind direct BIEs of the Helmholtz
-transmission problem. The direct algorithm from Eigen is used to compute the
-sinuglar values.
-The scatterer is set to be a square.
+#### <tt>sv_derivative_full</tt>
+This target builds a script that computes the singular values and
+their first two derivatives of the Galerkin BEM
+approximated BIO for the second-kind direct BIEs of the Helmholtz
+transmission problem.
+Minimas in the smallest singular value are determined as well
+by use of the Newton-Raphson method.
+The scatterer is set to be a circle.
 The results are written to file.
 The script can be run as follows:
-
 ~~~
-/path/to/sv_square <half of side length of square> <refraction inside>
-     <refraction outside> <initial wavenumber>
-     <#panels> <order of quadrature rule> <outputfile>.
+/path/to/library/bin/sv_derivative_full <radius of circle> 
+    <refraction inside> <refraction outside> <initial wavenumber>
+    <#panels> <order of quadrature rule> <outputfile>.
 ~~~
-
-The resulting file will contain the value of f$kf$ in the first column.
-The rest of the columns contain the singular values from
-smallest to largest for this f$kf$.
-The user will be updated through the command line about the
-progress of the algorithm
-if f$ verb|-DCMDL| f$ is set.
-
-#### <tt>sv_square_arnoldi</tt>
-This target builds a script that computes the singular values
-of the Galerkin BEM approximated BIO for the
-second-kind direct BIEs of the Helmholtz
-transmission problem. The arnoldi algorithm from arpack is used to compute the
-sinuglar values. The scatterer is set to be a square.
-The results are written to file.
-The script can be run as follows:
-
-~~~
-/path/to/sv_circle <radius of circle> <refraction inside>
-     <refraction outside> <initial wavenumber> <final wavenumber>
-     <#points to evaluate> <scan complex wavenumbers> <#panels>
-     <order of quadrature rule> <accuracy of arnoldi algorithm>.
-~~~
-
-The resulting file will contain the value of f$kf$ in the first column.
-The rest of the columns contain the singular values from
-smallest to largest for this f$kf$.
-The user will be updated through the command line about the
-progress of the algorithm
-if f$ verb|-DCMDL| f$ is set.
+The resulting file will contain the value of k in the first column.
+Then the singular values and their first two derivatives at k will be listed from smallest to largest in the columns.
+The singular values and their derivatives occupy three neighboring columns.
+The final three columns will contain the value of the root, the value of the first derivative at the root and the number of iterations taken to find the root in the interval between the current and the next evaluation point.
+If no root was found these three columns will contain <tt>NAN</tt>.
+The user will be updated through the command line about the progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>sv_derivative_verification_circle</tt>
 This target builds a script that verifies the derivatives of the singular
@@ -331,27 +528,51 @@ The second column will contain the value of the smallest singular value at this 
 Then the columns will contain the computed derivative, the extrapolated derivative, the computed second derivative and the extrapolated second derivative in this order.
 The user will be updated through the command line about the progress of the algorithm if <tt>-DCMDL</tt> is set.
 
-#### <tt>sv_derivative_full</tt>
-This target builds a script that computes the singular values and
-their first two derivatives of the Galerkin BEM
-approximated BIO for the second-kind direct BIEs of the Helmholtz
-transmission problem.
-Minimas in the smallest singular value are determined as well
-by use of the Newton-Raphson method.
-The scatterer is set to be a circle.
+#### <tt>sv_square</tt>
+This target builds a script that computes the singular values
+of the Galerkin BEM approximated BIO for the
+second-kind direct BIEs of the Helmholtz
+transmission problem. The direct algorithm from Eigen is used to compute the
+sinuglar values.
+The scatterer is set to be a square.
 The results are written to file.
 The script can be run as follows:
+
 ~~~
-/path/to/library/bin/sv_derivative_full <radius of circle> 
-    <refraction inside> <refraction outside> <initial wavenumber>
-    <#panels> <order of quadrature rule> <outputfile>.
+/path/to/sv_square <half of side length of square> <refraction inside>
+     <refraction outside> <initial wavenumber>
+     <#panels> <order of quadrature rule> <outputfile>.
 ~~~
-The resulting file will contain the value of k in the first column.
-Then the singular values and their first two derivatives at k will be listed from smallest to largest in the columns.
-The singular values and their derivatives occupy three neighboring columns.
-The final three columns will contain the value of the root, the value of the first derivative at the root and the number of iterations taken to find the root in the interval between the current and the next evaluation point.
-If no root was found these three columns will contain <tt>NAN</tt>.
-The user will be updated through the command line about the progress of the algorithm if <tt>-DCMDL</tt> is set.
+
+The resulting file will contain the value of <tt>k</tt> in the first column.
+The rest of the columns contain the singular values from
+smallest to largest for this <tt>k</tt>.
+The user will be updated through the command line about the
+progress of the algorithm
+if <tt>-DCMDL</tt> is set.
+
+#### <tt>sv_square_arnoldi</tt>
+This target builds a script that computes the singular values
+of the Galerkin BEM approximated BIO for the
+second-kind direct BIEs of the Helmholtz
+transmission problem. The arnoldi algorithm from arpack is used to compute the
+sinuglar values. The scatterer is set to be a square.
+The results are written to file.
+The script can be run as follows:
+
+~~~
+/path/to/sv_circle <radius of circle> <refraction inside>
+     <refraction outside> <initial wavenumber> <final wavenumber>
+     <#points to evaluate> <scan complex wavenumbers> <#panels>
+     <order of quadrature rule> <accuracy of arnoldi algorithm>.
+~~~
+
+The resulting file will contain the value of <tt>k</tt> in the first column.
+The rest of the columns contain the singular values from
+smallest to largest for this <tt>k</tt>.
+The user will be updated through the command line about the
+progress of the algorithm
+if <tt>-DCMDL</tt> is set.
 
 #### <tt>transmission_problem_verification</tt>
 This target builds a script that computes solutions to
