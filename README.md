@@ -46,7 +46,7 @@ Running CMake also configures some examples of how to use the library as <tt>mak
 These can then be built by running 
 
 ~~~
-make <target_name>.
+make <target_name>
 ~~~
 
 The compiled binary can be found in the <tt>bin</tt> directory.
@@ -64,7 +64,7 @@ This target builds a script that computes the Eigenvalues of the BIO for Helmhol
 ~~~
  /path/to/debugging_SVs
 ~~~
-The output file will contain a section for each set mesh resolution and each of those sections will contain one section each for every BIO where all Eigenvalues for different wavenumbers will be listed in columns. The Eigenvalues are computed using the facts stated in Lemma 3.22. [TODO: find refernce]
+The output file will contain a section for each set mesh resolution and each of those sections will contain one section each for every BIO where all Eigenvalues for different wavenumbers will be listed in columns. The Eigenvalues are computed using the facts stated in Lemma 3.22. [TODO: find reference]
 
 #### <tt>direct_v_arnoldi</tt>
 This target builds a script that computes the singular values of the Galerkin BEM approximated BIO for the second-kind direct BIEs of the Helmholtz transmission problem, once using the Arnoldi algorithm and once using s direct solver. The scatterer is set to be a circle. The results are written to file. The script can be run as follows: 
