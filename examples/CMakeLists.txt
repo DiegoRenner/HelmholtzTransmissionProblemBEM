@@ -1,5 +1,4 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
-link_directories(/u/drenner/cblib)
 
 add_executable(dirichlet_example dirichlet_example.cpp)
 add_executable(neumann_example neumann_example.cpp)
