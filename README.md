@@ -26,8 +26,9 @@ sudo pacman -S lapack
 ~~~
 For <tt>debian</tt> based distros:
 ~~~
-sudo apt install libarpack2
-sudo apt install liblapack3
+sudo apt install libboost-all-dev
+sudo apt install libarpack2-dev 
+sudo apt install liblapack3-dev
 ~~~
 
 To generate the documentation <tt>latex</tt> and <tt>doxygen</tt> have to be installed as well.
