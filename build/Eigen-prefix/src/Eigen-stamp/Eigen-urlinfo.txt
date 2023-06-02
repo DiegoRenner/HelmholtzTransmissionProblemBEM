@@ -1,3 +1,0 @@
-repository='external project URL'
-module='https://gitlab.com/libeigen/eigen/-/archive/3.3.4/eigen-3.3.4.zip'
-tag=''

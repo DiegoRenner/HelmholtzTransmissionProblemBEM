@@ -1,4 +1,0 @@
-# Target labels
- BuildUnsupported
-# Source files and their labels
-/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen/unsupported/test/splines.cpp
