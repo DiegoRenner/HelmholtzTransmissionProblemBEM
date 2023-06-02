@@ -24,7 +24,7 @@ enum flag {
     zerofound
 };
 
-struct data {
+struct grid_data {
 public:
     double grid_point;
     double value;

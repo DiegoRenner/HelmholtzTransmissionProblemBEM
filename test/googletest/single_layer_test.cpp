@@ -39,7 +39,7 @@ unsigned order = 11;
 
 // compute operator and extract first row
 Eigen::VectorXcd V =
-        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, c_i).block(0,0,1,numpanels).transpose();
+        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, 0., c_i).block(0,0,1,numpanels).transpose();
 
 // set variables for reading operator from file
 Eigen::VectorXcd V_expected(numpanels);

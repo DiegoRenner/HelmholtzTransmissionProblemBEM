@@ -1,8 +1,10 @@
 #include "mass_matrix.hpp"
+#include <execution>
 
     namespace mass_matrix {
 
         typedef std::complex<double> complex_t;
+        static const complex_t czero(0., 0.);
 
         Eigen::MatrixXcd InteractionMatrix(const AbstractParametrizedCurve &pi,
                                            const AbstractParametrizedCurve &pi_p,
@@ -16,8 +18,7 @@
                 unsigned int Qtrial = trial_space.getQ();
                 unsigned int Qtest = test_space.getQ();
                 // Interaction matrix with size Q x Q
-                Eigen::MatrixXcd interaction_matrix = Eigen::MatrixXcd::Zero(Qtest,Qtrial);
-                return interaction_matrix;
+                return Eigen::MatrixXcd::Zero(Qtest, Qtrial);
             }
         }
 
@@ -38,19 +39,13 @@
             // Computing the (i,j)th matrix entry
             for (int i = 0; i < Qtest; ++i) {
                 for (int j = 0; j < Qtrial; ++j) {
-                    // Lambda expression for functions F and G
-                    // Single Layer BIO
-                    auto F = [&](double t) { // Function associated with panel pi_p
-                        return trial_space.evaluateShapeFunction(j, t) * pi_p.Derivative_01(t).norm();
-                    };
-                    auto G = [&](double s) { // Function associated with panel pi
-                        return test_space.evaluateShapeFunction(i, s);
-                    };
-                    complex_t integral = complex_t(0.,0.);
+                    complex_t integral = czero;
                     for (unsigned int k = 0; k < N; ++k) {
                         // Tensor product quadrature rule
-                            double s = GaussQR.x(k);
-                            integral += GaussQR.w(k)*F(s)*G(s);
+                        double s = GaussQR.x(k);
+                        auto F = trial_space.evaluateShapeFunction(j, s) * pi_p.Derivative_01(s).norm();
+                        auto G = test_space.evaluateShapeFunction(i, s);
+                        integral += GaussQR.w(k) * F * G;
                     }
                     // Filling up the matrix entry
                     interaction_matrix(i, j) = integral;
@@ -79,7 +74,7 @@
             QuadRule GaussQR = getGaussQR(N,0.,1.);
             QuadRule CGaussQR = getCGaussQR(N);
             for (unsigned int i = 0; i < numpanels; ++i) {
-                for (unsigned int j = 0; j < numpanels; ++j) {
+                unsigned int j = i; //for (unsigned int j = 0; j < numpanels; ++j) {
                     // Getting the interaction matrix for the pair of panels i and j
                     Eigen::MatrixXcd interaction_matrix =
                             InteractionMatrix(*panels[i], *panels[j], trial_space, test_space, GaussQR, CGaussQR);
@@ -92,7 +87,7 @@
                             output(II, JJ) += interaction_matrix(I, J);
                         }
                     }
-                }
+                //}
             }
             return output;
         }

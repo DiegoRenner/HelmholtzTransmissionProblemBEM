@@ -1,0 +1,72 @@
+Performing C++ SOURCE FILE Test COMPILER_SUPPORT_Wshorten64to32 failed with the following output:
+Change Dir: /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/ninja cmTC_a32fe && [1/2] Building CXX object CMakeFiles/cmTC_a32fe.dir/src.cxx.o
+FAILED: CMakeFiles/cmTC_a32fe.dir/src.cxx.o 
+/usr/bin/c++ -DCOMPILER_SUPPORT_Wshorten64to32  -pedantic -Wall -Wextra -Wundef -Wcast-align -Wchar-subscripts -Wnon-virtual-dtor -Wunused-local-typedefs -Wpointer-arith -Wwrite-strings -Wformat-security -Werror   -Wshorten-64-to-32 -o CMakeFiles/cmTC_a32fe.dir/src.cxx.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build/CMakeFiles/CMakeTmp/src.cxx
+c++: error: unrecognized command-line option '-Wshorten-64-to-32'
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_SUPPORT_Wcpp11extensions failed with the following output:
+Change Dir: /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/ninja cmTC_6ca66 && [1/2] Building CXX object CMakeFiles/cmTC_6ca66.dir/src.cxx.o
+FAILED: CMakeFiles/cmTC_6ca66.dir/src.cxx.o 
+/usr/bin/c++ -DCOMPILER_SUPPORT_Wcpp11extensions  -pedantic -Wall -Wextra -Wundef -Wcast-align -Wchar-subscripts -Wnon-virtual-dtor -Wunused-local-typedefs -Wpointer-arith -Wwrite-strings -Wformat-security -Wlogical-op -Wenum-conversion -Werror   -Wc++11-extensions -o CMakeFiles/cmTC_6ca66.dir/src.cxx.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build/CMakeFiles/CMakeTmp/src.cxx
+c++: error: unrecognized command-line option '-Wc++11-extensions'; did you mean '-fms-extensions'?
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_SUPPORT_wd981 failed with the following output:
+Change Dir: /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/ninja cmTC_8f0ff && [1/2] Building CXX object CMakeFiles/cmTC_8f0ff.dir/src.cxx.o
+FAILED: CMakeFiles/cmTC_8f0ff.dir/src.cxx.o 
+/usr/bin/c++ -DCOMPILER_SUPPORT_wd981  -pedantic -Wall -Wextra -Wundef -Wcast-align -Wchar-subscripts -Wnon-virtual-dtor -Wunused-local-typedefs -Wpointer-arith -Wwrite-strings -Wformat-security -Wlogical-op -Wenum-conversion -Wdouble-promotion -Wno-psabi -Wno-variadic-macros -Wno-long-long -fno-check-new -fno-common -fstrict-aliasing -Werror   -wd981 -o CMakeFiles/cmTC_8f0ff.dir/src.cxx.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build/CMakeFiles/CMakeTmp/src.cxx
+c++: error: unrecognized command-line option '-wd981'
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_SUPPORT_wd2304 failed with the following output:
+Change Dir: /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/ninja cmTC_8deda && [1/2] Building CXX object CMakeFiles/cmTC_8deda.dir/src.cxx.o
+FAILED: CMakeFiles/cmTC_8deda.dir/src.cxx.o 
+/usr/bin/c++ -DCOMPILER_SUPPORT_wd2304  -pedantic -Wall -Wextra -Wundef -Wcast-align -Wchar-subscripts -Wnon-virtual-dtor -Wunused-local-typedefs -Wpointer-arith -Wwrite-strings -Wformat-security -Wlogical-op -Wenum-conversion -Wdouble-promotion -Wno-psabi -Wno-variadic-macros -Wno-long-long -fno-check-new -fno-common -fstrict-aliasing -Werror   -wd2304 -o CMakeFiles/cmTC_8deda.dir/src.cxx.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build/CMakeFiles/CMakeTmp/src.cxx
+c++: error: unrecognized command-line option '-wd2304'
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_SUPPORT_STRICTANSI failed with the following output:
+Change Dir: /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/ninja cmTC_29b5b && [1/2] Building CXX object CMakeFiles/cmTC_29b5b.dir/src.cxx.o
+FAILED: CMakeFiles/cmTC_29b5b.dir/src.cxx.o 
+/usr/bin/c++ -DCOMPILER_SUPPORT_STRICTANSI  -pedantic -Wall -Wextra -Wundef -Wcast-align -Wchar-subscripts -Wnon-virtual-dtor -Wunused-local-typedefs -Wpointer-arith -Wwrite-strings -Wformat-security -Wlogical-op -Wenum-conversion -Wdouble-promotion -Wno-psabi -Wno-variadic-macros -Wno-long-long -fno-check-new -fno-common -fstrict-aliasing -Werror   -strict-ansi -o CMakeFiles/cmTC_29b5b.dir/src.cxx.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build/CMakeFiles/CMakeTmp/src.cxx
+c++: error: unrecognized command-line option '-strict-ansi'; did you mean '-fstrict-enums'?
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_SUPPORT_Qunusedarguments failed with the following output:
+Change Dir: /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/ninja cmTC_1441f && [1/2] Building CXX object CMakeFiles/cmTC_1441f.dir/src.cxx.o
+FAILED: CMakeFiles/cmTC_1441f.dir/src.cxx.o 
+/usr/bin/c++ -DCOMPILER_SUPPORT_Qunusedarguments  -pedantic -Wall -Wextra -Wundef -Wcast-align -Wchar-subscripts -Wnon-virtual-dtor -Wunused-local-typedefs -Wpointer-arith -Wwrite-strings -Wformat-security -Wlogical-op -Wenum-conversion -Wdouble-promotion -Wno-psabi -Wno-variadic-macros -Wno-long-long -fno-check-new -fno-common -fstrict-aliasing -Werror   -Qunused-arguments -o CMakeFiles/cmTC_1441f.dir/src.cxx.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build/CMakeFiles/CMakeTmp/src.cxx
+c++: error: unrecognized command-line option '-Qunused-arguments'
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+int main() { return 0; }

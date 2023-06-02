@@ -41,12 +41,14 @@ namespace hypersingular_helmholtz_der {
  * @return the matrix W' for the derivative in \p k of the
  * Hypersingular BIO bilinear form
  */
-    Eigen::MatrixXcd ComputeIntegralAdjacent(const AbstractParametrizedCurve &pi,
-                                            const AbstractParametrizedCurve &pi_p,
-                                            const AbstractBEMSpace &space,
-                                            const QuadRule &GaussQR,
-                                             const std::complex<double> k,
-                                             const double c);
+    void ComputeIntegralAdjacent(Eigen::MatrixXcd &interaction_matrix,
+                                 const AbstractParametrizedCurve &pi,
+                                 const AbstractParametrizedCurve &pi_p,
+                                 const AbstractBEMSpace &space,
+                                 const QuadRule &GaussQR,
+                                 const std::complex<double> &k,
+                                 const double c_i, const double c_o,
+                                 gq_workspace_t &ws);
 
 
 /**
@@ -68,12 +70,14 @@ namespace hypersingular_helmholtz_der {
  * @return the matrix W' for the derivative in \p k of the
  * Hypersingular BIO bilinear form
  */
-    Eigen::MatrixXcd ComputeIntegralCoinciding(const AbstractParametrizedCurve &pi,
-                                              const AbstractParametrizedCurve &pi_p,
-                                              const AbstractBEMSpace &space,
-                                              const QuadRule &GaussQR,
-                                               const std::complex<double> k,
-                                               const double c);
+    void ComputeIntegralCoinciding(Eigen::MatrixXcd &interaction_matrix,
+                                   const AbstractParametrizedCurve &pi,
+                                   const AbstractParametrizedCurve &pi_p,
+                                   const AbstractBEMSpace &space,
+                                   const QuadRule &GaussQR,
+                                   const std::complex<double> &k,
+                                   const double c_i, const double c_o,
+                                   gq_workspace_t &ws);
 
 
 /**
@@ -95,12 +99,14 @@ namespace hypersingular_helmholtz_der {
  * @return the matrix W' for the derivative in \p k of the
  * Hypersingular BIO bilinear form
  */
-    Eigen::MatrixXcd ComputeIntegralGeneral(const AbstractParametrizedCurve &pi,
-                                           const AbstractParametrizedCurve &pi_p,
-                                           const AbstractBEMSpace &space,
-                                           const QuadRule &GaussQR,
-                                            const std::complex<double> k,
-                                            const double c);
+    void ComputeIntegralGeneral(Eigen::MatrixXcd &interaction_matrix,
+                                const AbstractParametrizedCurve &pi,
+                                const AbstractParametrizedCurve &pi_p,
+                                const AbstractBEMSpace &space,
+                                const QuadRule &GaussQR,
+                                const std::complex<double> &k,
+                                const double c_i, const double c_o,
+                                gq_workspace_t &ws);
 
 /**
  * This function is used to evaluate the Interaction Matrix
@@ -154,13 +160,15 @@ namespace hypersingular_helmholtz_der {
  * @return An Eigen::MatrixXd type Interaction Matrix
  * (\f$Q_{test}\times Q_{trial}\f$)
  */
-    Eigen::MatrixXcd InteractionMatrix(const AbstractParametrizedCurve &pi,
-                                      const AbstractParametrizedCurve &pi_p,
-                                      const AbstractBEMSpace &space,
-                                      const QuadRule &GaussQR,
-                                       const QuadRule &CGaussQR,
-                                       const std::complex<double> k,
-                                       const double c);
+    void InteractionMatrix(Eigen::MatrixXcd &interaction_matrix,
+                           const AbstractParametrizedCurve &pi,
+                           const AbstractParametrizedCurve &pi_p,
+                           const AbstractBEMSpace &space,
+                           const QuadRule &GaussQR,
+                           const QuadRule &CGaussQR,
+                           const std::complex<double> &k,
+                           const double c_i, const double c_o,
+                           gq_workspace_t &ws);
 
 /**
  * This function is used to evaluate the full Galerkin matrix based on the
@@ -180,10 +188,11 @@ namespace hypersingular_helmholtz_der {
  * @return an Eigen::MatrixXd type Galerkin Matrix for the given mesh and space
  */
     Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
-                                   const AbstractBEMSpace &space,
-                                   const unsigned int &N,
-                                    const std::complex<double> k,
-                                    const double c);
+                                    const AbstractBEMSpace &space,
+                                    const unsigned int &N,
+                                    const std::complex<double> &k,
+                                    const double c_i,
+                                    const double c_o);
 
 
 } // namespace hypersingular_helmholtz

@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen/test/geo_transformations.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"BuildOfficial"
+		],
+		"name" : "geo_transformations_1"
+	}
+}

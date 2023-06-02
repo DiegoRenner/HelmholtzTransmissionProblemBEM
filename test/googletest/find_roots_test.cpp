@@ -165,8 +165,8 @@ TEST(find_roots_test, findZeros_seq_recording) {
     double b = 2*M_PI;
     int init_resolution = 10;
 
-    std::vector<std::vector<data>> records;
-    std::function<void(std::vector<data>)> recorder = [&records](std::vector<data> entry)->void{records.push_back(entry);};
+    std::vector<std::vector<grid_data>> records;
+    std::function<void(std::vector<grid_data>)> recorder = [&records](std::vector<grid_data> entry)->void{records.push_back(entry);};
 
     std::vector<double> zeros = findZeros_seq(ddf3, a, b, init_resolution, recorder);
 

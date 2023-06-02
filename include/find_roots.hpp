@@ -104,12 +104,12 @@ std::vector<double> findZeros( const std::function<Eigen::MatrixXd(double)> f_bo
  * @param num_iter numbers of iterations taken to find root
  * @return value of root if root was found
  */
-template <typename RECORDER = std::function<void(std::vector<data>)>>
+template <typename RECORDER = std::function<void(std::vector<grid_data>)>>
 std::vector<double> findZeros_seq(const std::function<Eigen::MatrixXd(double)> f_both,
                                double a,
                                double b,
                                unsigned int m,
-                               RECORDER rec = [](std::vector<data>)->void{});
+                               RECORDER rec = [](std::vector<grid_data>)->void{});
 
 /**
  * This function computes the value of the function \p f and it's two

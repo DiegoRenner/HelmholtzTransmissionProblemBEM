@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen/test/determinant.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"BuildOfficial"
+		],
+		"name" : "determinant_6"
+	}
+}

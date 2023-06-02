@@ -502,12 +502,12 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
     double gamma_rel_1 = tau_abs / 3;
 
     // initialize search grid, function values, derivatives and flags
-    std::vector<data> S;
+    std::vector<grid_data> S;
     double interval_len = std::abs(b - a);
     double sub_interval_len = interval_len / m;
     for (unsigned int i = 0; i <= m; i++) {
         Eigen::MatrixXd tempM = fct_both(a + i * sub_interval_len);
-        data data_field = {a + i * sub_interval_len, tempM(0, 0), tempM(0, 1), active};
+        grid_data data_field = {a + i * sub_interval_len, tempM(0, 0), tempM(0, 1), active};
         S.push_back(data_field);
     }
     S.back().flag_val = nozero;
@@ -560,7 +560,7 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                 double f_kappa_r = tempM(0, 0);
                 double df_kappa_l = S[*it].derivative;
                 double df_kappa_r = tempM(0, 1);
-                data data_field = {kappa_r, f_kappa_r, df_kappa_r, active};
+                grid_data data_field = {kappa_r, f_kappa_r, df_kappa_r, active};
                 S.insert(S.begin() + *it + 1, data_field);
                 S[0].flag_val = active;
                 N_active += 1;
@@ -575,7 +575,7 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                 double f_kappa_r = S[*it].value;
                 double df_kappa_l = tempM(0, 1);
                 double df_kappa_r = S[*it].derivative;
-                data data_field = {kappa_l, f_kappa_l, df_kappa_l, active};
+                grid_data data_field = {kappa_l, f_kappa_l, df_kappa_l, active};
                 S.insert(S.begin() + *it, data_field);
                 N_active += 1;
 
@@ -592,7 +592,7 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
                 tempM = fct_both(kappa_r);
                 double f_kappa_r = tempM(0, 0);
                 double df_kappa_r = tempM(0, 1);
-                data data_field = {kappa_l, f_kappa_l, df_kappa_l, active};
+                grid_data data_field = {kappa_l, f_kappa_l, df_kappa_l, active};
                 S.erase(S.begin() + *it);
                 S.insert(S.begin() + *it, data_field);
                 data_field = {kappa_r, f_kappa_r, df_kappa_r, active};
@@ -749,7 +749,7 @@ std::vector<double> findZeros_seq(std::function<Eigen::MatrixXd(double)> fct_bot
         }
         for ( auto it = zeros.begin(); it != zeros.end(); ++it){
             Eigen::MatrixXd tempM = fct_both(*it);
-            data data_field = {*it, tempM(0,0), tempM(0,1), active};
+            grid_data data_field = {*it, tempM(0,0), tempM(0,1), active};
             S.push_back(data_field);
             N_active += 1;
         }
@@ -775,7 +775,7 @@ std::vector<double> findZeros_seq<>(std::function<Eigen::MatrixXd(double)> fct_b
                                     double a,
                                     double b,
                                     unsigned int m,
-                                    std::function<void(std::vector<data>)> rec);
+                                    std::function<void(std::vector<grid_data>)> rec);
 
 void min_shrinkage(double mu, std::vector<double> &pot_zeros, double init_len){
     std::cout << "Applying minimal shrinkage condition to vector: " << pot_zeros << std::endl;

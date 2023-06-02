@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen/test/sparse_solvers.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"BuildOfficial"
+		],
+		"name" : "sparse_solvers_1"
+	}
+}

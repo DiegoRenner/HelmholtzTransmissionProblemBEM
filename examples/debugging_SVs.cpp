@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
             file_out << "n = " << j+1 << " : ";
             for (int l = 0; l < 3; l++) {
                 Eigen::MatrixXcd V =
-                        single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k[l], c_o);
+                        single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k[l], 0., c_o);
                 Eigen::VectorXcd par_exp_N = cont_space.Interpolate_helmholtz(par_exp_n,mesh);
                 file_out << par_exp_N.conjugate().transpose()*V*par_exp_N << " ";
             }
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
             file_out << "n = " << j+1 << " : ";
             for (int l = 0; l < 3; l++) {
                 Eigen::MatrixXcd K =
-                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k[l], c_o);
+                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k[l], 0., c_o);
                 Eigen::VectorXcd par_exp_N = cont_space.Interpolate_helmholtz(par_exp_n,mesh);
                 file_out << par_exp_N.conjugate().transpose()*K*par_exp_N << " ";
             }
@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
             file_out << "n = " << j+1 << " : ";
             for (int l = 0; l < 3; l++) {
                 Eigen::MatrixXcd W =
-                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k[l], c_o);
+                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k[l], 0., c_o);
                 Eigen::VectorXcd par_exp_N = cont_space.Interpolate_helmholtz(par_exp_n,mesh);
                 file_out << par_exp_N.conjugate().transpose()*W*par_exp_N << " ";
             }

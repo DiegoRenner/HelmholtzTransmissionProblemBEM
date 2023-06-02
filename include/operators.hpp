@@ -19,7 +19,7 @@
 
 using namespace std;
 
-inline ostream& operator<<(ostream& os, data data_val){
+inline ostream& operator<<(ostream& os, grid_data data_val){
     os << data_val.grid_point << " ";
     os << data_val.value << " ";
     os << data_val.derivative << " ";
@@ -57,7 +57,7 @@ public:
     }
 };
 
-inline ostream& operator<<(ostream& os, std::vector<data> in){
+inline ostream& operator<<(ostream& os, std::vector<grid_data> in){
 
     formatted_output output(os, 15);
     output << "Grid Points" << "Value" << "Derivative" << "Flag Value" << std::endl;
@@ -72,8 +72,7 @@ inline ostream& operator<<(ostream& os, std::vector<data> in){
 };
 
 struct ordering {
-    bool operator()(data one, data two) {
-        bool ret;
+    bool operator()(grid_data one, grid_data two) {
         if (std::abs(one.grid_point-two.grid_point) < std::max(std::abs(one.grid_point),std::abs(two.grid_point))*1e-16){
             return one.flag_val > two.flag_val;
         } else {

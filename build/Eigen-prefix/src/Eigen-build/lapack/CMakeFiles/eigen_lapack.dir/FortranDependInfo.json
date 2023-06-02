@@ -1,0 +1,23 @@
+{
+	"compiler-id" : "GNU",
+	"dir-cur-bld" : "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build/lapack",
+	"dir-cur-src" : "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen/lapack",
+	"dir-top-bld" : "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build",
+	"dir-top-src" : "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen",
+	"include-dirs" : 
+	[
+		"lapack",
+		"/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen/lapack",
+		"/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen",
+		".",
+		"/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen/lapack/../blas"
+	],
+	"language" : "Fortran",
+	"linked-target-dirs" : 
+	[
+		"/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build/blas/CMakeFiles/eigen_blas.dir"
+	],
+	"module-dir" : "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen-prefix/src/Eigen-build/lapack",
+	"submodule-ext" : ".smod",
+	"submodule-sep" : "@"
+}

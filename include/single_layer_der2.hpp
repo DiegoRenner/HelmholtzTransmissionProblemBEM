@@ -42,12 +42,14 @@ namespace single_layer_helmholtz_der2 {
  * @return the matrix V'' for the second derivative in \p k of the
  * Single Layer BIO bilinear form
  */
-    Eigen::MatrixXcd ComputeIntegralAdjacent(const AbstractParametrizedCurve &pi,
-                                             const AbstractParametrizedCurve &pi_p,
-                                             const AbstractBEMSpace &space,
-                                             const QuadRule &GaussQR,
-                                             const std::complex<double> k,
-                                             const double c);
+    void ComputeIntegralAdjacent(Eigen::MatrixXcd &interaction_matrix,
+                                 const AbstractParametrizedCurve &pi,
+                                 const AbstractParametrizedCurve &pi_p,
+                                 const AbstractBEMSpace &space,
+                                 const QuadRule &GaussQR,
+                                 const std::complex<double> &k,
+                                 const double c_i, const double c_o,
+                                 gq_workspace_t &ws);
 
 /**
  * This function is used to evaluate the Interaction Matrix for a pair of
@@ -68,12 +70,14 @@ namespace single_layer_helmholtz_der2 {
  * @return the matrix V'' for the second derivative in \p k of the
  * Single Layer BIO bilinear form
  */
-    Eigen::MatrixXcd ComputeIntegralCoinciding(const AbstractParametrizedCurve &pi,
-                                               const AbstractParametrizedCurve &pi_p,
-                                               const AbstractBEMSpace &space,
-                                               const QuadRule &GaussQR,
-                                               const std::complex<double> k,
-                                               const double c);
+    void ComputeIntegralCoinciding(Eigen::MatrixXcd &interaction_matrix,
+                                   const AbstractParametrizedCurve &pi,
+                                   const AbstractParametrizedCurve &pi_p,
+                                   const AbstractBEMSpace &space,
+                                   const QuadRule &GaussQR,
+                                   const std::complex<double> &k,
+                                   const double c_i, const double c_o,
+                                   gq_workspace_t &ws);
 
 
 /**
@@ -95,12 +99,14 @@ namespace single_layer_helmholtz_der2 {
  * @return the matrix V'' for the second derivative in \p k of the
  * Single Layer BIO bilinear form
  */
-    Eigen::MatrixXcd ComputeIntegralGeneral(const AbstractParametrizedCurve &pi,
-                                            const AbstractParametrizedCurve &pi_p,
-                                            const AbstractBEMSpace &space,
-                                            const QuadRule &GaussQR,
-                                            const std::complex<double> k,
-                                            const double c);
+    void ComputeIntegralGeneral(Eigen::MatrixXcd &interaction_matrix,
+                                const AbstractParametrizedCurve &pi,
+                                const AbstractParametrizedCurve &pi_p,
+                                const AbstractBEMSpace &space,
+                                const QuadRule &GaussQR,
+                                const std::complex<double> &k,
+                                const double c_i, const double c_o,
+                                gq_workspace_t &ws);
 /**
  * This function is used to evaluate the Interaction Matrix
  * for the pair of panels \f$\Pi\f$ and \f$\Pi\f$' for the
@@ -143,13 +149,15 @@ namespace single_layer_helmholtz_der2 {
  * @return An Eigen::MatrixXd type Interaction Matrix
  * (\f$Q_{test}\times Q_{trial}\f$)
  */
-    Eigen::MatrixXcd InteractionMatrix(const AbstractParametrizedCurve &pi,
-                                       const AbstractParametrizedCurve &pi_p,
-                                       const AbstractBEMSpace &space,
-                                       const QuadRule &GaussQR,
-                                       const QuadRule &CGaussQR,
-                                       const std::complex<double> k,
-                                       const double c);
+    void InteractionMatrix(Eigen::MatrixXcd &interaction_matrix,
+                           const AbstractParametrizedCurve &pi,
+                           const AbstractParametrizedCurve &pi_p,
+                           const AbstractBEMSpace &space,
+                           const QuadRule &GaussQR,
+                           const QuadRule &CGaussQR,
+                           const std::complex<double> &k,
+                           const double c_i, const double c_o,
+                           gq_workspace_t &ws);
 
 /**
  * This function is used to evaluate the full Galerkin matrix based on the
@@ -171,8 +179,9 @@ namespace single_layer_helmholtz_der2 {
     Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
                                     const AbstractBEMSpace &space,
                                     const unsigned int &N,
-                                    const std::complex<double> k,
-                                    const double c);
+                                    const std::complex<double> &k,
+                                    const double c_i,
+                                    const double c_o);
 
 }
 

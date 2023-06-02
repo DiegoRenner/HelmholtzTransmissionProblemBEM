@@ -31,6 +31,11 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <random>
+#include <execution>
+#include <algorithm>
+#include <string>
+#include <limits>
 #include "parametrized_line.hpp"
 #include "singular_values_arnoldi.hpp"
 #include "find_roots.hpp"
@@ -46,21 +51,43 @@ double epsilon_ver = 1e-3;
 // tolerance when finding root
 double epsilon_fin = 1e-6;
 
+// Create a standard normal random matrix with NR rows and NC columns
+Eigen::MatrixXcd standard_normal_random_matrix(int nr, int nc) {
+    std::random_device rd {};
+    std::mt19937 gen { rd() };
+    std::normal_distribution<> d { 0, 1 };
+    Eigen::MatrixXcd W = Eigen::MatrixXcd::Zero(nr, nc);
+    for (int i = 0; i < nr; ++i) for (int j = 0; j < nc; ++j) {
+        W(i, j) = complex_t(d(gen), d(gen));
+    }
+    return W;
+}
+
+// Approximate the smallest singular value by randomized SVD
+inline double rsv(const Eigen::MatrixXcd &T, const Eigen::MatrixXcd &W) {
+    int nr = W.rows(), nc = W.cols();
+    Eigen::MatrixXcd U, V, Q, B, C, thinQ = Eigen::MatrixXcd::Identity(nr, nc);
+    Eigen::PartialPivLU<Eigen::MatrixXcd> lu_decomp(T * T.transpose().conjugate() * T);
+    V = lu_decomp.solve(W);
+    Eigen::HouseholderQR<Eigen::MatrixXcd> qr(V);
+    Q = qr.householderQ() * thinQ;
+    B = T.transpose().conjugate() * (T * lu_decomp.solve(Q));
+    C = Q.transpose().conjugate() * B;
+    Eigen::BDCSVD<Eigen::MatrixXcd> svd(C * Q.transpose().conjugate());
+    return 1.0 / svd.singularValues()(0);
+}
+
 int main(int argc, char** argv){
 
     // define radius of circle refraction index and initial wavenumber
     double eps = atof(argv[1]);
     double c_i = atof(argv[2]);
     double c_o = atof(argv[3]);
-    complex_t k_0 = atof(argv[4]);
+    double k_min = atof(argv[4]);
 
     // define mesh in space and on wavenumber on which to perform verification
-    unsigned n_points_x = atoi(argv[5]);
-    unsigned n_points_y = 1;
-    unsigned numpanels;
-    numpanels = atoi(argv[6]);
-    double h_x = 10.0/n_points_x;
-    double h_y = 10.0/n_points_y;
+    unsigned n_points_k = atoi(argv[5]);
+    unsigned numpanels = atoi(argv[6]);
     // compute mesh for numpanels
     using PanelVector = PanelVector;
     // corner points for the square
@@ -94,7 +121,6 @@ int main(int argc, char** argv){
 
     // define order of quadrature rule used to compute matrix entries and which singular value to evaluate
     unsigned order = atoi(argv[7]);
-    unsigned m = 0;
 
     // define accurracy of arnoldi algorithm
     double acc = atof(argv[8]);
@@ -110,107 +136,144 @@ int main(int argc, char** argv){
     file_out.open(file_minimas, std::ofstream::out | std::ofstream::trunc);
     file_out.close();
 
-    // Inform user of started computation.
-	#ifdef CMDL
-    std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "Finding resonances using Brent's method." << std::endl;
-    std::cout << "Computing on userdefined problem using square domain." << std::endl;
-    std::cout << std::endl;
-	#endif
+    int nc = 2;
+    int nr = 2 * numpanels;
+    Eigen::MatrixXcd W = standard_normal_random_matrix(nr, nc);
 
-    // loop over values of wavenumber 
-    for (unsigned j = 0; j < n_points_x; j++) {
-        for (unsigned k = 0; k < n_points_y; k++) {
-            auto duration_ops = milliseconds ::zero();
-            auto duration = milliseconds::zero();
+    double k_max = 4.0, k_step = (k_max - k_min) / n_points_k;
 
-            // define wavenumber for current loop
-            complex_t k_temp = (k_0+j*h_x+ii*double(k)*h_y);
+    std::cout << "Bracketing local minima... [--------------------]";
 
-            // set which singular values to evaluate, smallest only
-            unsigned count = 1;
+    auto tic = chrono::high_resolution_clock::now();
 
-            // define functions that return singular value and it's derivative
-            auto sv_eval = [&] (double k_in) {
-                auto start = high_resolution_clock::now();
-                Eigen::MatrixXcd T_in;
-                T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-                auto end = high_resolution_clock::now();
-                duration_ops += duration_cast<milliseconds>(end-start);
-                return arnoldi::sv(T_in, count, acc)(m);
-            };
-            auto sv_eval_both = [&] (double k_in) {
-                auto start = high_resolution_clock::now();
-                Eigen::MatrixXcd T_in;
-                Eigen::MatrixXcd T_der_in;
-                Eigen::MatrixXcd T_der2_in;
-                T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-                T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
-                T_der2_in = gen_sol_op_2nd_der(mesh, order, k_in , c_o, c_i);
-                Eigen::MatrixXd res = arnoldi::sv_2nd_der(T_in, T_der_in, T_der2_in, count, acc).block(m,1,1,2);
-                auto end = high_resolution_clock::now();
-                duration_ops += duration_cast<milliseconds>(end-start);
-                return res;
-            };
-            auto sv_eval_der = [&] (double k_in) {
-                auto start = high_resolution_clock::now();
-                Eigen::MatrixXcd T_in;
-                Eigen::MatrixXcd T_der_in;
-                T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-                T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
-                double res = arnoldi::sv_1st_der(T_in, T_der_in, count, acc)(m,1);
-                auto end = high_resolution_clock::now();
-                duration_ops += duration_cast<milliseconds>(end-start);
-                return res;
-            };
+    unsigned ksize = 1 + (int)round((k_max - k_min) / k_step), finished = 0;
+    std::vector<double> kv(ksize), res(ksize), loc_min, loc_min_approx, bnd(1, k_min);
+    std::generate(kv.begin(), kv.end(), [&]() { static double k = k_min - k_step; return k += k_step; });
 
-            bool root_found = false;
-            unsigned num_iter=0;
-            auto start = high_resolution_clock::now();
-	    
-			// search for root
-			#ifdef CMDL
-            std::cout << "#######################################################" << std::endl;
-			#endif
-            double root =  rtsafe(sv_eval_der,sv_eval_both,k_temp.real(), k_temp.real()+h_x,epsilon_fin,root_found,num_iter);
-            auto end = high_resolution_clock::now();
-            duration += duration_cast<milliseconds>(end-start);
-	    
-			#ifdef CMDL
-			// write interval searched to command line
-            std::cout << "Interval searched: [" << k_temp.real() 
-	    	<< "," << k_temp.real()+h_x << "]" << std::endl;
-			#endif
+    std::transform(std::execution::par_unseq, kv.cbegin(), kv.cend(), res.begin(), [&](double k) {
+        Eigen::MatrixXcd T = gen_sol_op(mesh, order, k, c_o, c_i);
+        double sv = rsv(T, W);
+        ++finished;
+        size_t progress = (100 * finished) / ksize, l1 = progress / 5, l2 = 20 - l1;
+        std::cout << "\rBracketing local minima... [" << std::string(l1, '=') << std::string(l2, '-') << "] (" << progress << "%)";
+        std::flush(std::cout);
+        return sv;
+    });
 
-            // write result to file
-            file_out.open(file_minimas, std::ios_base::app);
-            file_out << k_temp.real();// << " " << duration.count() << " " << duration_ops.count();
+    std::cout << "\rBracketing local minima... Done.                          " << std::endl;
 
-            // check if root was found
-            if (root_found) {
-                Eigen::Vector2d val_at_root = sv_eval_both(root);
-                // check if it's actually a root and not a crossing
-                if (std::abs(val_at_root[0]) < epsilon_fin) {
-                    file_out << " " << root << " " << sv_eval(root) << " " << val_at_root.transpose() << " " << num_iter << std::endl;
-				#ifdef CMDL
-				// write found roots to command line
-				std::cout << "A root was found at: " << root << std::endl;
-				std::cout << "The value of the first derivative here is: " << val_at_root << std::endl;
-				std::cout << "Number of iterations taken: " << num_iter << std::endl;
-				#endif
-                } else {
-                    file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
-                }
-            } else{
-                file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
-            }
-            file_out.close();
-			#ifdef CMDL
-            std::cout << "#######################################################" << std::endl;
-			std::cout << std::endl;
-			#endif
+    for (size_t i = 0; i < res.size() - 2; ++i) {
+        double &c = res[i+1], L = c - res[i], R = res[i+2] - c;
+        double k = k_min + i * k_step;
+        if (L < 0. && R > 0.) { // local minimum
+            loc_min_approx.push_back(k);
+        }
+        if (L > 0. && R < 0.) { // local maximum
+            bnd.push_back(k);
         }
     }
+    bnd.push_back(k_max);
+    auto toc = chrono::high_resolution_clock::now();
+
+    std::cout << "Found approximate locations of " << loc_min_approx.size() << " local minima." << std::endl;
+    std::cout << "Elapsed time: " << duration_cast<seconds>(toc - tic).count() << " sec" << std::endl;
+
+    // Routine for computing the smallest singular value by Arnoldi iterations
+    auto asv = [&](double k) {
+        Eigen::MatrixXcd T_in;
+        Eigen::MatrixXcd T_der_in;
+        Eigen::MatrixXcd T_der2_in;
+        T_in = gen_sol_op(mesh, order, k , c_o, c_i);
+        T_der_in = gen_sol_op_1st_der(mesh, order, k , c_o, c_i);
+        T_der2_in = gen_sol_op_2nd_der(mesh, order, k , c_o, c_i);
+        return arnoldi::sv_2nd_der(T_in, T_der_in, T_der2_in, 1, acc).block(0, 1, 1, 2);
+    };
+
+    std::vector<double> d1(loc_min_approx.size()), d2(loc_min_approx.size());
+    std::vector<double>::iterator d1t = d1.begin(), d2t = d2.begin();
+    std::vector<int> elim_pts;
+
+    int n_changed = 0;
+
+    // refine starting points
+    for (std::vector<double>::iterator it = loc_min_approx.begin(); it != loc_min_approx.end(); ++it, ++d1t, ++d2t) {
+        bool is_changed = false;
+        while (true) {
+            Eigen::MatrixXd der = asv(*it);
+            *d1t = der(0, 0);
+            *d2t = der(0, 1);
+            if (*d2t <= 0.) {
+                *it += k_step * (*d1t < 0. ? 1.0 : -1.0);
+                if (*it <= k_min || *it >= k_max) {
+                    elim_pts.push_back(it - loc_min_approx.begin());
+                    is_changed = false;
+                    break;
+                }
+                is_changed = true;
+            } else break;
+        }
+        if (is_changed)
+            ++n_changed;
+    }
+
+    if (n_changed > 0)
+        std::cout << "Improved " << n_changed << " starting point(s)" << std::endl;
+
+    if (!elim_pts.empty()) {
+        std::cout << "Discarded " << elim_pts.size() << " starting point(s)" << std::endl;
+        while (!elim_pts.empty()) {
+            loc_min_approx.erase(loc_min_approx.begin() + elim_pts.back());
+            d1.erase(loc_min_approx.begin() + elim_pts.back());
+            d2.erase(loc_min_approx.begin() + elim_pts.back());
+            elim_pts.pop_back();
+        }
+    }
+
+    d1t = d1.begin();
+    d2t = d2.begin();
+
+    for (std::vector<double>::const_iterator it = loc_min_approx.begin(); it != loc_min_approx.end(); ++it, ++d1t, ++d2t) {
+        double k0 = *it, k1, lb, ub;
+        std::vector<double>::const_iterator bt = std::lower_bound(bnd.begin(), bnd.end(), k0);
+        ub = *bt;
+        lb = *(--bt);
+        size_t iter = 0;
+        bool failed = false;
+        std::cout << "Finding local minimum " << 1 + int(it - loc_min_approx.begin())
+                  << ", k0 = " << *it << ", " << lb << " < k < " << ub << ": ";
+        std::flush(std::cout);
+        while (true) {
+            k1 = k0 - *d1t / *d2t;
+            ++iter;
+            if (std::abs(k1 - k0) < epsilon_fin)
+                break;
+            k0 = k1;
+            //cout << k0 << " ";
+            if (k0 <= lb || k0 >= ub) {
+                failed = true;
+                break;
+            }
+            Eigen::MatrixXd der = asv(k0);
+            *d1t = der(0, 0);
+            *d2t = der(0, 1);
+        }
+        if (failed)
+            std::cout << "not a local minimum" << std::endl;
+        else {
+            std::cout << "converged to " << k0 << " in " << iter << " iterations." << std::endl;
+            loc_min.push_back(k0);
+        }
+    }
+
+    toc = chrono::high_resolution_clock::now();
+
+    std::cout << "Local minima of the smallest singular value:" << std::endl;
+    for (std::vector<double>::const_iterator it = loc_min.begin(); it != loc_min.end(); ++it) {
+        std::cout << *it << std::endl;
+    }
+
+    std::cout << "Total time: " << duration_cast<seconds>(toc - tic).count() << " sec" << std::endl;
+
     return 0;
 }
 

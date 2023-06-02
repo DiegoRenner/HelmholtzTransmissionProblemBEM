@@ -172,8 +172,8 @@ int main(int argc, char** argv){
 #ifdef CMDL
     std::cout << "#######################################################" << std::endl;
 #endif
-    std::vector<std::vector<data>> records;
-    std::function<void(std::vector<data>)> recorder = [&records](std::vector<data> entry)->void{records.push_back(entry);};
+    std::vector<std::vector<grid_data>> records;
+    std::function<void(std::vector<grid_data>)> recorder = [&records](std::vector<grid_data> entry)->void{records.push_back(entry);};
     std::vector<double> roots = findZeros_seq(sv_eval_both,k_0.real(),k_0.real()+10.0, n_points_x,recorder);
     auto end = high_resolution_clock::now();
     duration += duration_cast<milliseconds>(end-start);

@@ -1,0 +1,362 @@
+[
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/dirichlet_example.dir/dirichlet_example.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/dirichlet_example.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/dirichlet_example.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/neumann_example.dir/neumann_example.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/neumann_example.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/neumann_example.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/transmission_problem_verification.dir/transmission_problem_verification.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/transmission_problem_verification.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/transmission_problem_verification.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/sv_derivative_verification_circle.dir/sv_derivative_verification_circle.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/sv_derivative_verification_circle.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/sv_derivative_verification_circle.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/sv_derivative_verification_square.dir/sv_derivative_verification_square.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/sv_derivative_verification_square.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/sv_derivative_verification_square.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/roots_newton_circle.dir/roots_newton_circle.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_newton_circle.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_newton_circle.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/roots_newton_circle_arnoldi.dir/roots_newton_circle_arnoldi.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_newton_circle_arnoldi.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_newton_circle_arnoldi.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/roots_mixed_circle_arnoldi.dir/roots_mixed_circle_arnoldi.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_mixed_circle_arnoldi.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_mixed_circle_arnoldi.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/roots_seq_circle_arnoldi.dir/roots_seq_circle_arnoldi.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_seq_circle_arnoldi.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_seq_circle_arnoldi.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/roots_brent_square.dir/roots_brent_square.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_brent_square.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_brent_square.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/roots_brent_square_arnoldi.dir/roots_brent_square_arnoldi.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_brent_square_arnoldi.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_brent_square_arnoldi.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/roots_newton_square.dir/roots_newton_square.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_newton_square.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_newton_square.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/roots_newton_square_arnoldi.dir/roots_newton_square_arnoldi.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_newton_square_arnoldi.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_newton_square_arnoldi.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/roots_mixed_square_arnoldi.dir/roots_mixed_square_arnoldi.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_mixed_square_arnoldi.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_mixed_square_arnoldi.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/roots_seq_square_arnoldi.dir/roots_seq_square_arnoldi.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_seq_square_arnoldi.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_seq_square_arnoldi.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/roots_brent_circle.dir/roots_brent_circle.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_brent_circle.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_brent_circle.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/roots_brent_circle_arnoldi.dir/roots_brent_circle_arnoldi.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_brent_circle_arnoldi.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/roots_brent_circle_arnoldi.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/sv_derivative_full.dir/sv_derivative_full.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/sv_derivative_full.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/sv_derivative_full.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/sv_circle.dir/sv_circle.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/sv_circle.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/sv_circle.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/sv_square.dir/sv_square.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/sv_square.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/sv_square.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/parabolic_approximation.dir/parabolic_approximation.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/parabolic_approximation.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/parabolic_approximation.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/direct_v_arnoldi.dir/direct_v_arnoldi.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/direct_v_arnoldi.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/direct_v_arnoldi.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/direct_v_arnoldi_1st_der.dir/direct_v_arnoldi_1st_der.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/direct_v_arnoldi_1st_der.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/direct_v_arnoldi_1st_der.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/direct_v_arnoldi_2nd_der.dir/direct_v_arnoldi_2nd_der.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/direct_v_arnoldi_2nd_der.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/direct_v_arnoldi_2nd_der.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/sv_circle_arnoldi.dir/sv_circle_arnoldi.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/sv_circle_arnoldi.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/sv_circle_arnoldi.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/sv_square_arnoldi.dir/sv_square_arnoldi.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/sv_square_arnoldi.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/sv_square_arnoldi.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o examples/CMakeFiles/debugging_SVs.dir/debugging_SVs.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/debugging_SVs.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/examples/debugging_SVs.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/single_layer.dir/single_layer.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/single_layer.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/single_layer.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/single_layer_der.dir/single_layer_der.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/single_layer_der.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/single_layer_der.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/single_layer_der2.dir/single_layer_der2.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/single_layer_der2.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/single_layer_der2.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/double_layer.dir/double_layer.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/double_layer.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/double_layer.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/double_layer_der.dir/double_layer_der.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/double_layer_der.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/double_layer_der.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/double_layer_der2.dir/double_layer_der2.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/double_layer_der2.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/double_layer_der2.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/hypersingular.dir/hypersingular.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/hypersingular.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/hypersingular.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/hypersingular_der.dir/hypersingular_der.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/hypersingular_der.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/hypersingular_der.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/hypersingular_der2.dir/hypersingular_der2.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/hypersingular_der2.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/hypersingular_der2.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/mass_matrix.dir/mass_matrix.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/mass_matrix.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/mass_matrix.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/sol_op.dir/single_layer.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/single_layer.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/single_layer.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/sol_op.dir/double_layer.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/double_layer.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/double_layer.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/sol_op.dir/hypersingular.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/hypersingular.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/hypersingular.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/sol_op.dir/mass_matrix.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/mass_matrix.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/mass_matrix.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/sol_op_der.dir/single_layer_der.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/single_layer_der.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/single_layer_der.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/sol_op_der.dir/double_layer_der.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/double_layer_der.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/double_layer_der.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/sol_op_der.dir/hypersingular_der.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/hypersingular_der.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/hypersingular_der.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/sol_op_der2.dir/single_layer_der2.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/single_layer_der2.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/single_layer_der2.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/sol_op_der2.dir/double_layer_der2.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/double_layer_der2.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/double_layer_der2.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/CMakeFiles/sol_op_der2.dir/hypersingular_der2.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/hypersingular_der2.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/hypersingular_der2.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/parametrizations/CMakeFiles/parametrizations.dir/parametrized_circular_arc.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/parametrizations/parametrized_circular_arc.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/parametrizations/parametrized_circular_arc.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/parametrizations/CMakeFiles/parametrizations.dir/parametrized_fourier_sum.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/parametrizations/parametrized_fourier_sum.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/parametrizations/parametrized_fourier_sum.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/parametrizations/CMakeFiles/parametrizations.dir/parametrized_line.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/parametrizations/parametrized_line.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/parametrizations/parametrized_line.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/parametrizations/CMakeFiles/parametrizations.dir/parametrized_mesh.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/parametrizations/parametrized_mesh.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/parametrizations/parametrized_mesh.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/parametrizations/CMakeFiles/parametrizations.dir/parametrized_polynomial.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/parametrizations/parametrized_polynomial.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/parametrizations/parametrized_polynomial.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/parametrizations/CMakeFiles/parametrizations.dir/parametrized_semi_circle.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/parametrizations/parametrized_semi_circle.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/parametrizations/parametrized_semi_circle.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/quadrature/CMakeFiles/quadrature.dir/genLaguerreRule.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/quadrature/genLaguerreRule.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/quadrature/genLaguerreRule.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/utilities/CMakeFiles/solvers.dir/solvers.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/solvers.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/solvers.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/utilities/CMakeFiles/compute_SV_der.dir/singular_values.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/singular_values.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/singular_values.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/utilities/CMakeFiles/compute_SV_der_arnoldi.dir/singular_values_arnoldi.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/singular_values_arnoldi.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/singular_values_arnoldi.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/utilities/CMakeFiles/gen_sol_op.dir/gen_sol_op.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/gen_sol_op.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/gen_sol_op.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/utilities/CMakeFiles/find_roots.dir/find_roots.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/find_roots.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/find_roots.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/utilities/CMakeFiles/arpp_eig_interface.dir/arpp_eig_interface.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/arpp_eig_interface.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/arpp_eig_interface.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/utilities/CMakeFiles/generate_solution.dir/gen_sol.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/gen_sol.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/gen_sol.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o source/utilities/CMakeFiles/cbessel.dir/cbessel.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/cbessel.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/cbessel.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/./googletest/include -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/include -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -Wall -Wshadow -Werror -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o test/googletest/CMakeFiles/gtest.dir/src/gtest-all.cc.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/src/gtest-all.cc",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/src/gtest-all.cc"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/./googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -Wall -Wshadow -Werror -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o test/googletest/CMakeFiles/gtest_main.dir/src/gtest_main.cc.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/src/gtest_main.cc",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/src/gtest_main.cc"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/./googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o test/googletest/CMakeFiles/double_layer_test.dir/double_layer_test.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/double_layer_test.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/double_layer_test.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/./googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o test/googletest/CMakeFiles/single_layer_test.dir/single_layer_test.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/single_layer_test.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/single_layer_test.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/./googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o test/googletest/CMakeFiles/hypersingular_test.dir/hypersingular_test.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/hypersingular_test.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/hypersingular_test.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/./googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o test/googletest/CMakeFiles/mass_matrix_test.dir/mass_matrix_test.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/mass_matrix_test.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/mass_matrix_test.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/./googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o test/googletest/CMakeFiles/solutions_test.dir/solutions_test.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/solutions_test.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/solutions_test.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/./googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o test/googletest/CMakeFiles/reuse_LU_test.dir/reuse_LU_test.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/reuse_LU_test.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/reuse_LU_test.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/./googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o test/googletest/CMakeFiles/find_roots_test.dir/find_roots_test.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/find_roots_test.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/find_roots_test.cpp"
+},
+{
+  "directory": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build",
+  "command": "/usr/bin/c++ -DEIGEN3_ACTIVATED -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build/Eigen_install/include/eigen3 -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/include -I/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/./googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest/include -isystem /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/test/googletest -O3 -march=native -mtune=native -O3 -DNDEBUG   -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -Wno-unknown-pragmas -o test/googletest/CMakeFiles/find_roots_test.dir/__/__/source/utilities/find_roots.cpp.o -c /home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/find_roots.cpp",
+  "file": "/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/source/utilities/find_roots.cpp"
+}
+]

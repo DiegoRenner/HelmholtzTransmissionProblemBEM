@@ -18,3 +18,5 @@ add_library(find_roots STATIC find_roots.cpp)
 add_library(arpp_eig_interface STATIC arpp_eig_interface.cpp)
 
 add_library(generate_solution STATIC gen_sol.cpp)
+
+add_library(cbessel STATIC cbessel.cpp)

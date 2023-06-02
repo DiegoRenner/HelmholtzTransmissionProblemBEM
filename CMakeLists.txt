@@ -39,8 +39,8 @@ unset(CMDL CACHE)
 
 # COMPILATION FLAGS
 ###########################################################################
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "-O3")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "-O3 -march=native -mtune=native")
 
 # IGNORE WARNINGS
 ###########################################################################
@@ -64,7 +64,7 @@ endif()
 
 include(${PROJECT_SOURCE_DIR}/cmake/functions/GetEIGEN3.cmake)
 add_definitions(-DEIGEN3_ACTIVATED)
-include(${PROJECT_SOURCE_DIR}/cmake/functions/Getcomplex_bessel.cmake)
+#include(${PROJECT_SOURCE_DIR}/cmake/functions/Getcomplex_bessel.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/functions/Getarpackpp.cmake)
 
 # ADD SUBDIRECTORIES

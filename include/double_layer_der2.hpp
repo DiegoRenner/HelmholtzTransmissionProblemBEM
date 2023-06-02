@@ -43,13 +43,15 @@
  * @return the matrix K'' for the second derivative in \p k of the
  * Double Layer BIO bilinear form
  */
-        Eigen::MatrixXcd ComputeIntegralAdjacent(const AbstractParametrizedCurve &pi,
-                                                 const AbstractParametrizedCurve &pi_p,
-                                                 const AbstractBEMSpace &trial_space,
-                                                 const AbstractBEMSpace &test_space,
-                                                 const QuadRule &GaussQR,
-                                                 const std::complex<double> k,
-                                                 const double c);
+        void ComputeIntegralAdjacent(Eigen::MatrixXcd &interaction_matrix,
+                                     const AbstractParametrizedCurve &pi,
+                                     const AbstractParametrizedCurve &pi_p,
+                                     const AbstractBEMSpace &trial_space,
+                                     const AbstractBEMSpace &test_space,
+                                     const QuadRule &GaussQR,
+                                     const std::complex<double> &k,
+                                     const double c_i, const double c_o,
+                                     gq_workspace_t &ws);
 
 /**
  * This function is used to evaluate the Interaction Matrix for a pair of
@@ -71,13 +73,15 @@
  * @return the matrix K'' for the second derivative in \p k of the
  * Double Layer BIO bilinear form
  */
-        Eigen::MatrixXcd ComputeIntegralCoinciding(const AbstractParametrizedCurve &pi,
-                                                   const AbstractParametrizedCurve &pi_p,
-                                                   const AbstractBEMSpace &trial_space,
-                                                   const AbstractBEMSpace &test_space,
-                                                   const QuadRule &GaussQR,
-                                                   const std::complex<double> k,
-                                                   const double c);
+        void ComputeIntegralCoinciding(Eigen::MatrixXcd &interaction_matrix,
+                                       const AbstractParametrizedCurve &pi,
+                                       const AbstractParametrizedCurve &pi_p,
+                                       const AbstractBEMSpace &trial_space,
+                                       const AbstractBEMSpace &test_space,
+                                       const QuadRule &GaussQR,
+                                       const std::complex<double> &k,
+                                       const double c_i, const double c_o,
+                                       gq_workspace_t &ws);
 
 /**
  * This function is used to evaluate the Interaction Matrix for a pair of
@@ -99,13 +103,15 @@
  * @return the matrix K'' for the second derivative in \p k of the
  * Double Layer BIO bilinear form
  */
-        Eigen::MatrixXcd ComputeIntegralGeneral(const AbstractParametrizedCurve &pi,
-                                                const AbstractParametrizedCurve &pi_p,
-                                                const AbstractBEMSpace &trial_space,
-                                                const AbstractBEMSpace &test_space,
-                                                const QuadRule &GaussQR,
-                                                const std::complex<double> k,
-                                                const double c);
+        void ComputeIntegralGeneral(Eigen::MatrixXcd &interaction_matrix,
+                                    const AbstractParametrizedCurve &pi,
+                                    const AbstractParametrizedCurve &pi_p,
+                                    const AbstractBEMSpace &trial_space,
+                                    const AbstractBEMSpace &test_space,
+                                    const QuadRule &GaussQR,
+                                    const std::complex<double> &k,
+                                    const double c_i, const double c_o,
+                                    gq_workspace_t &ws);
 
 /**
  * This function is used to evaluate the Interaction Matrix
@@ -151,14 +157,16 @@
  * @return An Eigen::MatrixXd type Interaction Matrix
  * (\f$Q_{test}\times Q_{trial}\f$)
  */
-        Eigen::MatrixXcd InteractionMatrix(const AbstractParametrizedCurve &pi,
-                                           const AbstractParametrizedCurve &pi_p,
-                                           const AbstractBEMSpace &trial_space,
-                                           const AbstractBEMSpace &test_space,
-                                           const QuadRule &GaussQR,
-                                           const QuadRule &CGaussQR,
-                                           const std::complex<double> k,
-                                           const double c);
+        void InteractionMatrix(Eigen::MatrixXcd &interaction_matrix,
+                               const AbstractParametrizedCurve &pi,
+                               const AbstractParametrizedCurve &pi_p,
+                               const AbstractBEMSpace &trial_space,
+                               const AbstractBEMSpace &test_space,
+                               const QuadRule &GaussQR,
+                               const QuadRule &CGaussQR,
+                               const std::complex<double> &k,
+                               const double c_i, const double c_o,
+                               gq_workspace_t &ws);
 
 /**
  * This function is used to evaluate the full Galerkin matrix based on the
@@ -182,8 +190,9 @@
                                         const AbstractBEMSpace &trial_space,
                                         const AbstractBEMSpace &test_space,
                                         const unsigned int &N,
-                                        const std::complex<double> k,
-                                        const double c);
+                                        const std::complex<double> &k,
+                                        const double c_i,
+                                        const double c_o);
 
     }
 

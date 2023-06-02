@@ -25,9 +25,9 @@ namespace bvp {
             Eigen::MatrixXcd M =
                     mass_matrix::GalerkinMatrix(mesh,discont_space,cont_space,order);
             Eigen::MatrixXcd K =
-                    double_layer_helmholtz::GalerkinMatrix(mesh, discont_space, cont_space, order, k,1);
+                    double_layer_helmholtz::GalerkinMatrix(mesh, discont_space, cont_space, order, k, 0., 1.);
             Eigen::MatrixXcd V =
-                    single_layer_helmholtz::GalerkinMatrix(mesh,cont_space,order,k,1);
+                    single_layer_helmholtz::GalerkinMatrix(mesh,cont_space,order,k, 0., 1.);
             // build rhs for solving
             Eigen::VectorXcd rhs = (0.5*M-K)*u_dir_N;
             // solve for coefficients
@@ -51,9 +51,9 @@ namespace bvp {
             Eigen::MatrixXcd M =
                     mass_matrix::GalerkinMatrix(mesh,cont_space,discont_space,order);
             Eigen::MatrixXcd K =
-                    double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, 1);
+                    double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, discont_space, order, k, 0., 1.);
             Eigen::MatrixXcd W =
-                    hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, 1);
+                    hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, 0., 1.);
             // build rhs for solving
             Eigen::VectorXcd rhs = (0.5*M+K.transpose())*u_neu_N;
             // solve for coefficients
@@ -78,17 +78,17 @@ namespace tp {
             ContinuousSpace<1> cont_space;
             // compute operators of second kind direct BIEs for the Helmholtz Transmission problem
             Eigen::MatrixXcd K_o =
-                    double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_o);
+                    double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k, 0., c_o);
             Eigen::MatrixXcd K_i =
-                    double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_i);
+                    double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k, 0., c_i);
             Eigen::MatrixXcd W_i =
-                    hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i);
+                    hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, 0., c_i);
             Eigen::MatrixXcd W_o =
-                    hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order,k, c_o);
+                    hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order,k, 0., c_o);
             Eigen::MatrixXcd V_o =
-                    single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_o);
+                    single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, 0., c_o);
             Eigen::MatrixXcd V_i =
-                    single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i);
+                    single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, 0., c_i);
             Eigen::MatrixXcd M_cont =
                     mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
             // Build matrices for solving linear system of equations
