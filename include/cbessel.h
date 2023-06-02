@@ -10,7 +10,23 @@
 using namespace std;
 
 /**
- * @todo write docs
+ * This is a C++ library for Bessel functions of complex argument and
+ * real order, intended as a replacement for complex_bessel library
+ * using the Fortran code by Donald E. Amos.
+ *
+ * The same theoretical basis is used, as explained in the two papers
+ * by Amos (1983). This code includes optimizations for order 0 and 1,
+ * making it slightly faster than the Fortran library.
+ *
+ * The routines below will throw exceptions if CBESSEL_EXCEPT is defined
+ * (by default it is not defined, the respective line in the CPP file
+ * is commented out). The following exceptions are thrown:
+ *
+ *  - std::overflow_error in the case of overflow
+ *  - std::underflow_error in the case of underflow (the result is 0)
+ *  - std::invalid_argument in the case of undefined result (NAN)
+ *  - std::length_error in the case of convergence failure
+ *  - std::domain_error in the case of invalid parameter value
  */
 namespace ComplexBessel
 {

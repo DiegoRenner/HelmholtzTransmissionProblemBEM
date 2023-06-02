@@ -1120,8 +1120,10 @@ namespace ComplexBessel {
     }
     /* Hankel function H^(kind)_v(z) */
     inline Cplx H(Real v,const Cplx &z,int kind,bool scaled) {
-        //if (kind<1 || kind>2)
-        //    throw domain_error("Invalid kind");
+#ifdef CBESSEL_EXCEPT
+        if (kind<1 || kind>2)
+            throw domain_error("Invalid kind");
+#endif
         Real va=abs(v),s=kind==1?1.0:-1.0;
         Cplx si=i*s,a=exp(M_PI_2*va*si),iz=si*z,ret;
         if (s*arg(z)>=-M_PI_2) {
@@ -1149,8 +1151,10 @@ namespace ComplexBessel {
         return -2.0*s*(v>=0.0?ret:a*a*ret);
     }
     inline Cplx H_v0(const Cplx &z,int kind,bool scaled) {
-        //if (kind<1 || kind>2)
-        //    throw domain_error("Invalid kind");
+#ifdef CBESSEL_EXCEPT
+        if (kind<1 || kind>2)
+            throw domain_error("Invalid kind");
+#endif
         Real s=kind==1?1.0:-1.0;
         Cplx si=i*s,iz=si*z,ret;
         if (s*arg(z)>=-M_PI_2) {
@@ -1177,8 +1181,10 @@ namespace ComplexBessel {
         return -2.0*s*ret;
     }
     inline Cplx H_v1(const Cplx &z,int kind,bool scaled) {
-        //if (kind<1 || kind>2)
-        //    throw domain_error("Invalid kind");
+#ifdef CBESSEL_EXCEPT
+        if (kind<1 || kind>2)
+            throw domain_error("Invalid kind");
+#endif
         Real s=kind==1?1.0:-1.0;
         Cplx si=i*s,iz=si*z,ret;
         if (s*arg(z)>=-M_PI_2) {
