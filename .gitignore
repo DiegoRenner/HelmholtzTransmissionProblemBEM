@@ -1,13 +1,13 @@
 # Default ignored files
 .idea/*
 bin
+build
 cmake-build-debug
 cmake-build-release
 cmake-build
 doxygen/generated_doc
-complex_bessel_lib
-include/complex_bessel*
 arpackpp_lib
+include/arpp_eig_interface.hpp
 data/*.dat
 data/*.txt
 data_bckp
