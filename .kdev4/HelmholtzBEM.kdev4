@@ -1,24 +1,21 @@
-[Buildset]
-BuildItems=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x01\x00\x00\x00>\x00H\x00e\x00l\x00m\x00h\x00o\x00l\x00t\x00z\x00T\x00r\x00a\x00n\x00s\x00m\x00i\x00s\x00s\x00i\x00o\x00n\x00P\x00r\x00o\x00b\x00l\x00e\x00m\x00B\x00E\x00M)
-
 [CMake]
 Build Directory Count=1
 Current Build Directory Index-Host System=0
 
 [CMake][CMake Build Directory 0]
-Build Directory Path=/home/luka/Projects/PMF/HelmholtzTransmissionProblemBEM/build
-Build Type=Debug
+Build Directory Path=/home/luka/Projects/PMF/HelmholtzBEM/build
+Build Type=Release
 CMake Binary=/usr/bin/cmake
 CMake Executable=/usr/bin/cmake
 Environment Profile=
 Extra Arguments=
-Install Directory=/usr/local
+Install Directory=
 Runtime=Host System
 
 [CustomDefinesAndIncludes][ProjectPath0]
 Path=.
 parseAmbiguousAsCPP=true
-parserArguments=-ferror-limit=100 -fspell-checking -Wdocumentation -Wunused-parameter -Wunreachable-code -Wall -Wno-int-in-bool-context -std=c++17
+parserArguments=-ferror-limit=100 -fspell-checking -Wdocumentation -Wunused-parameter -Wunreachable-code -Wall -std=c++17
 parserArgumentsC=-ferror-limit=100 -fspell-checking -Wdocumentation -Wunused-parameter -Wunreachable-code -Wall -std=c99
 parserArgumentsCuda=-ferror-limit=100 -fspell-checking -Wdocumentation -Wunused-parameter -Wunreachable-code -Wall -std=c++11
 parserArgumentsOpenCL=-ferror-limit=100 -fspell-checking -Wdocumentation -Wunused-parameter -Wunreachable-code -Wall -cl-std=CL1.1

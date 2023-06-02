@@ -7,7 +7,6 @@ cmake-build-release
 cmake-build
 doxygen/generated_doc
 arpackpp_lib
-include/arpp_eig_interface.hpp
 data/*.dat
 data/*.txt
 data_bckp
