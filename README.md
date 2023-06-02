@@ -1,4 +1,13 @@
-# HelmholtzTransmissionProblemBEM
+# Helmholtz Transmission Problem BEM with randomized SVD
+## Introduction
+This is a fork of the project [HelmholtzTransmissionProblemBEM](https://github.com/DiegoRenner/HelmholtzTransmissionProblemBEM/tree/master) written by Diego Renner, with the following improvements:
+
+- The code is upgraded to the C++17 standard. This required the typedef <tt>data</tt> to be renamed to <tt>grid_data</tt> to avoid collision with <tt>std::data</tt>.
+- The new dependency is the Intel <tt>tbb</tt> library for parallelization, which is supported by GCC.
+- Linking to [complex_bessel](https://github.com/joeydumont/complex_bessel) library is rendered obsolete since this code includes routines for computing Bessel functions written from scratch in C++, following the same theoretical basis explained by Donald E. Amos in his two papers. The new code, contained in <tt>cbessel.cpp</tt>, is slightly faster than the Fortran code and includes optimizations for Bessel functions of order 0 and 1. It has been extensively tested against the Fortran code.
+- Significant performance improvements are made to the process of assembling the solution matrix (with the respective derivatives). Lots of unnecessary computation was removed and the performance bottleneck was reduced to Hankel function computation, which is itself parallelized and reduced to computing HankelH1 of order 0 and 1.
+- The main contribution is an implementation of randomized SVD following the algorithm presented in [this paper](https://arxiv.org/abs/0909.4061). The corresponding routine called <tt>rsv</tt> approximates the smallest singular value of the solution matrix by using this technique. Although the approximation is not good enough to replace <tt>arpack</tt>, it is fast and robust, can be parallelized, and provides rough positions and bracketing for local extrema, which is particularly useful for finding near-resonance points.
+
 ## Configuration and Dependencies
 The library can be configured by running 
 ~~~
@@ -13,22 +22,38 @@ This should automatically generate a target with which the Eigen library for mat
 ~~~
 make Eigen
 ~~~
-if it is not already available.
-The [complex_bessel library](https://github.com/joeydumont/complex_bessel)
+if it is not already available. This step is not required; just typing
+~~~
+make
+~~~
+will build the entire project together with Eigen. However, if you're using <tt>cmake</tt> with <tt>ninja</tt>, make sure you always do
+~~~
+cd build
+ninja Eigen
+~~~
+from the project root directory after configuration. (In particular, you should do this in a terminal before building the project in Kdevelop for the first time.) Afterwards, the rest is compiled by running
+~~~
+ninja
+~~~
+from the <tt>build</tt> directory (or by issuing the build step in Kdevelop).
+
+~~The [complex_bessel library](https://github.com/joeydumont/complex_bessel)
 that is used for passing complex arguments to the Hankel and Bessel functions 
-aswell as the [arpackpp library](https://github.com/m-reuter/arpackpp) which gives a <tt>c++</tt> interface to the [arpack library](https://github.com/opencollab/arpack-ng) are installed automatically and don't need to be built.
-<tt>arpack</tt> and <tt>lapack</tt> need to be installed separately and can usually be done so with your distributions packagemanager.
+as well as~~ the [arpackpp library](https://github.com/m-reuter/arpackpp) which gives a <tt>c++</tt> interface to the [arpack library](https://github.com/opencollab/arpack-ng) are installed automatically and don't need to be built.
+<tt>arpack</tt>, <tt>lapack</tt> and <tt>tbb</tt> need to be installed separately and can usually be done so with your distributions packagemanager.
 
 For <tt>arch</tt> based distros:
 ~~~
 sudo pacman -S arpack
 sudo pacman -S lapack
+sudo pacman -S tbb2020
 ~~~
 For <tt>debian</tt> based distros:
 ~~~
 sudo apt install libboost-all-dev
 sudo apt install libarpack2-dev 
 sudo apt install liblapack3-dev
+sudo apt install libtbb-dev
 ~~~
 
 To generate the documentation <tt>latex</tt> and <tt>doxygen</tt> have to be installed as well.
