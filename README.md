@@ -4,9 +4,9 @@ This is a fork of the project [HelmholtzTransmissionProblemBEM](https://github.c
 
 - The code is upgraded to the C++17 standard. This required the typedef <tt>data</tt> to be renamed to <tt>grid_data</tt> to avoid collision with <tt>std::data</tt>.
 - The new dependency is the Intel <tt>tbb</tt> library for parallelization, which is supported by GCC.
-- Linking to [complex_bessel](https://github.com/joeydumont/complex_bessel) library is rendered obsolete since this code includes routines for computing Bessel functions written from scratch in C++, following the same theoretical basis explained by Donald E. Amos in his two papers. The new code, contained in <tt>cbessel.cpp</tt>, is slightly faster than the Fortran code and includes optimizations for Bessel functions of order 0 and 1. It has been extensively tested against the Fortran code.
-- Significant performance improvements are made to the process of assembling the solution matrix (with the respective derivatives). Lots of unnecessary computation was removed and the performance bottleneck was reduced to Hankel function computation, which is itself parallelized and reduced to computing HankelH1 of order 0 and 1.
-- The main contribution is an implementation of randomized SVD following the algorithm presented in [this paper](https://arxiv.org/abs/0909.4061). The corresponding routine called <tt>rsv</tt> approximates the smallest singular value of the solution matrix by using this technique. Although the approximation is not good enough to replace <tt>arpack</tt>, it is fast and provides rough positions and bracketing for local extrema, which is particularly useful for finding near-resonance points.
+- Linking to [complex_bessel](https://github.com/joeydumont/complex_bessel) library is rendered obsolete since this code includes routines for computing Bessel functions written from scratch in C++, following the same theoretical ideas as presented in two papers by Donald E. Amos (1983). The new code, contained in <tt>cbessel.cpp</tt>, is slightly faster than the Fortran code and has been extensively tested against the latter.
+- Significant performance improvements are made to the process of assembling the solution matrix and the respective derivatives by using parallelization and by removing duplicate computation.
+- The main contribution is an implementation of randomized SVD following the algorithm presented in [this paper](https://arxiv.org/abs/0909.4061). The corresponding routine called <tt>randomized_svd::sv</tt> approximates the smallest singular value of the solution matrix by using this technique. Although the approximation is not good enough to replace <tt>arpack</tt>, it is useful for detecting local extrema.
 
 ## Configuration and Dependencies
 The library can be configured by running 
@@ -81,36 +81,43 @@ The compiled binary can be found in the <tt>bin</tt> directory.
 For Windows 10 and 11 users, the code can be compiled to native binaries as follows. If you already have <tt>MSYS2</tt> installed, skip the next section.
 
 #### Installing <tt>MSYS2</tt>
-Download the latest <tt>MSYS2</tt> installer from [here](https://www.msys2.org/) and run it. Use the defaults provided by the installer, but untick the "Run MSYS2" checkbox in the last page. Then run the <tt>MSYS2 MINGW64</tt> application from the Windows menu. This opens a terminal. Type
+Download the latest <tt>MSYS2</tt> installer from [here](https://www.msys2.org/) and run it. Use the defaults provided by the installer, but untick the "Run MSYS2" checkbox in the last page. Then run the <tt>MSYS2 MINGW64</tt> application from the Windows menu, which opens a terminal. Type
 ~~~
 pacman -Syu
 ~~~
-to update the system.
+to update the system. You may be asked to relaunch the <tt>MINGW64</tt> terminal.
 
-#### Compiling the code
-Open the <tt>MSYS2 MINGW64</tt> terminal. To install the required packages, enter
+#### Installing necessary packages
+Open the <tt>MSYS2 MINGW64</tt> terminal from the Windows Start menu if it's not already running. To install the required packages, enter
 ~~~
 pacman -S base-devel git mingw-w64-x86_64-gcc mingw-w64-x86_64-gcc-fortran mingw-w64-x86_64-lapack mingw-w64-x86_64-arpack mingw-w64-x86_64-boost mingw-w64-x86_64-python mingw-w64-x86_64-tbb mingw-w64-x86_64-cmake
 ~~~
-Next, add a symbolic link to the <tt>tbb</tt> shared library by running
+Next, add a symbolic link to the <tt>tbb</tt> shared library by issuing the command
 ~~~
 ln -s /mingw64/lib/libtbb12.dll.a /mingw64/lib/libtbb.dll.a
 ~~~
-Now close the <tt>MSYS2</tt> terminal and start typing <tt>environment</tt> in the Windows menu. This should offer you to edit the environment variables for your account. Select the entry and press Enter, which will open a Control Panel dialog with user variables. Select the <tt>Path</tt> variable in the upper list and click <tt>Edit</tt>. In the dialog that opens, click <tt>New</tt> and enter
+After this is done, close the <tt>MSYS2</tt> terminal. You will not be needing it anymore.
+
+In the Windows Start menu, start typing <tt>environment</tt>, which should offer you to edit the environment variables for your account. Select the entry and press Enter, which will open a Control Panel dialog with user variables. Select the <tt>Path</tt> variable in the upper list and click <tt>Edit</tt>. In the dialog that opens, click <tt>New</tt> and enter
 ~~~
 C:\msys64\mingw64\bin
 ~~~
-Repeat the same process to add
+Press <tt>Enter</tt> and repeat the same process to add
 ~~~
 C:\msys64\usr\bin
 ~~~
 This will have the desired effect only if you have installed <tt>MSYS2</tt> in the <tt>C:\msys64</tt> directory (which is the default). Otherwise, modify the above paths accordingly.
 
-Close the dialog and open the Windows PowerShell. Navigate to a folder in which you wish to install the code. Alternatively, open that folder in the File manager, right click to get the context menu and choose "Open in terminal". Then enter
+#### Compilation in the Windows commandline
+Launch the Windows PowerShell (or <tt>cmd</tt>, but the former is better). Navigate to the directory in which you wish to install the code. Alternatively, open that folder in File manager, right click to get the context menu and choose "Open in terminal". Then enter
 ~~~
 git clone https://github.com/marohnicluka/HelmholtzBEM
 ~~~
-This should download the project in the HelmholtzBEM folder. To configure the project, run
+This should download the project to the <tt>HelmholtzBEM</tt> folder. To configure the project, enter
+~~~
+cd HelmholtzBEM
+~~~
+and run
 ~~~
 cmake .
 ~~~
@@ -118,15 +125,21 @@ After configuring is done, run
 ~~~
 ninja Eigen
 ~~~
-which builds Eigen. Then run
+which builds the <tt>Eigen</tt> library. Then run
 ~~~
 ninja
 ~~~
-to compile the rest of the project. The binaries are located in the <tt>bin</tt> subdirectory. Anytime you wish to update the code and recompile, simply enter
+to compile the rest of the project. The target binaries are located in the <tt>bin</tt> subdirectory. Anytime you wish to update the code and recompile, simply enter
 ~~~
 git pull; ninja
 ~~~
-from the project root directory.
+from the project root directory. If CMake files have been changed, you may have to configure the project again before recompiling:
+~~~
+git pull
+rm CMakeCache.txt
+cmake .
+ninja
+~~~
 
 ## Usage
 We will show how the built targets are to be used.

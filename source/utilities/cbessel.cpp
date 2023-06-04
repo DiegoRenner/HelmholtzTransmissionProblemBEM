@@ -1,8 +1,15 @@
-// Compute Bessel functions of real order and complex argument.
-// SPDX-FileCopyrightText: 2023 Luka Marohnić <lmarohni@tvz.hr>
-// SPDX-License-Identifier: LGPL-3-or-later
+/**
+ * \file cbessel.cpp
+ *
+ * \brief This file contains the implementation of Bessel functions of real
+ *        order and complex argument.
+ *
+ * If CBESSEL_EXCEPT is defined, then routines will throw exceptions.
+ *
+ * (c) 2023 Luka Marohnić
+ */
 
-#include "cbessel.h"
+#include "cbessel.hpp"
 #include <limits>
 #include <vector>
 #include <numeric>
@@ -10,7 +17,7 @@
 #define MAXITER 10000
 //#define CBESSEL_EXCEPT 1
 
-namespace ComplexBessel {
+namespace complex_bessel {
 
     /* precomputed data */
     const Real D[10] = {
@@ -1066,14 +1073,14 @@ namespace ComplexBessel {
     Cplx J(Real v,const Cplx &z,bool scaled) {
         Cplx si=sign1(imag(z))*i;
         if (v>=0.0) {
-            if (zero(arg(z))) {
-                Real x=real(z);
-                return cyl_bessel_j(v,x);
-            }
-            if (abs(zero(arg(z))-M_PI)) {
-                Real x=real(z);
-                return exp(si*M_PI*v)*cyl_bessel_j(v,-x);
-            }
+            if (zero(arg(z)))
+                return cyl_bessel_j(v,real(z));
+            if (abs(zero(arg(z))-M_PI))
+                return exp(si*M_PI*v)*cyl_bessel_j(v,-real(z));
+            if (v==0.0)
+                return I0_in(-z*si,scaled);
+            if (v==1.0)
+                return si*I1_in(-z*si,scaled);
         }
         return exp(si*M_PI_2*v)*I_in(v,-z*si,scaled);
     }
@@ -1083,17 +1090,29 @@ namespace ComplexBessel {
 #ifdef CBESSEL_EXCEPT
         try {
 #endif
-            Iv=I_in(va,-iz,scaled,&Kv);
+            if (va==0.0)
+                Iv=I0_in(-iz,scaled,&Kv);
+            else if (va==1.0)
+                Iv=I1_in(-iz,scaled,&Kv);
+            else Iv=I_in(va,-iz,scaled,&Kv);
 #ifdef CBESSEL_EXCEPT
         } catch (const underflow_error &e) { Iv=0.0; }
 #endif
         if (scaled || undef(Kv))
 #ifdef CBESSEL_EXCEPT
-        try {
+        try
 #endif
-            Kv=K_in(va,-iz,false)*(scaled?exp(-abs(imag(z))):1.0);
+            {
+            if (va==0.0)
+                Kv=K0_in(-iz,false);
+            else if (va==1.0)
+                Kv=K1_in(-iz,false);
+            else Kv=K_in(va,-iz,false);
+            if (scaled)
+                Kv*=exp(-abs(imag(z)));
+            }
 #ifdef CBESSEL_EXCEPT
-        } catch (const underflow_error &e) { Kv=0.0; }
+        catch (const underflow_error &e) { Kv=0.0; }
 #endif
         Cplx ret=si*a*Iv-M_2_PI*Kv/a;
         if (v>=0.0)
@@ -1101,6 +1120,10 @@ namespace ComplexBessel {
         int n;
         if (abs(2.0*v-(n=int(round(2.0*v))))<eps && n%2)
             return ((-n/2)%2?-1.0:1.0)*a*Iv;
+        if (va==0.0)
+            return ret;
+        if (va==1.0)
+            return -ret;
         return cos(M_PI*va)*ret+sin(M_PI*va)*a*Iv;
     }
     /* modified Bessel functions I_v(z) and K_v(z) */

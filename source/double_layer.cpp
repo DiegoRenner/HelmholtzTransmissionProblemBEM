@@ -1,5 +1,5 @@
 #include "double_layer.hpp"
-#include "cbessel.h"
+#include "cbessel.hpp"
 #include <numeric>
 #include <execution>
 
@@ -73,12 +73,12 @@
                 double v_norm = v.norm(), d = v.dot(normal) * 0.25 / v_norm;
                 if (with_i) {
                     if (ksqrtca_i * v_norm > epsilon ) // Away from singularity
-                        result_i = ii * ksqrtc_i * ComplexBessel::H1(1, ksqrtc_i * v_norm) * d;
+                        result_i = ii * ksqrtc_i * complex_bessel::H1(1, ksqrtc_i * v_norm) * d;
                     else if (v_norm > epsilon)
                         result_i = M_2_PI * d / v_norm;
                 }
                 if (ksqrtca_o * v_norm > epsilon ) // Away from singularity
-                    result_o = ii * ksqrtc_o * ComplexBessel::H1(1, ksqrtc_o * v_norm) * d;
+                    result_o = ii * ksqrtc_o * complex_bessel::H1(1, ksqrtc_o * v_norm) * d;
                 else if (v_norm > epsilon)
                     result_o = M_2_PI * d / v_norm;
             });
@@ -143,12 +143,12 @@
                     double v_norm = v.norm(), d = v.dot(normal) * 0.25 / v_norm;
                     if (with_i) {
                         if (ksqrtca_i * v_norm > epsilon ) // Away from singularity
-                            result_i = ii * ksqrtc_i * ComplexBessel::H1(1, ksqrtc_i * v_norm) * d;
+                            result_i = ii * ksqrtc_i * complex_bessel::H1(1, ksqrtc_i * v_norm) * d;
                         else if (v_norm > epsilon)
                             result_i = M_2_PI * d / v_norm;
                     }
                     if (ksqrtca_o * v_norm > epsilon ) // Away from singularity
-                        result_o = ii * ksqrtc_o * ComplexBessel::H1(1, ksqrtc_o * v_norm) * d;
+                        result_o = ii * ksqrtc_o * complex_bessel::H1(1, ksqrtc_o * v_norm) * d;
                     else if (v_norm > epsilon)
                         result_o = M_2_PI * d / v_norm;
                 } else {
@@ -156,12 +156,12 @@
                     double v_norm = v.norm(), d = v.dot(normal) * 0.25 / v_norm;
                     if (with_i) {
                         if (ksqrtca_i * v_norm > epsilon ) // Away from singularity
-                            result_i = ii * ksqrtc_i * ComplexBessel::H1(1, ksqrtc_i * v_norm) * d;
+                            result_i = ii * ksqrtc_i * complex_bessel::H1(1, ksqrtc_i * v_norm) * d;
                         else if (v_norm > epsilon)
                             result_i = M_2_PI * d / v_norm;
                     }
                     if (ksqrtca_o * v_norm > epsilon ) // Away from singularity
-                        result_o = ii * ksqrtc_o * ComplexBessel::H1(1, ksqrtc_o * v_norm) * d;
+                        result_o = ii * ksqrtc_o * complex_bessel::H1(1, ksqrtc_o * v_norm) * d;
                     else if (v_norm > epsilon)
                         result_o = M_2_PI * d / v_norm;
                 }
@@ -227,12 +227,12 @@
                 double v_norm = v.norm(), d = v.dot(normal) * 0.25 / v_norm;
                 if (with_i) {
                     if (ksqrtca_i * v_norm > epsilon ) // Away from singularity
-                        result_i = ii * ksqrtc_i * ComplexBessel::H1(1, ksqrtc_i * v_norm) * d;
+                        result_i = ii * ksqrtc_i * complex_bessel::H1(1, ksqrtc_i * v_norm) * d;
                     else if (v_norm > epsilon)
                         result_i = M_2_PI * d / v_norm;
                 }
                 if (ksqrtca_o * v_norm > epsilon ) // Away from singularity
-                    result_o = ii * ksqrtc_o * ComplexBessel::H1(1, ksqrtc_o * v_norm) * d;
+                    result_o = ii * ksqrtc_o * complex_bessel::H1(1, ksqrtc_o * v_norm) * d;
                 else if (v_norm > epsilon)
                     result_o = M_2_PI * d / v_norm;
             });

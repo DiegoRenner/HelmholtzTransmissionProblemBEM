@@ -19,4 +19,6 @@ add_library(arpp_eig_interface STATIC arpp_eig_interface.cpp)
 
 add_library(generate_solution STATIC gen_sol.cpp)
 
-add_library(cbessel STATIC cbessel.cpp)
+add_library(complex_bessel STATIC cbessel.cpp)
+
+add_library(randomized_svd STATIC randsvd.cpp)

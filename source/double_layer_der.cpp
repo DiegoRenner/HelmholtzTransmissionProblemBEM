@@ -1,5 +1,5 @@
 #include "double_layer_der.hpp"
-#include "cbessel.h"
+#include "cbessel.hpp"
 #include <execution>
 
     namespace double_layer_helmholtz_der {
@@ -72,9 +72,9 @@
                 Eigen::Vector2d v = pi[s]-pi_p[t];
                 double d = v.norm(), vdotn = v.dot(normal);
                 if (with_i && ksqrtca_i * d > epsilon ) // Away from singularity
-                    result_i = ComplexBessel::H1(0, ksqrtc_i * d) * ksqrtc_i * vdotn;
+                    result_i = complex_bessel::H1(0, ksqrtc_i * d) * ksqrtc_i * vdotn;
                 if (ksqrtca_o * d > epsilon ) // Away from singularity
-                    result_o = ComplexBessel::H1(0, ksqrtc_o * d) * ksqrtc_o * vdotn;
+                    result_o = complex_bessel::H1(0, ksqrtc_o * d) * ksqrtc_o * vdotn;
             });
             // Lambda expression for the integrand
             auto integrand = [&](int i, int j, int m) {
@@ -140,9 +140,9 @@
                 Eigen::Vector2d v = swap ? pi[s]-pi_p.swapped_op(t) : pi.swapped_op(s)-pi_p[t];
                 double d = v.norm(), vdotn = v.dot(normal);
                 if (with_i && ksqrtca_i * d > epsilon)
-                    result_i = ComplexBessel::H1(0, ksqrtc_i * d) * ksqrtc_i * vdotn;
+                    result_i = complex_bessel::H1(0, ksqrtc_i * d) * ksqrtc_i * vdotn;
                 if (ksqrtca_o * d > epsilon)
-                    result_o = ComplexBessel::H1(0, ksqrtc_o * d) * ksqrtc_o * vdotn;
+                    result_o = complex_bessel::H1(0, ksqrtc_o * d) * ksqrtc_o * vdotn;
             });
             // Lambda expression for the integrand
             auto integrand = [&](int i, int j, int m) {
@@ -203,9 +203,9 @@
                 Eigen::Vector2d v = pi[s]-pi_p[t];
                 double d = v.norm(), vdotn = v.dot(normal);
                 if (with_i && ksqrtca_i * d > epsilon)
-                    result_i = ComplexBessel::H1(0, ksqrtc_i * d) * ksqrtc_i * vdotn;
+                    result_i = complex_bessel::H1(0, ksqrtc_i * d) * ksqrtc_i * vdotn;
                 if (ksqrtca_o * d > epsilon)
-                    result_o = ComplexBessel::H1(0, ksqrtc_o * d) * ksqrtc_o * vdotn;
+                    result_o = complex_bessel::H1(0, ksqrtc_o * d) * ksqrtc_o * vdotn;
             });
             for (int i = 0; i < Qtest; ++i) {
                 for (int j = 0; j < Qtrial; ++j) {

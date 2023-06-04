@@ -1,6 +1,6 @@
 #include "hypersingular_der2.hpp"
 #include "discontinuous_space.hpp"
-#include "cbessel.h"
+#include "cbessel.hpp"
 #include <execution>
 
     namespace hypersingular_helmholtz_der2 {
@@ -64,12 +64,12 @@
                 n_dot_np = (tangent_p(1) * tangent(1) + tangent_p(0) * tangent(0)) / (tp_norm * t_norm);
                 double d = (pi[s] - pi_p[t]).norm();
                 if (with_i && ksqrtca_i * d > epsilon) {
-                    complex_t h0 = ComplexBessel::H1(0, ksqrtc_i * d), h1 = ComplexBessel::H1(1, ksqrtc_i * d);
+                    complex_t h0 = complex_bessel::H1(0, ksqrtc_i * d), h1 = complex_bessel::H1(1, ksqrtc_i * d);
                     result_i = h0 * d * d - h1 * d / ksqrtc_i;
                     result_ir = -h1 * d * 4.0 * ksqrtc_i + h0 * 2.0;
                 }
                 if (ksqrtca_o * d > epsilon) {
-                    complex_t h0 = ComplexBessel::H1(0, ksqrtc_o * d), h1 = ComplexBessel::H1(1, ksqrtc_o * d);
+                    complex_t h0 = complex_bessel::H1(0, ksqrtc_o * d), h1 = complex_bessel::H1(1, ksqrtc_o * d);
                     result_o = h0 * d * d - h1 * d / ksqrtc_o;
                     result_or = -h1 * d * 4.0 * ksqrtc_o + h0 * 2.0;
                 }
@@ -133,12 +133,12 @@
                 n_dot_np = (tangent_p(1) * tangent(1) + tangent_p(0) * tangent(0)) / (tp_norm * t_norm);
                 double d = swap ? (pi[s] - pi_p.swapped_op(t)).norm() : (pi.swapped_op(s) - pi_p[t]).norm();
                 if (with_i && ksqrtca_i * d > epsilon) {
-                    complex_t h0 = ComplexBessel::H1(0, ksqrtc_i * d), h1 = ComplexBessel::H1(1, ksqrtc_i * d);
+                    complex_t h0 = complex_bessel::H1(0, ksqrtc_i * d), h1 = complex_bessel::H1(1, ksqrtc_i * d);
                     result_i = h0 * d * d - h1 * d / ksqrtc_i;
                     result_ir = -h1 * d * 4.0 * ksqrtc_i + h0 * 2.0;
                 }
                 if (ksqrtca_o * d > epsilon) {
-                    complex_t h0 = ComplexBessel::H1(0, ksqrtc_o * d), h1 = ComplexBessel::H1(1, ksqrtc_o * d);
+                    complex_t h0 = complex_bessel::H1(0, ksqrtc_o * d), h1 = complex_bessel::H1(1, ksqrtc_o * d);
                     result_o = h0 * d * d - h1 * d / ksqrtc_o;
                     result_or = -h1 * d * 4.0 * ksqrtc_o + h0 * 2.0;
                 }
@@ -201,12 +201,12 @@
                 n_dot_np = (tangent_p(1) * tangent(1) + tangent_p(0) * tangent(0)) / (tp_norm * t_norm);
                 double d = (pi[s] - pi_p[t]).norm();
                 if (with_i && ksqrtca_i * d > epsilon ) {
-                    complex_t h0 = ComplexBessel::H1(0, ksqrtc_i * d), h1 = ComplexBessel::H1(1, ksqrtc_i * d);
+                    complex_t h0 = complex_bessel::H1(0, ksqrtc_i * d), h1 = complex_bessel::H1(1, ksqrtc_i * d);
                     result_i = h0 * d * d - h1 * d / ksqrtc_i;
                     result_ir = -h1 * d * 4.0 * ksqrtc_i + h0 * 2.0;
                 }
                 if (ksqrtca_o * d > epsilon ) {
-                    complex_t h0 = ComplexBessel::H1(0, ksqrtc_o * d), h1 = ComplexBessel::H1(1, ksqrtc_o * d);
+                    complex_t h0 = complex_bessel::H1(0, ksqrtc_o * d), h1 = complex_bessel::H1(1, ksqrtc_o * d);
                     result_o = h0 * d * d - h1 * d / ksqrtc_o;
                     result_or = -h1 * d * 4.0 * ksqrtc_o + h0 * 2.0;
                 }

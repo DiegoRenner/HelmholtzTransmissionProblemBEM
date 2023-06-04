@@ -1,5 +1,5 @@
 #include "double_layer_der2.hpp"
-#include "cbessel.h"
+#include "cbessel.hpp"
 #include <execution>
 
     namespace double_layer_helmholtz_der2 {
@@ -70,11 +70,11 @@
                 Eigen::Vector2d v = pi[s] - pi_p[t];
                 double d = v.norm(), vdotn = v.dot(normal);
                 if (with_i && ksqrtca_i * d > epsilon) {
-                    complex_t h0 = ComplexBessel::H1(0, ksqrtc_i * d), h1 = ComplexBessel::H1(1, ksqrtc_i * d);
+                    complex_t h0 = complex_bessel::H1(0, ksqrtc_i * d), h1 = complex_bessel::H1(1, ksqrtc_i * d);
                     result_i = (h0 + h1 * (2.0 - d * ksqrtc_i - 2.0 / (d * ksqrtc_i))) * vdotn;
                 }
                 if (ksqrtca_o * d > epsilon) {
-                    complex_t h0 = ComplexBessel::H1(0, ksqrtc_o * d), h1 = ComplexBessel::H1(1, ksqrtc_o * d);
+                    complex_t h0 = complex_bessel::H1(0, ksqrtc_o * d), h1 = complex_bessel::H1(1, ksqrtc_o * d);
                     result_o = (h0 + h1 * (2.0 - d * ksqrtc_o - 2.0 / (d * ksqrtc_o))) * vdotn;
                 }
             });
@@ -142,11 +142,11 @@
                 Eigen::Vector2d v = swap ? pi[s] - pi_p.swapped_op(t) : pi.swapped_op(s) - pi_p[t];
                 double d = v.norm(), vdotn = v.dot(normal);
                 if (with_i && ksqrtca_i * d > epsilon) {
-                    complex_t h0 = ComplexBessel::H1(0, ksqrtc_i * d), h1 = ComplexBessel::H1(1, ksqrtc_i * d);
+                    complex_t h0 = complex_bessel::H1(0, ksqrtc_i * d), h1 = complex_bessel::H1(1, ksqrtc_i * d);
                     result_i = (h0 + h1 * (2.0 - d * ksqrtc_i - 2.0 / (d * ksqrtc_i))) * vdotn;
                 }
                 if (ksqrtca_o * d > epsilon) {
-                    complex_t h0 = ComplexBessel::H1(0, ksqrtc_o * d), h1 = ComplexBessel::H1(1, ksqrtc_o * d);
+                    complex_t h0 = complex_bessel::H1(0, ksqrtc_o * d), h1 = complex_bessel::H1(1, ksqrtc_o * d);
                     result_o = (h0 + h1 * (2.0 - d * ksqrtc_o - 2.0 / (d * ksqrtc_o))) * vdotn;
                 }
             });
@@ -210,11 +210,11 @@
                 Eigen::Vector2d v = pi[s] - pi_p[t];
                 double d = v.norm(), vdotn = v.dot(normal);
                 if (with_i && ksqrtca_i * d > epsilon) {
-                    complex_t h0 = ComplexBessel::H1(0, ksqrtc_i * d), h1 = ComplexBessel::H1(1, ksqrtc_i * d);
+                    complex_t h0 = complex_bessel::H1(0, ksqrtc_i * d), h1 = complex_bessel::H1(1, ksqrtc_i * d);
                     result_i = (h0 + h1 * (2.0 - d * ksqrtc_i - 2.0 / (d * ksqrtc_i))) * vdotn;
                 }
                 if (ksqrtca_o * d > epsilon) {
-                    complex_t h0 = ComplexBessel::H1(0, ksqrtc_o * d), h1 = ComplexBessel::H1(1, ksqrtc_o * d);
+                    complex_t h0 = complex_bessel::H1(0, ksqrtc_o * d), h1 = complex_bessel::H1(1, ksqrtc_o * d);
                     result_o = (h0 + h1 * (2.0 - d * ksqrtc_o - 2.0 / (d * ksqrtc_o))) * vdotn;
                 }
             });

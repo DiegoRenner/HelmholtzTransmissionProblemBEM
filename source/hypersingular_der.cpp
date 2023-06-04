@@ -1,6 +1,6 @@
 #include "hypersingular_der.hpp"
 #include "discontinuous_space.hpp"
-#include "cbessel.h"
+#include "cbessel.hpp"
 #include <execution>
 
     namespace hypersingular_helmholtz_der {
@@ -65,12 +65,12 @@
                 n_dot_np = (tangent_p(1) * tangent(1) + tangent_p(0) * tangent(0)) / (tp_norm * t_norm);
                 double d = (pi[s]-pi_p[t]).norm();
                 if (with_i && ksqrtca_i * d > epsilon) {
-                    result_i = ComplexBessel::H1(1, ksqrtc_i * d) * d;
-                    result_ir = ComplexBessel::H1(0, ksqrtc_i * d) * 2.0 * ksqrtc_i;
+                    result_i = complex_bessel::H1(1, ksqrtc_i * d) * d;
+                    result_ir = complex_bessel::H1(0, ksqrtc_i * d) * 2.0 * ksqrtc_i;
                 }
                 if (ksqrtca_o * d > epsilon) {
-                    result_o = ComplexBessel::H1(1, ksqrtc_o * d) * d;
-                    result_or = ComplexBessel::H1(0, ksqrtc_o * d) * 2.0 * ksqrtc_o;
+                    result_o = complex_bessel::H1(1, ksqrtc_o * d) * d;
+                    result_or = complex_bessel::H1(0, ksqrtc_o * d) * 2.0 * ksqrtc_o;
                 }
             });
             // Lambda expression for the integrand
@@ -132,12 +132,12 @@
                 n_dot_np = (tangent_p(1) * tangent(1) + tangent_p(0) * tangent(0)) / (tp_norm * t_norm);
                 double d = swap ? (pi[s]-pi_p.swapped_op(t)).norm() : (pi.swapped_op(s)-pi_p[t]).norm();
                 if (with_i && ksqrtca_i * d > epsilon ) {
-                    result_i = ComplexBessel::H1(1, ksqrtc_i * d) * d;
-                    result_ir = ComplexBessel::H1(0, ksqrtc_i * d) * 2.0 * ksqrtc_i;
+                    result_i = complex_bessel::H1(1, ksqrtc_i * d) * d;
+                    result_ir = complex_bessel::H1(0, ksqrtc_i * d) * 2.0 * ksqrtc_i;
                 }
                 if (ksqrtca_o * d > epsilon ) {
-                    result_o = ComplexBessel::H1(1, ksqrtc_o * d) * d;
-                    result_or = ComplexBessel::H1(0, ksqrtc_o * d) * 2.0 * ksqrtc_o;
+                    result_o = complex_bessel::H1(1, ksqrtc_o * d) * d;
+                    result_or = complex_bessel::H1(0, ksqrtc_o * d) * 2.0 * ksqrtc_o;
                 }
             });
             // Lambda expression for the integrand
@@ -196,12 +196,12 @@
                 n_dot_np = (tangent_p(1) * tangent(1) + tangent_p(0) * tangent(0)) / (tp_norm * t_norm);
                 double d = (pi[s]-pi_p[t]).norm();
                 if (with_i && ksqrtca_i * d > epsilon) {
-                    result_i = ComplexBessel::H1(1, ksqrtc_i * d) * d;
-                    result_ir = ComplexBessel::H1(0, ksqrtc_i * d) * 2.0 * ksqrtc_i;
+                    result_i = complex_bessel::H1(1, ksqrtc_i * d) * d;
+                    result_ir = complex_bessel::H1(0, ksqrtc_i * d) * 2.0 * ksqrtc_i;
                 }
                 if (ksqrtca_o * d > epsilon) {
-                    result_o = ComplexBessel::H1(1, ksqrtc_o * d) * d;
-                    result_or = ComplexBessel::H1(0, ksqrtc_o * d) * 2.0 * ksqrtc_o;
+                    result_o = complex_bessel::H1(1, ksqrtc_o * d) * d;
+                    result_or = complex_bessel::H1(0, ksqrtc_o * d) * 2.0 * ksqrtc_o;
                 }
             });
             for (int i = 0; i < Q; ++i) {

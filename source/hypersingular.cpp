@@ -1,6 +1,6 @@
 #include "hypersingular.hpp"
 #include "discontinuous_space.hpp"
-#include "cbessel.h"
+#include "cbessel.hpp"
 #include <numeric>
 #include <execution>
 
@@ -67,12 +67,12 @@
                 double d = (pi[s] - pi_p[t]).norm();
                 if (with_i) {
                     if (ksqrtca_i * d > epsilon)
-                        result_i = ii * ComplexBessel::H1(0, ksqrtc_i * d) * 0.25;
+                        result_i = ii * complex_bessel::H1(0, ksqrtc_i * d) * 0.25;
                     else if (d > epsilon)
                         result_i = -0.5 * M_1_PI * log(d);
                 }
                 if (ksqrtca_o * d > epsilon)
-                    result_o = ii * ComplexBessel::H1(0, ksqrtc_o * d) * 0.25;
+                    result_o = ii * complex_bessel::H1(0, ksqrtc_o * d) * 0.25;
                 else if (d > epsilon)
                     result_o = -0.5 * M_1_PI * log(d);
             });
@@ -137,24 +137,24 @@
                     double d = (pi[s] - pi_p.swapped_op(t)).norm();
                     if (with_i) {
                         if (ksqrtca_i * d > epsilon )
-                            result_i = ii * ComplexBessel::H1(0, ksqrtc_i * d) * 0.25;
+                            result_i = ii * complex_bessel::H1(0, ksqrtc_i * d) * 0.25;
                         else if (d > epsilon )
                             result_i = -0.5 * M_1_PI * log(d);
                     }
                     if (ksqrtca_o * d > epsilon )
-                        result_o = ii * ComplexBessel::H1(0, ksqrtc_o * d) * 0.25;
+                        result_o = ii * complex_bessel::H1(0, ksqrtc_o * d) * 0.25;
                     else if (d > epsilon )
                         result_o = -0.5 * M_1_PI * log(d);
                 } else {
                     double d = (pi.swapped_op(s) - pi_p[t]).norm();
                     if (with_i) {
                         if (ksqrtca_i * d > epsilon )
-                            result_i = ii * ComplexBessel::H1(0, ksqrtc_i * d) * 0.25;
+                            result_i = ii * complex_bessel::H1(0, ksqrtc_i * d) * 0.25;
                         else if (d > epsilon )
                             result_i = -0.5 * M_1_PI * log(d);
                     }
                     if (ksqrtca_o * d > epsilon )
-                        result_o = ii * ComplexBessel::H1(0, ksqrtc_o * d) * 0.25;
+                        result_o = ii * complex_bessel::H1(0, ksqrtc_o * d) * 0.25;
                     else if (d > epsilon )
                         result_o = -0.5 * M_1_PI * log(d);
                 }
@@ -217,12 +217,12 @@
                 double d = (pi[s] - pi_p[t]).norm();
                 if (with_i) {
                     if (ksqrtca_i * d > epsilon )
-                        result_i = ii * ComplexBessel::H1(0, ksqrtc_i * d) * 0.25;
+                        result_i = ii * complex_bessel::H1(0, ksqrtc_i * d) * 0.25;
                     else if (d > epsilon)
                         result_i = -0.5 * M_1_PI * log(d);
                 }
                 if (ksqrtca_o * d > epsilon )
-                    result_o = ii * ComplexBessel::H1(0, ksqrtc_o * d) * 0.25;
+                    result_o = ii * complex_bessel::H1(0, ksqrtc_o * d) * 0.25;
                 else if (d > epsilon)
                     result_o = -0.5 * M_1_PI * log(d);
             });

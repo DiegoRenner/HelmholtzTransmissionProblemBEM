@@ -1,5 +1,5 @@
 #include "single_layer_der2.hpp"
-#include "cbessel.h"
+#include "cbessel.hpp"
 #include <execution>
 
     namespace single_layer_helmholtz_der2 {
@@ -62,9 +62,9 @@
                 t_norm = swap ? pi.Derivative_01(s).norm() : pi.Derivative_01_swapped(s).norm();
                 double d = swap ? (pi[s]-pi_p.swapped_op(t)).norm() : (pi.swapped_op(s)-pi_p[t]).norm();
                 if (with_i && ksqrtca_i * d > epsilon)
-                    result_i = -ComplexBessel::H1(1, ksqrtc_i * d, 2) * d * d;
+                    result_i = -complex_bessel::H1(1, ksqrtc_i * d, 2) * d * d;
                 if (ksqrtca_o * d > epsilon)
-                    result_o = -ComplexBessel::H1(1, ksqrtc_o * d, 2) * d * d;
+                    result_o = -complex_bessel::H1(1, ksqrtc_o * d, 2) * d * d;
             });
             // Lambda expression for the integrand
             auto integrand = [&](int i, int j, int m) {
@@ -116,9 +116,9 @@
                 t_norm = pi.Derivative_01(s).norm();
                 double d = (pi[s] - pi_p[t]).norm();
                 if (with_i && ksqrtca_i * d > epsilon)
-                    result_i = -ComplexBessel::H1(1, ksqrtc_i * d, 2) * d * d;
+                    result_i = -complex_bessel::H1(1, ksqrtc_i * d, 2) * d * d;
                 if (ksqrtca_o * d > epsilon)
-                    result_o = -ComplexBessel::H1(1, ksqrtc_o * d, 2) * d * d;
+                    result_o = -complex_bessel::H1(1, ksqrtc_o * d, 2) * d * d;
             });
             auto integrand = [&](int i, int j, int m) {
                 auto F = space.evaluateShapeFunction(j, ws.t(m)) * ws.tp_norm(m);
@@ -168,9 +168,9 @@
                 t_norm = pi.Derivative_01(s).norm();
                 double d = (pi[s] - pi_p[t]).norm();
                 if (with_i && ksqrtca_i * d > epsilon)
-                    result_i = -ComplexBessel::H1(1, ksqrtc_i * d, 2) * d * d;
+                    result_i = -complex_bessel::H1(1, ksqrtc_i * d, 2) * d * d;
                 if (ksqrtca_o * d > epsilon)
-                    result_o = -ComplexBessel::H1(1, ksqrtc_o * d, 2) * d * d;
+                    result_o = -complex_bessel::H1(1, ksqrtc_o * d, 2) * d * d;
             });
             for (int i = 0; i < Q; ++i) {
                 for (int j = 0; j < Q; ++j) {
