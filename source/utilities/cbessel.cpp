@@ -1,8 +1,8 @@
 /**
  * \file cbessel.cpp
  *
- * \brief This file contains the implementation of Bessel functions of real
- *        order and complex argument.
+ * \brief This file contains the implementation of Bessel functions
+ * of real order and complex argument.
  *
  * If CBESSEL_EXCEPT is defined, then routines will throw exceptions.
  *
@@ -356,7 +356,7 @@ namespace complex_bessel {
         Real R=abs(z),vL=v_L(eps);
         int maxiter=MAXITER,j;
         if (R<=2.0*sqrt(v+1.0)) {
-            Real tg=(v==1.0||v==0.0)?1.0:tgamma(1.0+v),scale=scaled?exp(-real(z)):1.0;
+            Real tg=tgamma(1.0+v),scale=scaled?exp(-real(z)):1.0;
             Cplx A=1.0,z24=0.25*z*z,a=isinf(tg)?NAN:scale*pow(z2,-v)/tg,res=1.0;
             if (zero(a))
 #ifdef CBESSEL_EXCEPT
@@ -734,7 +734,7 @@ namespace complex_bessel {
         if (with_y) {
             Real nu3R=(nu+3.0)/R,beta0=nu3R+sqrt(nu3R*nu3R-1.0),beta02=beta0*beta0;
             Real bnd=(2.0*beta02)/(eps*(beta02-1.0)*(beta0-1.0));
-            while (abs(p1)<=(k+1)*(k+1)*bnd && k++<maxiter)
+            while (k++<maxiter && abs(p1)<=k*k*bnd)
                 p0-=Real(k)*z2*p1,swap(p0,p1);
 #ifdef CBESSEL_EXCEPT
             if (k>maxiter) throw cvg_err;
@@ -753,8 +753,10 @@ namespace complex_bessel {
                 continue;
             }
             y0=yt; ++j;
-            if (j==jmax) sum*=2.0;
-            if (with_y) sum+=y0;
+            if (with_y) {
+                if (j==jmax) sum*=2.0;
+                sum+=y0;
+            }
             swap(y0,y1);
         }
         if (with_y)

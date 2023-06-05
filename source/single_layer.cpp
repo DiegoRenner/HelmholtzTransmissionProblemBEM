@@ -98,7 +98,7 @@
                 for (int j = 0; j < Qtrial; ++j) {
                     interaction_matrix(i, j) =
                     std::accumulate(ws.IJ().cbegin(), ws.IJ().cbegin() + N2, czero, [&](const auto &sum, const auto &ij) {
-                        const int &I = ij.first, &J = ij.second;
+                        int I = ij.first, J = ij.second;
                         return sum + ws.w(I * N + J) * (integrand(i, j, I * N + J) + integrand(i, j, J * N + I));
                     });
                 }
@@ -154,7 +154,7 @@
                 for (int j = 0; j < Q; ++j) {
                     interaction_matrix(i, j) =
                     std::accumulate(ws.IJ().cbegin(), ws.IJ().cbegin() + N2, czero, [&](const auto &sum, const auto &ij) {
-                        const int &I = ij.first, &J = ij.second;
+                        int I = ij.first, J = ij.second;
                         return sum + ws.w(I * N + J) * (integrand(i, j, I * N + J) + integrand(i, j, J * N + I));
                     });
                 }

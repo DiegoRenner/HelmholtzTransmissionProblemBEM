@@ -36,8 +36,9 @@ namespace double_layer_helmholtz {
  * @param GaussQR QuadRule object containing the Gaussian quadrature to be
  * applied
  * @param k wavenumber
- * @param c refraction index
- * @return the matrix K for Helmholtz kernel Double Layer BIO bilinear form
+ * @param c_i refraction index inside
+ * @param c_o refraction index outside
+ * @param ws workspace
  */
     void ComputeIntegralAdjacent(Eigen::MatrixXcd &interaction_matrix,
                                  const AbstractParametrizedCurve &pi,
@@ -64,8 +65,9 @@ namespace double_layer_helmholtz {
  * @param GaussQR QuadRule object containing the Gaussian quadrature to be
  * applied
  * @param k wavenumber
- * @param c refraction index
- * @return the matrix K for Helmholtz kernel Double Layer BIO bilinear form
+ * @param c_i refraction index inside
+ * @param c_o refraction index outside
+ * @param ws workspace
  */
     void ComputeIntegralCoinciding(Eigen::MatrixXcd &interaction_matrix,
                                    const AbstractParametrizedCurve &pi,
@@ -91,8 +93,9 @@ namespace double_layer_helmholtz {
  * @param GaussQR QuadRule object containing the Gaussian quadrature to be
  * applied
  * @param k wavenumber
- * @param c refraction index
- * @return the matrix K for Helmholtz kernel Double Layer BIO bilinear form
+ * @param c_i refraction index inside
+ * @param c_o refraction index outside
+ * @param ws workspace
  */
     void ComputeIntegralGeneral(Eigen::MatrixXcd &interaction_matrix,
                                 const AbstractParametrizedCurve &pi,
@@ -148,9 +151,9 @@ namespace double_layer_helmholtz {
  * @param CGaussQR QuadRule object containing the composite
  * Gauss-Legendre quadrature rule to be applied.
  * @param k wavenumber
- * @param c refraction index
- * @return an Eigen::MatrixXd type Interaction Matrix
- * (\f$Q_{test}\times Q_{trial}\f$)
+ * @param c_i refraction index inside
+ * @param c_o refraction index outside
+ * @param ws workspace
  */
     void InteractionMatrix(Eigen::MatrixXcd &interaction_matrix,
                            const AbstractParametrizedCurve &pi,
@@ -177,8 +180,10 @@ namespace double_layer_helmholtz {
  * @param test_space the test space for evaluating the matrix
  * @param N the order for common/composite Gauss-Legendre quadrature rule
  * @param k wavenumber
- * @param c refraction index
- * @return an Eigen::MatrixXd type Galerkin Matrix for the given mesh and space
+ * @param c_i refraction index inside
+ * @param c_o refraction index outside
+ * @return the matrix K = K_o - K_i for Helmholtz kernel Double Layer
+ * BIO bilinear form, set c_i to zero and c_o to c for K_c
  */
     Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
                                     const AbstractBEMSpace &trial_space,

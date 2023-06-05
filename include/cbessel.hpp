@@ -2,8 +2,8 @@
  * \file cbessel.hpp
  *
  * \brief This is a C++ library for Bessel functions of complex argument and
- *        real order, intended as a replacement for complex_bessel library
- *        which uses the Fortran code by Donald E. Amos.
+ * real order, intended as a replacement for complex_bessel library which
+ * uses the Fortran code by Donald E. Amos.
  *
  * The same theoretical basis is used, as explained in the two papers by
  * Amos (1983). This code includes optimizations for order 0 and 1, making it
@@ -17,6 +17,7 @@
  *  - std::invalid_argument in the case of undefined result (NAN)
  *  - std::length_error in the case of convergence failure
  *  - std::domain_error in the case of invalid parameter value
+ *
  * Throwing exceptions is more informative but slightly slower.
  * Convergence problems should not happen in practice.
  *

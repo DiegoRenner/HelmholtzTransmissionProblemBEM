@@ -4,26 +4,27 @@
  * the smallest singular value of the Galerkin BEM
  * approximated solutions operator for the sedond-kind
  * direct BIEs of the Helmholtz transmission problem
- * using the Brent method. The scatterer is set to be
- * a square. The results are written to disk.
+ * using the Brent method without derivatives.
+ * The scatterer is set to be a square. The results are
+ * written to the <tt>data</tt> directory.
  * The script can be run as follows:
  *
  * <tt>
  *  /path/to/roots_brent_square_rsvd \<half side length of square\> \<refraction inside\>
  *     \<refraction outside\> \<initial wavenumber\> \<\#grid points for root search\>
- *     \<\#panels\> \<order of quadrature rule\> \<outputfile\>.
+ *     \<\#panels\> \<order of quadrature rule\> \<accuracy of Arnoldi algorithm\>
+ *     \<number of subspace iterations\>.
  * </tt>
  *
- * The resulting file will contain the left boundary of the
- * interval used to compute the root in the first column.
- * Then in the next three columns will be the point, the
- * function value and the derivative at which the root was found.
- * The last column will contain the number of iterations used to find the root.
- * If no root was found the last four columns will be set to \f$\verb|NAN|\f$.
- * The singular values and their derivatives are computed using the Arnoldi algorithm.
+ * The resulting file will contain the boundaries of the interval
+ * used to compute the root in the first two columns.
+ * Then in the next two columns will be the point and the
+ * respective function value. The last two column will contain the
+ * correspoding minimum of the minimal singular value approximation
+ * with randomized SVD and number of iterations used to find the root.
+ * The singular values are computed using the Arnoldi algorithm.
  * The user will be updated through the command line about the
- * progress of the algorithm
- * if \f$ \verb|-DCMDL| \f$ is set.
+ * progress of the algorithm.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  *
@@ -106,13 +107,17 @@ int main(int argc, char** argv) {
     // define accurracy of arnoldi algorithm
     double acc = atof(argv[8]);
 
+    // define the number of subspace iterations
+    int q = atoi(argv[9]);
+
     // generate output filename with set parameters
     std::string base_name = "../data/file_roots_brent_square_rsvd_";
     std::string file_plot = base_name + "plot.m";
     std::string suffix = ".dat";
-    std::string divider = "_";
+    std::string sep = "_";
     std::string file_minimas = base_name;
-    file_minimas.append(argv[2]).append(divider).append(argv[5]).append(divider).append(argv[8]) + suffix;
+    file_minimas.append(argv[2]).append(sep).append(argv[5]).append(sep).append(argv[8]).append(sep).append(argv[9]);
+    file_minimas += suffix;
     // clear existing files
     std::ofstream file_out;
     file_out.open(file_minimas, std::ofstream::out | std::ofstream::trunc);
@@ -120,7 +125,7 @@ int main(int argc, char** argv) {
     file_out.open(file_plot, std::ofstream::out | std::ofstream::trunc);
     file_out.close();
 
-    int nc = 2, q = 2;
+    int nc = 2;
     int nr = 2 * numpanels;
     Eigen::MatrixXcd W = randomized_svd::randGaussian(nr, nc);
 
@@ -128,7 +133,8 @@ int main(int argc, char** argv) {
 
     std::vector<int> ind(n_points_k), loc_min_iter;
     std::vector<double> rsv(n_points_k), asv(n_points_k),
-                        loc_min, loc_min_approx, bracket_left, bracket_right;
+                        loc_min, loc_min_approx, bracket_left, bracket_right,
+                        rsvd_min, val, bnd_left, bnd_right;
     std::iota(ind.begin(), ind.end(), 0);
     Eigen::MatrixXcd Tall(nr, nr * n_points_k);
 
@@ -159,23 +165,30 @@ int main(int argc, char** argv) {
     std::cout << "Parallel randomized SVD is " << double(asv_time.count()) / double(rsv_time.count())
               << " times faster than Arnoldi." << std::endl;
 
-    bool lb = false;
+    auto rsvd_sv = [&](double k) {
+        Eigen::MatrixXcd T = gen_sol_op(mesh, order, k, c_o, c_i);
+        return randomized_svd::sv(T, W, q);
+    };
 
     for (size_t i = 0; i < rsv.size() - 2; ++i) {
         double &c = rsv[i+1], L = c - rsv[i], R = rsv[i+2] - c;
-        double k = k_min + i * k_step;
-        if (!lb && L < 0. && R > 0.) { // local minimum
+        double k = k_min + i * k_step, arg, a, b;
+        if (L < 0. && R > 0.) { // local minimum
             bracket_left.push_back(k);
+            int status = 0;
+            a = k;
+            b = k + k_step * 2.0;
+            arg = local_min_rc(a, b, status, 0., epsilon_fin);
+            while (status)
+                arg = local_min_rc(a, b, status, rsvd_sv(arg), epsilon_fin);
+            rsvd_min.push_back(arg);
         }
         else if (L > 0. && R < 0.) { // local maximum
-            k += k_step;
-            if (lb) {
-                bracket_right.push_back(k);
-                lb = false;
-            } else if (bracket_left.empty()) {
-                bracket_left.push_back(k);
-                lb = true;
-            } else bracket_right.push_back(k);
+            if (bracket_left.empty()) {
+                std::cerr << "Error: local maximum comes first in rSVD, try again" << std::endl;
+                return 1;
+            }
+            bracket_right.push_back(k + k_step);
         }
     }
     if (bracket_right.size() < bracket_left.size())
@@ -202,8 +215,8 @@ int main(int argc, char** argv) {
 
     for (size_t i = 0; i < loc_min_count; ++i) {
         double a = bracket_left[i], b = bracket_right[i];
-        if (arnoldi_sv_der(a) > 0.)
-            a = i == 0 ? k_min : bracket_right[i - 1];
+        while (arnoldi_sv_der(a) > 0.)
+            a = (a + (i == 0 ? k_min : bracket_right[i - 1])) / 2.0;
         double h = b - a, lp = a, arg;
         int status = 0, ic = 0;
         std::cout << "Local search " << i + 1 << " in [" << a << "," << b << "]..." << std::endl;
@@ -213,8 +226,11 @@ int main(int argc, char** argv) {
             ++ic;
         }
         if (arg < lp + h * .95) {
+            bnd_left.push_back(lp);
+            bnd_right.push_back(lp + h);
             loc_min.push_back(arg);
-            loc_min_approx.push_back(bracket_left[i]);
+            val.push_back(arnoldi_sv(arg));
+            loc_min_approx.push_back(rsvd_min[i]);
             loc_min_iter.push_back(ic);
         }
     }
@@ -223,7 +239,9 @@ int main(int argc, char** argv) {
     file_out.open(file_minimas, std::ios_base::app);
     loc_min_count = loc_min.size();
     for (size_t i = 0; i < loc_min_count; ++i) {
-        file_out << loc_min[i] << "\t" << loc_min_approx[i] << "\t" << loc_min_iter[i] << std::endl;
+        file_out << bnd_left[i] << "\t" << bnd_right[i] << "\t"
+                 << loc_min[i] << "\t" << val[i] << "\t"
+                 << loc_min_approx[i] << "\t" << loc_min_iter[i] << std::endl;
     }
     file_out.close();
 
