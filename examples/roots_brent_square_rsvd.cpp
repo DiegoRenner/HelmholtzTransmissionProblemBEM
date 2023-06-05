@@ -215,6 +215,8 @@ int main(int argc, char** argv) {
 
     for (size_t i = 0; i < loc_min_count; ++i) {
         double a = bracket_left[i], b = bracket_right[i];
+        if (arnoldi_sv_der((a + b) / 2.0) <= 0.)
+          continue;
         while (arnoldi_sv_der(a) > 0.)
             a = (a + (i == 0 ? k_min : bracket_right[i - 1])) / 2.0;
         double h = b - a, lp = a, arg;
@@ -225,14 +227,12 @@ int main(int argc, char** argv) {
             arg = local_min_rc(a, b, status, arnoldi_sv(arg), epsilon_fin);
             ++ic;
         }
-        if (arg < lp + h * .95) {
-            bnd_left.push_back(lp);
-            bnd_right.push_back(lp + h);
-            loc_min.push_back(arg);
-            val.push_back(arnoldi_sv(arg));
-            loc_min_approx.push_back(rsvd_min[i]);
-            loc_min_iter.push_back(ic);
-        }
+        bnd_left.push_back(lp);
+        bnd_right.push_back(lp + h);
+        loc_min.push_back(arg);
+        val.push_back(arnoldi_sv(arg));
+        loc_min_approx.push_back(rsvd_min[i]);
+        loc_min_iter.push_back(ic);
     }
 
     std::cout << "Found " << loc_min.size() << " local minima." << std::endl;

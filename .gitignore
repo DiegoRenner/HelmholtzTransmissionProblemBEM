@@ -9,6 +9,7 @@ doxygen/generated_doc
 arpackpp_lib
 data/*.dat
 data/*.txt
+data/*.m
 data_bckp
 figures/*.pdf
 plotting_scripts/.idea
