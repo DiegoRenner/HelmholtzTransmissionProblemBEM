@@ -43,7 +43,6 @@
 #include "gen_sol_op.hpp"
 #include "randsvd.hpp"
 
-//#define PLOT_CURVES
 //#define FIND_MIN_RSVD
 
 // define shorthand for time benchmarking tools, complex data type and immaginary unit
@@ -142,28 +141,12 @@ int main(int argc, char** argv) {
                         ;
 #endif
     std::iota(ind.begin(), ind.end(), 0);
-    Eigen::MatrixXcd Tall(nr, nr * n_points_k);
-
     auto tic = high_resolution_clock::now();
 
-    std::cout << "Computing solution operator matrices..." << std::endl;
-    std::for_each(std::execution::par_unseq, ind.cbegin(), ind.cend(), [&](int i) {
-        Tall.block(0, nr * i, nr, nr) = gen_sol_op(mesh, order, k_min + k_step * i, c_o, c_i);
-    });
-
-    std::cout << "Applying randomized SVD..." << std::endl;
+    std::cout << "Approximating local extrema with randomized SVD..." << std::endl;
     std::transform(std::execution::par_unseq, ind.cbegin(), ind.cend(), rsv.begin(), [&](int i) {
-        const Eigen::MatrixXcd &T = Tall.block(0, nr * i, nr, nr);
-        return randomized_svd::sv(T, W, q);
+        return randomized_svd::sv(gen_sol_op(mesh, order, k_min + k_step * i, c_o, c_i), W, q);
     });
-#ifdef PLOT_CURVES
-    std::vector<double> asv(n_points_k);
-    std::cout << "Applying Arnoldi iterations..." << std::endl;
-    std::transform(std::execution::seq, ind.cbegin(), ind.cend(), asv.begin(), [&](int i) {
-        const Eigen::MatrixXcd &T = Tall.block(0, nr * i, nr, nr);
-        return arnoldi::sv(T, 1, acc)(0);
-    });
-#endif
 #ifdef FIND_MIN_RSVD
     auto rsvd_sv = [&](double k) {
         Eigen::MatrixXcd T = gen_sol_op(mesh, order, k, c_o, c_i);
@@ -236,32 +219,6 @@ int main(int argc, char** argv) {
     }
     file_out.close();
 
-#ifdef PLOT_CURVES
-    // Write rSVD and Arnoldi curves to Matlab file
-    file_out.open(file_plot, std::ios_base::app);
-    file_out << "x = linspace(" << k_min << ", " << k_max << ", " << n_points_k << ");" << std::endl;
-    file_out << "rsv = [";
-    std::vector<double>::const_iterator it;
-    for (it = rsv.begin(); it != rsv.end(); ++it) {
-        if (it != rsv.begin())
-            file_out << " ";
-        file_out << *it;
-    }
-    file_out << "];" << std::endl << "asv = [";
-    for (it = asv.begin(); it != asv.end(); ++it) {
-        if (it != asv.begin())
-            file_out << " ";
-        file_out << *it;
-    }
-    file_out << "];" << std::endl << "plot(x, rsv, x, asv); hold on;" << std::endl;
-    for (it = loc_min.begin(); it != loc_min.end(); ++it) {
-        file_out << "plot([" << *it << ", " << *it << "], [0, 1], 'g');" << std::endl;
-    }
-    file_out << "hold off;" << std::endl;
-    file_out << "legend('Randomized SVD', 'Arnoldi iterations');" << std::endl;
-    file_out << "xlabel('Wavenumber k'); ylabel('Smallest singular value');" << std::endl;
-    file_out.close();
-#endif
     toc = high_resolution_clock::now();
     std::cout << "Total time: " << duration_cast<seconds>(toc - tic).count() << " sec" << std::endl;
 
