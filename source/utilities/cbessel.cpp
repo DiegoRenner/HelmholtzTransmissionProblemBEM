@@ -13,6 +13,7 @@
 #include <limits>
 #include <vector>
 #include <numeric>
+#include <cmath>
 
 #define MAXITER 10000
 //#define CBESSEL_EXCEPT 1
@@ -1075,8 +1076,13 @@ namespace complex_bessel {
     Cplx J(Real v,const Cplx &z,bool scaled) {
         Cplx si=sign1(imag(z))*i;
         if (v>=0.0) {
-            if (zero(arg(z)))
+            if (zero(arg(z))) {
+                if (v==0.0)
+                    return j0(real(z));
+                if (v==1.0)
+                    return j1(real(z));
                 return cyl_bessel_j(v,real(z));
+            }
             if (abs(zero(arg(z))-M_PI))
                 return exp(si*M_PI*v)*cyl_bessel_j(v,-real(z));
             if (v==0.0)
@@ -1087,6 +1093,14 @@ namespace complex_bessel {
         return exp(si*M_PI_2*v)*I_in(v,-z*si,scaled);
     }
     Cplx Y(Real v,const Cplx &z,bool scaled) {
+        if (zero(imag(z))) {
+            if (v==0.0)
+                return j0(real(z));
+            if (v==1.0)
+                return j1(real(z));
+            if (v>0.0)
+                return cyl_neumann(v,real(z));
+        }
         Real s=sign1(imag(z)),va=abs(v);
         Cplx si=i*s,a=exp(va*M_PI_2*si),iz=z*si,Kv=NAN,Iv;
 #ifdef CBESSEL_EXCEPT
@@ -1237,10 +1251,16 @@ namespace complex_bessel {
     }
     /* Hankel functions */
     Cplx H1(Real v,const Cplx &z,bool scaled) {
-        if (v==0.0)
+        if (v==0.0) {
+            if (zero(imag(z)))
+                return j0(real(z))+i*y0(real(z));
             return H_v0(z,1,scaled);
-        if (v==1.0)
+        }
+        if (v==1.0) {
+            if (zero(imag(z)))
+                return j1(real(z))+i*y1(real(z));
             return H_v1(z,1,scaled);
+        }
         return H(v,z,1,scaled);
     }
     Cplx H2(Real v,const Cplx &z,bool scaled) {

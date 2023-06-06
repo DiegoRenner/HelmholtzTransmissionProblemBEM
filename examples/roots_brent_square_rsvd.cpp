@@ -19,9 +19,8 @@
  * The resulting file will contain the boundaries of the interval
  * used to compute the root in the first two columns.
  * Then in the next two columns will be the point and the
- * respective function value. The last two column will contain the
- * correspoding minimum of the minimal singular value approximation
- * with randomized SVD and number of iterations used to find the root.
+ * respective function value. The last column will contain the
+ * number of iterations used to find the root.
  * The singular values are computed using the Arnoldi algorithm.
  * The user will be updated through the command line about the
  * progress of the algorithm.
@@ -43,6 +42,9 @@
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 #include "randsvd.hpp"
+
+//#define PLOT_CURVES
+//#define FIND_MIN_RSVD
 
 // define shorthand for time benchmarking tools, complex data type and immaginary unit
 using namespace std::chrono;
@@ -132,63 +134,56 @@ int main(int argc, char** argv) {
     double k_max = 10.0, k_step = (k_max - k_min) / (n_points_k - 1);
 
     std::vector<int> ind(n_points_k), loc_min_iter;
-    std::vector<double> rsv(n_points_k), asv(n_points_k),
-                        loc_min, loc_min_approx, bracket_left, bracket_right,
-                        rsvd_min, val, bnd_left, bnd_right;
+    std::vector<double> rsv(n_points_k),
+                        loc_min, loc_min_approx, bracket_left, bracket_right, val, bnd_left, bnd_right
+#ifdef FIND_MIN_RSVD
+                       ,rsvd_min;
+#else
+                        ;
+#endif
     std::iota(ind.begin(), ind.end(), 0);
     Eigen::MatrixXcd Tall(nr, nr * n_points_k);
 
-    std::cout << "Computing solution operator matrices..." << std::endl;
     auto tic = high_resolution_clock::now();
+
+    std::cout << "Computing solution operator matrices..." << std::endl;
     std::for_each(std::execution::par_unseq, ind.cbegin(), ind.cend(), [&](int i) {
         Tall.block(0, nr * i, nr, nr) = gen_sol_op(mesh, order, k_min + k_step * i, c_o, c_i);
     });
 
     std::cout << "Applying randomized SVD..." << std::endl;
-    auto tic_in = high_resolution_clock::now();
     std::transform(std::execution::par_unseq, ind.cbegin(), ind.cend(), rsv.begin(), [&](int i) {
         const Eigen::MatrixXcd &T = Tall.block(0, nr * i, nr, nr);
         return randomized_svd::sv(T, W, q);
     });
-    auto toc_in = high_resolution_clock::now();
-    auto rsv_time = duration_cast<microseconds>(toc_in - tic_in);
-
+#ifdef PLOT_CURVES
+    std::vector<double> asv(n_points_k);
     std::cout << "Applying Arnoldi iterations..." << std::endl;
-    tic_in = high_resolution_clock::now();
     std::transform(std::execution::seq, ind.cbegin(), ind.cend(), asv.begin(), [&](int i) {
         const Eigen::MatrixXcd &T = Tall.block(0, nr * i, nr, nr);
         return arnoldi::sv(T, 1, acc)(0);
     });
-    toc_in = high_resolution_clock::now();
-    auto asv_time = duration_cast<microseconds>(toc_in - tic_in);
-
-    std::cout << "Parallel randomized SVD is " << double(asv_time.count()) / double(rsv_time.count())
-              << " times faster than Arnoldi." << std::endl;
-
+#endif
+#ifdef FIND_MIN_RSVD
     auto rsvd_sv = [&](double k) {
         Eigen::MatrixXcd T = gen_sol_op(mesh, order, k, c_o, c_i);
         return randomized_svd::sv(T, W, q);
     };
-
+#endif
     for (size_t i = 0; i < rsv.size() - 2; ++i) {
         double &c = rsv[i+1], L = c - rsv[i], R = rsv[i+2] - c;
-        double k = k_min + i * k_step, arg, a, b;
+        double k = k_min + i * k_step;
         if (L < 0. && R > 0.) { // local minimum
             bracket_left.push_back(k);
+            bracket_right.push_back(k + k_step * 2.0);
+#ifdef FIND_MIN_RSVD
             int status = 0;
-            a = k;
-            b = k + k_step * 2.0;
+            double arg, a = bracket_left.back(), b = bracket_right.back();
             arg = local_min_rc(a, b, status, 0., epsilon_fin);
             while (status)
                 arg = local_min_rc(a, b, status, rsvd_sv(arg), epsilon_fin);
             rsvd_min.push_back(arg);
-        }
-        else if (L > 0. && R < 0.) { // local maximum
-            if (bracket_left.empty()) {
-                std::cerr << "Error: local maximum comes first in rSVD, try again" << std::endl;
-                return 1;
-            }
-            bracket_right.push_back(k + k_step);
+#endif
         }
     }
     if (bracket_right.size() < bracket_left.size())
@@ -207,19 +202,9 @@ int main(int argc, char** argv) {
         Eigen::MatrixXcd T = gen_sol_op(mesh, order, k, c_o, c_i);
         return arnoldi::sv(T, 1, acc)(0);
     };
-    auto arnoldi_sv_der = [&](double k) {
-        Eigen::MatrixXcd T = gen_sol_op(mesh, order, k, c_o, c_i);
-        Eigen::MatrixXcd T_der = gen_sol_op_1st_der(mesh, order, k , c_o, c_i);
-        return arnoldi::sv_1st_der(T, T_der, 1, acc)(0, 1);
-    };
 
     for (size_t i = 0; i < loc_min_count; ++i) {
-        double a = bracket_left[i], b = bracket_right[i];
-        if (arnoldi_sv_der((a + b) / 2.0) <= 0.)
-          continue;
-        while (arnoldi_sv_der(a) > 0.)
-            a = (a + (i == 0 ? k_min : bracket_right[i - 1])) / 2.0;
-        double h = b - a, lp = a, arg;
+        double a = bracket_left[i], b = bracket_right[i], h = b - a, lp = a, arg;
         int status = 0, ic = 0;
         std::cout << "Local search " << i + 1 << " in [" << a << "," << b << "]..." << std::endl;
         arg = local_min_rc(a, b, status, 0., epsilon_fin);
@@ -231,21 +216,28 @@ int main(int argc, char** argv) {
         bnd_right.push_back(lp + h);
         loc_min.push_back(arg);
         val.push_back(arnoldi_sv(arg));
+#ifdef FIND_MIN_RSVD
         loc_min_approx.push_back(rsvd_min[i]);
+#endif
         loc_min_iter.push_back(ic);
     }
 
     std::cout << "Found " << loc_min.size() << " local minima." << std::endl;
+    // output minima information to file
     file_out.open(file_minimas, std::ios_base::app);
     loc_min_count = loc_min.size();
     for (size_t i = 0; i < loc_min_count; ++i) {
         file_out << bnd_left[i] << "\t" << bnd_right[i] << "\t"
                  << loc_min[i] << "\t" << val[i] << "\t"
-                 << loc_min_approx[i] << "\t" << loc_min_iter[i] << std::endl;
+#ifdef FIND_MIN_RSVD
+                 << loc_min_approx[i] << "\t"
+#endif
+                 << loc_min_iter[i] << std::endl;
     }
     file_out.close();
 
-    // Writing Matlab plot file
+#ifdef PLOT_CURVES
+    // Write rSVD and Arnoldi curves to Matlab file
     file_out.open(file_plot, std::ios_base::app);
     file_out << "x = linspace(" << k_min << ", " << k_max << ", " << n_points_k << ");" << std::endl;
     file_out << "rsv = [";
@@ -269,7 +261,7 @@ int main(int argc, char** argv) {
     file_out << "legend('Randomized SVD', 'Arnoldi iterations');" << std::endl;
     file_out << "xlabel('Wavenumber k'); ylabel('Smallest singular value');" << std::endl;
     file_out.close();
-
+#endif
     toc = high_resolution_clock::now();
     std::cout << "Total time: " << duration_cast<seconds>(toc - tic).count() << " sec" << std::endl;
 

@@ -6,7 +6,7 @@ This is a fork of the project [HelmholtzTransmissionProblemBEM](https://github.c
 - The new dependency is the Intel <tt>tbb</tt> library for parallelization, which is supported by GCC.
 - Linking to [complex_bessel](https://github.com/joeydumont/complex_bessel) library is rendered obsolete since this code includes routines for computing Bessel functions written from scratch in C++, following the same theoretical ideas as presented in two papers by Donald E. Amos (1983). The new code, contained in <tt>cbessel.cpp</tt>, is slightly faster than the Fortran code and has been extensively tested against the latter.
 - Significant performance improvements are made to the process of assembling the solution matrix and the respective derivatives by using parallelization and by removing duplicate computation.
-- The main contribution is an implementation of randomized SVD following the algorithm presented in [this paper](https://arxiv.org/abs/0909.4061). The corresponding routine called <tt>randomized_svd::sv</tt> approximates the smallest singular value of the solution matrix by using this technique. Although the approximation is not good enough to replace <tt>arpack</tt>, it is useful for detecting local extrema.
+- The main contribution is an implementation of randomized SVD following the algorithm presented in [this paper](https://arxiv.org/abs/0909.4061). The corresponding routine called <tt>randomized_svd::sv</tt> approximates the smallest singular value of the solution matrix by using this technique.
 
 ## Configuration and Dependencies
 The library can be configured by running 
@@ -324,7 +324,7 @@ This target builds a script that computes minimas in the smallest singular value
 <#grid points for root search> <#panels> <order of quadrature rule>
 <accuracy of Arnoldi algorithm> <number of subspace iterations>
 ~~~
-The resulting file will contain the boundaries of the interval used to compute the root in the first two columns, which are obtained by approximating the smallest singular value with randomized SVD. Then in the next two columns will be the point and the respective function value. The last two column will contain the correspoding minimum of the minimal singular value approximation with randomized SVD and number of iterations used to find the root. The singular values are computed using the Arnoldi algorithm. The user will be updated through the command line about the progress of the algorithm.
+The resulting file will contain the boundaries of the interval used to compute the root in the first two columns, which are obtained by approximating the smallest singular value with randomized SVD. Then in the next two columns will be the point and the respective function value. The last column will contain the number of iterations used to find the root. The singular values are computed using the Arnoldi algorithm. The user will be updated through the command line about the progress of the algorithm.
 
 #### <tt>roots_mixed_circle_arnoldi</tt>
 This target builds a script that computes minimas in the smallest singular value of the

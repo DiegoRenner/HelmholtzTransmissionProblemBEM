@@ -64,26 +64,26 @@
                 if (swap) {
                     double d = (pi[s] - pi_p.swapped_op(t)).norm();
                     if (with_i) {
-                        if (ksqrtca_i * d > epsilon)
+                        if (ksqrtca_i * d > epsilon) {
                             result_i = ii * complex_bessel::H1(0, ksqrtc_i * d) * 0.25;
-                        else if (d > epsilon)
+                        } else if (d > epsilon)
                             result_i = -0.5 * M_1_PI * log(d);
                     }
-                    if (ksqrtca_o * d > epsilon)
+                    if (ksqrtca_o * d > epsilon) {
                         result_o = ii * complex_bessel::H1(0, ksqrtc_o * d) * 0.25;
-                    else if (d > epsilon)
+                    } else if (d > epsilon)
                         result_o = -0.5 * M_1_PI * log(d);
                 } else {
                     double d = (pi.swapped_op(s) - pi_p[t]).norm();
                     if (with_i) {
-                        if (ksqrtca_i * d > epsilon)
+                        if (ksqrtca_i * d > epsilon) {
                             result_i = ii * complex_bessel::H1(0, ksqrtc_i * d) * 0.25;
-                        else if (d > epsilon)
+                        } else if (d > epsilon)
                             result_i = -0.5 * M_1_PI * log(d);
                     }
-                    if (ksqrtca_o * d > epsilon)
+                    if (ksqrtca_o * d > epsilon) {
                         result_o = ii * complex_bessel::H1(0, ksqrtc_o * d) * 0.25;
-                    else if (d > epsilon)
+                    } else if (d > epsilon)
                         result_o = -0.5 * M_1_PI * log(d);
                 }
             });
@@ -135,14 +135,14 @@
                 tp_norm = pi_p.Derivative_01(t).norm();
                 double d = (pi[s] - pi_p[t]).norm();
                 if (with_i) {
-                    if (ksqrtca_i * d > epsilon)
+                    if (ksqrtca_i * d > epsilon) {
                         result_i = ii * complex_bessel::H1(0, ksqrtc_i * d) * 0.25;
-                    else if (d > epsilon)
+                    } else if (d > epsilon)
                         result_i = -0.5 * M_1_PI * log(d);
                 }
-                if (ksqrtca_o * d > epsilon)
+                if (ksqrtca_o * d > epsilon) {
                     result_o = ii * complex_bessel::H1(0, ksqrtc_o * d) * 0.25;
-                else if (d > epsilon)
+                } else if (d > epsilon)
                     result_o = -0.5 * M_1_PI * log(d);
             });
             auto integrand = [&](int i, int j, int m) {
@@ -192,14 +192,14 @@
                 tp_norm = pi_p.Derivative_01(t).norm();
                 double d = (pi[s] - pi_p[t]).norm();
                 if (with_i) {
-                    if (ksqrtca_i * d > epsilon)
+                    if (ksqrtca_i * d > epsilon) {
                         result_i = ii * complex_bessel::H1(0, ksqrtc_i * d) * 0.25;
-                    else if (d > epsilon)
+                    } else if (d > epsilon)
                         result_i = -0.5 * M_1_PI * log(d);
                 }
-                if (ksqrtca_o * d > epsilon)
+                if (ksqrtca_o * d > epsilon) {
                     result_o = ii * complex_bessel::H1(0, ksqrtc_o * d) * 0.25;
-                else if (d > epsilon)
+                } else if (d > epsilon)
                     result_o = -0.5 * M_1_PI * log(d);
             });
             for (int i = 0; i < Q; ++i) {

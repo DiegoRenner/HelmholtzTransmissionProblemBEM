@@ -19,12 +19,12 @@ namespace randomized_svd {
     Eigen::MatrixXcd randGaussian(int nr, int nc) {
         std::random_device rd {};
         std::mt19937 gen { rd() };
-        std::normal_distribution<> d { 0, 1 };
+        std::uniform_real_distribution<> d { 0, 1 };
         Eigen::MatrixXcd W = Eigen::MatrixXcd::Zero(nr, nc);
         for (int i = 0; i < nr; ++i) for (int j = 0; j < nc; ++j) {
             W(i, j) = std::complex<double>(d(gen), d(gen));
         }
-        return W;
+        return W / M_SQRT2;
     }
 
     double sv(const Eigen::MatrixXcd &T, const Eigen::MatrixXcd &W, int q) {
@@ -36,7 +36,7 @@ namespace randomized_svd {
             Q = lu_decomp.adjoint().solve(Q).householderQr().householderQ() * thinQ;
             Q = lu_decomp.solve(Q).householderQr().householderQ() * thinQ;
         }
-        return 1.0 / lu_decomp.adjoint().solve(Q).bdcSvd().singularValues()(0);
+        return 1.0 / lu_decomp.adjoint().solve(Q).bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).singularValues()(0);
     }
 
 }
