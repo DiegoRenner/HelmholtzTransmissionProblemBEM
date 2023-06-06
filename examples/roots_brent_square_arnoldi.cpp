@@ -38,6 +38,8 @@
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 
+#define CMDL
+
 // define shorthand for time benchmarking tools, complex data type and immaginary unit
 using namespace std::chrono;
 typedef std::complex<double> complex_t;
@@ -113,13 +115,14 @@ int main(int argc, char** argv) {
     file_out.close();
 
     // Inform user of started computation.
-	#ifdef CMDL
+#ifdef CMDL
     std::cout << "-------------------------------------------------------" << std::endl;
     std::cout << "Finding resonances using Brent's method." << std::endl;
     std::cout << "Computing on userdefined problem using square domain." << std::endl;
     std::cout << std::endl;
-	#endif
+#endif
     // loop over values of wavenumber
+    auto tic = high_resolution_clock::now();
     for (unsigned j = 0; j < n_points_x; j++) {
         for (unsigned k = 0; k < n_points_y; k++) {
             auto duration_ops = milliseconds::zero();
@@ -174,18 +177,18 @@ int main(int argc, char** argv) {
             bool root_found = false;
             unsigned num_iter = 0;
             auto start = high_resolution_clock::now();
-			#ifdef CMDL
+#ifdef CMDL
             std::cout << "#######################################################" << std::endl;
-			#endif
+#endif
             double root = zbrent(sv_eval_der,k_temp.real(), k_temp.real()+h_x,epsilon_fin,root_found,num_iter);
             auto end = high_resolution_clock::now();
             duration += duration_cast<milliseconds>(end-start);
 
-			#ifdef CMDL
+#ifdef CMDL
 			// write interval searched to command line
             std::cout << "Interval searched: [" << k_temp.real() 
 	    	<< "," << k_temp.real()+h_x << "]" << std::endl;
-			#endif
+#endif
 	    
             // write result to file
             file_out.open(file_minimas, std::ios_base::app);
@@ -197,12 +200,12 @@ int main(int argc, char** argv) {
                 // check if it's actually a root and not a crossing
                 if (std::abs(val_at_root[0]) < epsilon_ver) {
                     file_out << " " << root << " " << sv_eval(root) << " " << val_at_root.transpose() << " " << num_iter << std::endl;
-				#ifdef CMDL
+#ifdef CMDL
 				// write found roots to command line
 				std::cout << "A root was found at: " << root << std::endl;
 				std::cout << "The value of the first derivative here is: " << val_at_root << std::endl;
 				std::cout << "Number of iterations taken: " << num_iter << std::endl;
-				#endif
+#endif
                 } else {
                     file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
                 }
@@ -210,12 +213,16 @@ int main(int argc, char** argv) {
                 file_out << " " << NAN << " " << NAN << " " << NAN << " " << NAN << " " << NAN << std::endl;
             }
             file_out.close();
-			#ifdef CMDL
+#ifdef CMDL
             std::cout << "#######################################################" << std::endl;
 			std::cout << std::endl;
-			#endif
+#endif
         }
     }
+    auto toc = high_resolution_clock::now();
+#ifdef CMDL
+    std::cout << "Total time: " << duration_cast<seconds>(toc - tic).count() << std::endl;
+#endif
     return 0;
 }
 

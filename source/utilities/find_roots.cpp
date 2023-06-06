@@ -23,8 +23,6 @@ double zbrent( const function<double(double)> f,
     // initialize function values and boundaries
     double a=x1, b=x2, c=x2, d, e, min1, min2;
     double fa=f(a), fb=f(b), fc, p, q, r, s, tol1, xm;
-    cout << fa << endl;
-    cout << fb << endl;
     // sanity checks
     if ((fa > 0.0 && fb > 0.0) || (fa < 0.0 && fb < 0.0)) {
 #ifdef CMDL

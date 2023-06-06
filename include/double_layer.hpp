@@ -21,6 +21,8 @@
  * Galerkin Matrix using common and composite Gauss-Legendre quadrature rules.
  */
 namespace double_layer_helmholtz {
+
+#if 0
 /**
  * This function is used to evaluate the Interaction Matrix for a pair of
  * panels \f$\Pi\f$ and \f$\Pi\f$' for the bilinear form induced by the Double
@@ -165,7 +167,7 @@ namespace double_layer_helmholtz {
                            const std::complex<double> &k,
                            const double c_i, const double c_o,
                            gq_workspace_t &ws);
-
+#endif
 /**
  * This function is used to evaluate the full Galerkin matrix based on the
  * Bilinear form for the Helmholtz kernel Double Layer BIO. It uses the trial

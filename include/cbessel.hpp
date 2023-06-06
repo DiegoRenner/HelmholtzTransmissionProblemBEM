@@ -141,6 +141,8 @@ namespace complex_bessel {
      * @param scaled if true, the value is scaled by exp(-i*z)
      */
     Cplx H1 (Real v,const Cplx &z,bool scaled=false);
+    Cplx H1_0_i (const Cplx &z,bool scaled=false);
+    Cplx H1_1_i (const Cplx &z,bool scaled=false);
 
     /**
      * This function computes the nth derivative of the

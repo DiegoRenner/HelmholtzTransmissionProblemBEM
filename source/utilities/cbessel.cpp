@@ -1253,22 +1253,38 @@ namespace complex_bessel {
     Cplx H1(Real v,const Cplx &z,bool scaled) {
         if (v==0.0) {
             if (zero(imag(z)))
-                return j0(real(z))+i*y0(real(z));
+                return Cplx(j0(real(z)),y0(real(z)));
             return H_v0(z,1,scaled);
         }
         if (v==1.0) {
             if (zero(imag(z)))
-                return j1(real(z))+i*y1(real(z));
+                return Cplx(j1(real(z)),y1(real(z)));
             return H_v1(z,1,scaled);
         }
         return H(v,z,1,scaled);
     }
     Cplx H2(Real v,const Cplx &z,bool scaled) {
-        if (v==0.0)
+        if (v==0.0) {
+            if (zero(imag(z)))
+                return Cplx(j0(real(z)),-y0(real(z)));
             return H_v0(z,2,scaled);
-        if (v==1.0)
+        }
+        if (v==1.0) {
+            if (zero(imag(z)))
+                return Cplx(j1(real(z)),-y1(real(z)));
             return H_v1(z,2,scaled);
+        }
         return H(v,z,2,scaled);
+    }
+    Cplx H1_0_i(const Cplx &z,bool scaled) {
+        if (zero(imag(z)))
+            return Cplx(-y0(real(z)),j0(real(z)));
+        return i*H_v0(z,1,scaled);
+    }
+    Cplx H1_1_i(const Cplx &z,bool scaled) {
+        if (zero(imag(z)))
+            return Cplx(-y1(real(z)),j1(real(z)));
+        return i*H_v1(z,1,scaled);
     }
 
     /* n-th derivative of Bessel function f_v(z) */

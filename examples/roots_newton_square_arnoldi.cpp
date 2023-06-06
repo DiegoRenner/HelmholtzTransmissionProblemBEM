@@ -36,6 +36,8 @@
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 
+#define CMDL
+
 // define shorthand for time benchmarking tools, complex data type and immaginary unit
 using namespace std::chrono;
 typedef std::complex<double> complex_t;
@@ -113,12 +115,13 @@ int main(int argc, char** argv){
     // Inform user of started computation.
 	#ifdef CMDL
     std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "Finding resonances using Brent's method." << std::endl;
+    std::cout << "Finding resonances using Newton-Raphson method." << std::endl;
     std::cout << "Computing on userdefined problem using square domain." << std::endl;
     std::cout << std::endl;
 	#endif
 
-    // loop over values of wavenumber 
+    // loop over values of wavenumber
+    auto tic = high_resolution_clock::now();
     for (unsigned j = 0; j < n_points_x; j++) {
         for (unsigned k = 0; k < n_points_y; k++) {
             auto duration_ops = milliseconds ::zero();
@@ -211,6 +214,10 @@ int main(int argc, char** argv){
 			#endif
         }
     }
+    auto toc = high_resolution_clock::now();
+#ifdef CMDL
+    std::cout << "Total time: " << duration_cast<seconds>(toc - tic).count() << std::endl;
+#endif
     return 0;
 }
 

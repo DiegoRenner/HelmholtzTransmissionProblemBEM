@@ -6,31 +6,10 @@
     namespace double_layer_helmholtz {
 
         typedef std::complex<double> complex_t;
-        static const complex_t ii(0., 1.);
         static const complex_t czero(0., 0.);
         static const double epsilon = std::numeric_limits<double>::epsilon();
 
-        void InteractionMatrix(Eigen::MatrixXcd &interaction_matrix,
-                               const AbstractParametrizedCurve &pi,
-                               const AbstractParametrizedCurve &pi_p,
-                               const AbstractBEMSpace &trial_space,
-                               const AbstractBEMSpace &test_space,
-                               const QuadRule &GaussQR,
-                               const QuadRule &CGaussQR,
-                               const complex_t &k,
-                               const double c_i, const double c_o,
-                               gq_workspace_t &ws) {
-            if (&pi == &pi_p) { // Same Panels case
-                ComputeIntegralCoinciding(interaction_matrix, pi, pi_p, trial_space, test_space, CGaussQR, k, c_i, c_o, ws);
-            }
-            else if ((pi(1) - pi_p(-1)).norm() / 100. < epsilon ||
-                     (pi(-1) - pi_p(1)).norm() / 100. < epsilon) {// Adjacent Panels case
-                ComputeIntegralAdjacent(interaction_matrix, pi, pi_p, trial_space, test_space, CGaussQR, k, c_i, c_o, ws);
-            } else { //Disjoint panels case
-                ComputeIntegralGeneral(interaction_matrix, pi, pi_p, trial_space, test_space, GaussQR, k, c_i, c_o, ws);
-            }
-        }
-
+        inline
         void ComputeIntegralCoinciding(Eigen::MatrixXcd &interaction_matrix,
                                        const AbstractParametrizedCurve &pi,
                                        const AbstractParametrizedCurve &pi_p,
@@ -39,7 +18,7 @@
                                        const QuadRule &GaussQR,
                                        const complex_t &k,
                                        const double c_i, const double c_o,
-                                       gq_workspace_t &ws) {
+                                       gq_workspace_t &ws) throw() {
             unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
             int Qtrial = trial_space.getQ();
@@ -73,12 +52,12 @@
                 double v_norm = v.norm(), d = v.dot(normal) * 0.25 / v_norm;
                 if (with_i) {
                     if (ksqrtca_i * v_norm > epsilon ) // Away from singularity
-                        result_i = ii * ksqrtc_i * complex_bessel::H1(1, ksqrtc_i * v_norm) * d;
+                        result_i = (ksqrtc_i * d) * complex_bessel::H1_1_i(ksqrtc_i * v_norm);
                     else if (v_norm > epsilon)
                         result_i = M_2_PI * d / v_norm;
                 }
                 if (ksqrtca_o * v_norm > epsilon ) // Away from singularity
-                    result_o = ii * ksqrtc_o * complex_bessel::H1(1, ksqrtc_o * v_norm) * d;
+                    result_o = (ksqrtc_o * d) * complex_bessel::H1_1_i(ksqrtc_o * v_norm);
                 else if (v_norm > epsilon)
                     result_o = M_2_PI * d / v_norm;
             });
@@ -99,6 +78,7 @@
             }
         }
 
+        inline
         void ComputeIntegralAdjacent(Eigen::MatrixXcd &interaction_matrix,
                                      const AbstractParametrizedCurve &pi,
                                      const AbstractParametrizedCurve &pi_p,
@@ -107,7 +87,7 @@
                                      const QuadRule &GaussQR,
                                      const complex_t &k,
                                      const double c_i, const double c_o,
-                                     gq_workspace_t &ws) {
+                                     gq_workspace_t &ws) throw() {
             unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in trial space
             int Qtrial = trial_space.getQ();
@@ -143,12 +123,12 @@
                     double v_norm = v.norm(), d = v.dot(normal) * 0.25 / v_norm;
                     if (with_i) {
                         if (ksqrtca_i * v_norm > epsilon ) // Away from singularity
-                            result_i = ii * ksqrtc_i * complex_bessel::H1(1, ksqrtc_i * v_norm) * d;
+                            result_i = (ksqrtc_i * d) * complex_bessel::H1_1_i(ksqrtc_i * v_norm);
                         else if (v_norm > epsilon)
                             result_i = M_2_PI * d / v_norm;
                     }
                     if (ksqrtca_o * v_norm > epsilon ) // Away from singularity
-                        result_o = ii * ksqrtc_o * complex_bessel::H1(1, ksqrtc_o * v_norm) * d;
+                        result_o = (ksqrtc_o * d) * complex_bessel::H1_1_i(ksqrtc_o * v_norm);
                     else if (v_norm > epsilon)
                         result_o = M_2_PI * d / v_norm;
                 } else {
@@ -156,12 +136,12 @@
                     double v_norm = v.norm(), d = v.dot(normal) * 0.25 / v_norm;
                     if (with_i) {
                         if (ksqrtca_i * v_norm > epsilon ) // Away from singularity
-                            result_i = ii * ksqrtc_i * complex_bessel::H1(1, ksqrtc_i * v_norm) * d;
+                            result_i = (ksqrtc_i * d) * complex_bessel::H1_1_i(ksqrtc_i * v_norm);
                         else if (v_norm > epsilon)
                             result_i = M_2_PI * d / v_norm;
                     }
                     if (ksqrtca_o * v_norm > epsilon ) // Away from singularity
-                        result_o = ii * ksqrtc_o * complex_bessel::H1(1, ksqrtc_o * v_norm) * d;
+                        result_o = (ksqrtc_o * d) * complex_bessel::H1_1_i(ksqrtc_o * v_norm);
                     else if (v_norm > epsilon)
                         result_o = M_2_PI * d / v_norm;
                 }
@@ -184,6 +164,7 @@
             }
         }
 
+        inline
         void ComputeIntegralGeneral(Eigen::MatrixXcd &interaction_matrix,
                                     const AbstractParametrizedCurve &pi,
                                     const AbstractParametrizedCurve &pi_p,
@@ -192,7 +173,7 @@
                                     const QuadRule &GaussQR,
                                     const complex_t &k,
                                     const double c_i, const double c_o,
-                                    gq_workspace_t &ws) {
+                                    gq_workspace_t &ws) throw() {
             unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
             // The number of Reference Shape Functions in space
             int Qtrial = trial_space.getQ();
@@ -227,12 +208,12 @@
                 double v_norm = v.norm(), d = v.dot(normal) * 0.25 / v_norm;
                 if (with_i) {
                     if (ksqrtca_i * v_norm > epsilon ) // Away from singularity
-                        result_i = ii * ksqrtc_i * complex_bessel::H1(1, ksqrtc_i * v_norm) * d;
+                        result_i = (ksqrtc_i * d) * complex_bessel::H1_1_i(ksqrtc_i * v_norm);
                     else if (v_norm > epsilon)
                         result_i = M_2_PI * d / v_norm;
                 }
                 if (ksqrtca_o * v_norm > epsilon ) // Away from singularity
-                    result_o = ii * ksqrtc_o * complex_bessel::H1(1, ksqrtc_o * v_norm) * d;
+                    result_o = (ksqrtc_o * d) * complex_bessel::H1_1_i(ksqrtc_o * v_norm);
                 else if (v_norm > epsilon)
                     result_o = M_2_PI * d / v_norm;
             });
@@ -246,6 +227,28 @@
                         return sum + ws.w(m) * (ws.result_o(m) - ws.result_i(m)) * F * G;
                     });
                 }
+            }
+        }
+
+        inline
+        void InteractionMatrix(Eigen::MatrixXcd &interaction_matrix,
+                               const AbstractParametrizedCurve &pi,
+                               const AbstractParametrizedCurve &pi_p,
+                               const AbstractBEMSpace &trial_space,
+                               const AbstractBEMSpace &test_space,
+                               const QuadRule &GaussQR,
+                               const QuadRule &CGaussQR,
+                               const complex_t &k,
+                               const double c_i, const double c_o,
+                               gq_workspace_t &ws) throw() {
+            if (&pi == &pi_p) { // Same Panels case
+                ComputeIntegralCoinciding(interaction_matrix, pi, pi_p, trial_space, test_space, CGaussQR, k, c_i, c_o, ws);
+            }
+            else if ((pi(1) - pi_p(-1)).norm() / 100. < epsilon ||
+                     (pi(-1) - pi_p(1)).norm() / 100. < epsilon) {// Adjacent Panels case
+                ComputeIntegralAdjacent(interaction_matrix, pi, pi_p, trial_space, test_space, CGaussQR, k, c_i, c_o, ws);
+            } else { //Disjoint panels case
+                ComputeIntegralGeneral(interaction_matrix, pi, pi_p, trial_space, test_space, GaussQR, k, c_i, c_o, ws);
             }
         }
 
