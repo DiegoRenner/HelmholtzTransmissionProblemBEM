@@ -4,7 +4,7 @@ This is a fork of the project [HelmholtzTransmissionProblemBEM](https://github.c
 
 - The code is upgraded to the C++17 standard. The typedef <tt>data</tt> was replaced by <tt>grid_data</tt> because it clashed with <tt>std::data</tt>.
 - The new dependency is the Intel <tt>tbb</tt> library for parallelization, which is supported by GCC.
-- Linking to [complex_bessel](https://github.com/joeydumont/complex_bessel) library is rendered obsolete since this code includes routines for computing Bessel functions written from scratch in C++, following the same theoretical ideas as presented in two papers by Donald E. Amos (1983). The new code, contained in <tt>cbessel.cpp</tt>, is slightly faster than the Fortran code and has been extensively tested against the latter.
+- Linking to [complex_bessel](https://github.com/joeydumont/complex_bessel) library is rendered obsolete since this code includes routines for computing Bessel functions written from scratch in C++, following the same theoretical ideas as presented in two papers by Donald E. Amos (1983). The new code, contained in <tt>cbessel.cpp</tt>, is faster than the Fortran code (it has been extensively tested against the latter) and is optimized for order 0 and 1 as well as for the case of real argument.
 - Significant performance improvements are made to the process of assembling the solution matrix and the respective derivatives by using parallelization and by removing duplicate computation.
 - The main contribution is an implementation of randomized SVD following the algorithm presented in [this paper](https://arxiv.org/abs/0909.4061). The corresponding routine called <tt>randomized_svd::sv</tt> approximates the smallest singular value of the solution matrix by using this technique.
 

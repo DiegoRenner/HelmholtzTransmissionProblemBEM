@@ -109,8 +109,8 @@
                 s = t * GaussQR.x(J);
                 w = t * GaussQR.w(I) * GaussQR.w(J);
                 // Finding the tangent of pi_p to get its normal
-                Eigen::Vector2d tangent_p = swap ? -pi_p.Derivative_01_swapped(t) : pi_p.Derivative_01(t);
-                Eigen::Vector2d tangent = swap ? pi.Derivative_01(s) : -pi.Derivative_01_swapped(s);
+                const Eigen::Vector2d &tangent_p = swap ? -pi_p.Derivative_01_swapped(t) : pi_p.Derivative_01(t);
+                const Eigen::Vector2d &tangent = swap ? pi.Derivative_01(s) : -pi.Derivative_01_swapped(s);
                 tp_norm = tangent_p.norm();
                 t_norm = tangent.norm();
                 n_dot_np = (tangent_p(1) * tangent(1) + tangent_p(0) * tangent(0)) / (t_norm * tp_norm);
@@ -240,7 +240,7 @@
                 ComputeIntegralCoinciding(interaction_matrix, pi, pi_p, space, CGaussQR, k, c_i, c_o, ws);
             }
             else if ((pi(1) - pi_p(-1)).norm() / 100. < epsilon ||
-                        (pi(-1) - pi_p(1)).norm() / 100. < epsilon) {// Adjacent Panels case
+                     (pi(-1) - pi_p(1)).norm() / 100. < epsilon) {// Adjacent Panels case
                 ComputeIntegralAdjacent(interaction_matrix, pi, pi_p, space, CGaussQR, k, c_i, c_o, ws);
             }
             else {// Disjoint panels case*/
@@ -264,7 +264,7 @@
             unsigned int Q = space.getQ();
             Eigen::MatrixXcd interaction_matrix(Q, Q);
             // Initializing the Galerkin matrix with zeros
-            Eigen::MatrixXcd output = Eigen::MatrixXd::Zero(dims, dims);
+            Eigen::MatrixXcd output = Eigen::MatrixXcd::Zero(dims, dims);
             // Panel oriented assembly
             QuadRule GaussQR = getGaussQR(N, 0., 1.);
             QuadRule CGaussQR = getCGaussQR(N);

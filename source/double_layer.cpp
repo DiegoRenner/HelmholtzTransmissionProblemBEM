@@ -247,7 +247,8 @@
             else if ((pi(1) - pi_p(-1)).norm() / 100. < epsilon ||
                      (pi(-1) - pi_p(1)).norm() / 100. < epsilon) {// Adjacent Panels case
                 ComputeIntegralAdjacent(interaction_matrix, pi, pi_p, trial_space, test_space, CGaussQR, k, c_i, c_o, ws);
-            } else { //Disjoint panels case
+            }
+            else { //Disjoint panels case
                 ComputeIntegralGeneral(interaction_matrix, pi, pi_p, trial_space, test_space, GaussQR, k, c_i, c_o, ws);
             }
         }
@@ -271,12 +272,12 @@
             unsigned int Qtrial = trial_space.getQ();
             Eigen::MatrixXcd interaction_matrix(Qtest, Qtrial);
             // Initializing the Galerkin matrix with zeros
-            Eigen::MatrixXcd output = Eigen::MatrixXd::Zero(rows, cols);
+            Eigen::MatrixXcd output = Eigen::MatrixXcd::Zero(rows, cols);
             // Panel oriented assembly
             QuadRule GaussQR = getGaussQR(N,0.,1.);
             QuadRule CGaussQR = getCGaussQR(N);
             gq_workspace_t ws(std::max(GaussQR.n, CGaussQR.n));
-            unsigned i, j, I, J;
+            unsigned int i, j, I, J;
             for (i = 0; i < numpanels; ++i) {
                 for (j = 0; j < numpanels; ++j) {
                     // Getting the interaction matrix for the pair of panels i and j
