@@ -96,6 +96,9 @@ int main(int argc, char** argv) {
     std::cout << "Computing on userdefined problem using square domain." << std::endl;
     std::cout << std::endl;
 	#endif
+
+    SolutionsOperator so(mesh, order);
+
     for (unsigned j = 0; j < n_points_x; j++) {
         for (unsigned k = 0; k < n_points_y; k++) {
             Eigen::MatrixXd res(2*numpanels,3);
@@ -103,7 +106,7 @@ int main(int argc, char** argv) {
             complex_t k_temp = (k_0+j*h_x+ii*double(k)*h_y);
 
             // compute solutions operator
-            Eigen::MatrixXcd T = gen_sol_op(mesh, order, k_temp, c_o, c_i);
+            Eigen::MatrixXcd T = so.gen_sol_op(k_temp, c_o, c_i);
 
             // set singular values to be computed, all
             unsigned count = T.cols();

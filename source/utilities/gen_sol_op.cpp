@@ -1,7 +1,5 @@
 #include "gen_sol_op.hpp"
 #include "mass_matrix.hpp"
-#include "continuous_space.hpp"
-#include "discontinuous_space.hpp"
 #include "single_layer.hpp"
 #include "single_layer_der.hpp"
 #include "single_layer_der2.hpp"
@@ -11,135 +9,83 @@
 #include "hypersingular.hpp"
 #include "hypersingular_der.hpp"
 #include "hypersingular_der2.hpp"
-#include "parametrized_mesh.hpp"
-
 
 typedef std::complex<double> complex_t;
-    Eigen::MatrixXcd gen_sol_op(const ParametrizedMesh &mesh,
-                                unsigned order,
-                                const complex_t k,
-                                const double c_o,
-                                const double c_i){
-        // get number of panels in mesh and initialize FEM-spaces
-        int numpanels = mesh.getNumPanels();
-        ContinuousSpace<1> cont_space;
 
-        // compute mass matrix
-        Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, order);
-        Eigen::MatrixXcd M = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
-        M.block(0,0,numpanels,numpanels) = M_cont;
-        M.block(numpanels,numpanels,numpanels,numpanels) = M_cont;
-
-        // compute matrix for projection onto ortogonal FEM-spaces
-        Eigen::MatrixXcd lt(2*numpanels,2*numpanels);
-        Eigen::LDLT<Eigen::MatrixXcd> llt(M);
-        lt.setIdentity();
-        lt = llt.transpositionsP() * lt;
-        lt = llt.matrixU() * lt;
-        lt = llt.vectorD().cwiseSqrt().asDiagonal() * lt;
-        Eigen::MatrixXcd L = lt.transpose();
-        Eigen::HouseholderQR<Eigen::MatrixXcd> qr_cont(L);
-        Eigen::MatrixXcd R = qr_cont.matrixQR().triangularView<Eigen::Upper>();
-        Eigen::MatrixXcd Q = qr_cont.householderQ();
-        Eigen::MatrixXcd Trafo = R.inverse() * Q.transpose();
-
-        // compute operator matrices and their derivatives on inner and outer domain
-        Eigen::MatrixXcd K = double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_i, c_o);
-        Eigen::MatrixXcd W = hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i, c_o);
-        Eigen::MatrixXcd V = single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i, c_o);
-
-        // build solutions operator and it's derivative, project them
-        Eigen::MatrixXcd T = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
-        T.block(0, 0, numpanels, numpanels) = -K;
-        T.block(0, numpanels, numpanels, numpanels) = V;
-        T.block(numpanels, 0, numpanels, numpanels) = W;
-        T.block(numpanels, numpanels, numpanels, numpanels) = K.transpose();
-
-        return Trafo * (T + M) * Trafo.transpose();
+void SolutionsOperator::tridiagonal_ldl(const Eigen::MatrixXcd &A, Eigen::VectorXcd &l, Eigen::VectorXcd &d) const {
+    d(0) = A(0, 0);
+    unsigned int n = A.rows(), k = 1;
+    for (; k < n; ++k) {
+        const complex_t &a = A(k, k - 1);
+        d(k) = A(k, k) - (l(k - 1) = a / d(k - 1)) * a;
     }
+}
 
-    Eigen::MatrixXcd gen_sol_op_1st_der(const ParametrizedMesh &mesh,
-                                unsigned order,
-                                const complex_t k,
-                                const double c_o,
-                                const double c_i){
-        // get number of panels in mesh and initialize FEM-spaces
-        int numpanels = mesh.getNumPanels();
-        ContinuousSpace<1> cont_space;
-
-        // compute mass matrix
-        Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, order);
-        Eigen::MatrixXcd M = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
-        M.block(0,0,numpanels,numpanels) = M_cont;
-        M.block(numpanels,numpanels,numpanels,numpanels) = M_cont;
-
-        // compute matrix for projection onto ortogonal FEM-sapces
-        Eigen::MatrixXcd lt(2*numpanels,2*numpanels);
-        Eigen::LDLT<Eigen::MatrixXcd> llt(M);
-        lt.setIdentity();
-        lt = llt.transpositionsP() * lt;
-        lt = llt.matrixU() * lt;
-        lt = llt.vectorD().cwiseSqrt().asDiagonal() * lt;
-        Eigen::MatrixXcd L = lt.transpose();
-        Eigen::HouseholderQR<Eigen::MatrixXcd> qr_cont(L);
-        Eigen::MatrixXcd R = qr_cont.matrixQR().triangularView<Eigen::Upper>();
-        Eigen::MatrixXcd Q = qr_cont.householderQ();
-        Eigen::MatrixXcd Trafo = R.inverse() * Q.transpose();
-
-        // compute operator matrices and their derivatives on inner and outer domain
-        Eigen::MatrixXcd K_der = double_layer_helmholtz_der::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_i, c_o);
-        Eigen::MatrixXcd W_der = hypersingular_helmholtz_der::GalerkinMatrix(mesh, cont_space, order, k, c_i, c_o);
-        Eigen::MatrixXcd V_der = single_layer_helmholtz_der::GalerkinMatrix(mesh, cont_space, order, k, c_i, c_o);
-
-        // build solutions operator and it's derivative, project them
-        Eigen::MatrixXcd T_der = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
-        T_der.block(0, 0, numpanels, numpanels) = -K_der;
-        T_der.block(0, numpanels, numpanels, numpanels) = V_der;
-        T_der.block(numpanels, 0, numpanels, numpanels) = W_der;
-        T_der.block(numpanels, numpanels, numpanels, numpanels) = K_der.transpose();
-
-        return Trafo * T_der * Trafo.transpose();
+Eigen::MatrixXcd SolutionsOperator::tridiagonal_lu(const Eigen::MatrixXcd &B) const {
+    unsigned int n = B.rows(), k = 1;
+    Eigen::MatrixXcd res(n, n);
+    res.row(0) = B.row(0);
+    for (; k < n; ++k) {
+        res.row(k) = B.row(k) - L(k - 1) * res.row(k - 1);
+        res.row(k - 1) /= U(k - 1);
     }
+    res.row(n - 1) /= U(n - 1);
+    return res;
+}
 
-    Eigen::MatrixXcd gen_sol_op_2nd_der(const ParametrizedMesh &mesh,
-                                        unsigned order,
-                                        const complex_t k,
-                                        const double c_o,
-                                        const double c_i){
-        // get number of panels in mesh and initialize FEM-spaces
-        int numpanels = mesh.getNumPanels();
-        ContinuousSpace<1> cont_space;
+SolutionsOperator::SolutionsOperator(const ParametrizedMesh &mesh_in, unsigned order_in) : mesh(mesh_in) {
+    order = order_in;
+    numpanels = mesh.getNumPanels();
+    L.resize(2 * numpanels - 1);
+    U.resize(2 * numpanels);
+    // compute mass matrix
+    M = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, order);
+    // compute matrix for projection onto ortogonal FEM-spaces
+    Eigen::VectorXcd l(numpanels - 1), u(numpanels);
+    tridiagonal_ldl(M, l, u);
+    u = u.cwiseSqrt();
+    L << l, 0.0, l;
+    U << u, u;
+}
 
-        // compute mass matrix
-        Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, order);
-        Eigen::MatrixXcd M = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
-        M.block(0,0,numpanels,numpanels) = M_cont;
-        M.block(numpanels,numpanels,numpanels,numpanels) = M_cont;
+Eigen::MatrixXcd SolutionsOperator::gen_sol_op(const complex_t &k, double c_o, double c_i) const {
+    // compute operator matrices and their derivatives on inner and outer domain
+    Eigen::MatrixXcd K = double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_i, c_o);
+    Eigen::MatrixXcd W = hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i, c_o);
+    Eigen::MatrixXcd V = single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k, c_i, c_o);
+    // build solutions operator and it's derivative, project them
+    Eigen::MatrixXcd T = Eigen::MatrixXcd::Zero(2 * numpanels, 2 * numpanels);
+    T.block(0, 0, numpanels, numpanels) = M - K;
+    T.block(0, numpanels, numpanels, numpanels) = V;
+    T.block(numpanels, 0, numpanels, numpanels) = W;
+    T.block(numpanels, numpanels, numpanels, numpanels) = M + K.transpose();
+    return tridiagonal_lu(tridiagonal_lu(T).transpose()).transpose();
+}
 
-        // compute matrix for projection onto ortogonal FEM-sapces
-        Eigen::MatrixXcd lt(2*numpanels,2*numpanels);
-        Eigen::LDLT<Eigen::MatrixXcd> llt(M);
-        lt.setIdentity();
-        lt = llt.transpositionsP() * lt;
-        lt = llt.matrixU() * lt;
-        lt = llt.vectorD().cwiseSqrt().asDiagonal() * lt;
-        Eigen::MatrixXcd L = lt.transpose();
-        Eigen::HouseholderQR<Eigen::MatrixXcd> qr_cont(L);
-        Eigen::MatrixXcd R = qr_cont.matrixQR().triangularView<Eigen::Upper>();
-        Eigen::MatrixXcd Q = qr_cont.householderQ();
-        Eigen::MatrixXcd Trafo = R.inverse() * Q.transpose();
+Eigen::MatrixXcd SolutionsOperator::gen_sol_op_1st_der(const complex_t &k, double c_o, double c_i) const {
+    // compute operator matrices and their derivatives on inner and outer domain
+    Eigen::MatrixXcd K_der = double_layer_helmholtz_der::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_i, c_o);
+    Eigen::MatrixXcd W_der = hypersingular_helmholtz_der::GalerkinMatrix(mesh, cont_space, order, k, c_i, c_o);
+    Eigen::MatrixXcd V_der = single_layer_helmholtz_der::GalerkinMatrix(mesh, cont_space, order, k, c_i, c_o);
+    // build solutions operator and it's derivative, project them
+    Eigen::MatrixXcd T_der = Eigen::MatrixXcd::Zero(2 * numpanels, 2 * numpanels);
+    T_der.block(0, 0, numpanels, numpanels) = -K_der;
+    T_der.block(0, numpanels, numpanels, numpanels) = V_der;
+    T_der.block(numpanels, 0, numpanels, numpanels) = W_der;
+    T_der.block(numpanels, numpanels, numpanels, numpanels) = K_der.transpose();
+    return tridiagonal_lu(tridiagonal_lu(T_der).transpose()).transpose();
+}
 
-        // compute operator matrices and their derivatives on inner and outer domain
-        Eigen::MatrixXcd K_der2 = double_layer_helmholtz_der2::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_i, c_o);
-        Eigen::MatrixXcd W_der2 = hypersingular_helmholtz_der2::GalerkinMatrix(mesh, cont_space, order, k, c_i, c_o);
-        Eigen::MatrixXcd V_der2 = single_layer_helmholtz_der2::GalerkinMatrix(mesh, cont_space, order, k, c_i, c_o);
-
-        // build solutions operator and it's derivative, project them
-        Eigen::MatrixXcd T_der2 = Eigen::MatrixXcd::Zero(2*numpanels,2*numpanels);
-        T_der2.block(0, 0, numpanels, numpanels) = -K_der2;
-        T_der2.block(0, numpanels, numpanels, numpanels) = V_der2;
-        T_der2.block(numpanels, 0, numpanels, numpanels) = W_der2;
-        T_der2.block(numpanels, numpanels, numpanels, numpanels) = K_der2.transpose();
-
-        return Trafo * T_der2 * Trafo.transpose();
-   }
+Eigen::MatrixXcd SolutionsOperator::gen_sol_op_2nd_der(const complex_t &k, double c_o, double c_i) const {
+    // compute operator matrices and their derivatives on inner and outer domain
+    Eigen::MatrixXcd K_der2 = double_layer_helmholtz_der2::GalerkinMatrix(mesh, cont_space, cont_space, order, k, c_i, c_o);
+    Eigen::MatrixXcd W_der2 = hypersingular_helmholtz_der2::GalerkinMatrix(mesh, cont_space, order, k, c_i, c_o);
+    Eigen::MatrixXcd V_der2 = single_layer_helmholtz_der2::GalerkinMatrix(mesh, cont_space, order, k, c_i, c_o);
+    // build solutions operator and it's derivative, project them
+    Eigen::MatrixXcd T_der2 = Eigen::MatrixXcd::Zero(2 * numpanels, 2 * numpanels);
+    T_der2.block(0, 0, numpanels, numpanels) = -K_der2;
+    T_der2.block(0, numpanels, numpanels, numpanels) = V_der2;
+    T_der2.block(numpanels, 0, numpanels, numpanels) = W_der2;
+    T_der2.block(numpanels, numpanels, numpanels, numpanels) = K_der2.transpose();
+    return tridiagonal_lu(tridiagonal_lu(T_der2).transpose()).transpose();
+}

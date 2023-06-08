@@ -106,9 +106,10 @@ int main(int argc, char** argv) {
 	#endif
 
     // initialize operators
-    Eigen::MatrixXcd T_next = gen_sol_op(mesh, order, k_0 , c_o, c_i);
-    Eigen::MatrixXcd T_der_next = gen_sol_op_1st_der(mesh, order, k_0 , c_o, c_i);
-    Eigen::MatrixXcd T_der2_next = gen_sol_op_2nd_der(mesh, order, k_0 , c_o, c_i);
+    SolutionsOperator so(mesh, order);
+    Eigen::MatrixXcd T_next = so.gen_sol_op(k_0, c_o, c_i);
+    Eigen::MatrixXcd T_der_next = so.gen_sol_op_1st_der(k_0, c_o, c_i);
+    Eigen::MatrixXcd T_der2_next = so.gen_sol_op_2nd_der(k_0, c_o, c_i);
 
     // loop over wavenumber
     for (unsigned j = 0; j < n_points_x; j++) {
@@ -122,9 +123,9 @@ int main(int argc, char** argv) {
                 Eigen::MatrixXcd T = T_next;
                 Eigen::MatrixXcd T_der = T_der_next;
                 Eigen::MatrixXcd T_der2 = T_der2_next;
-                T_next = gen_sol_op(mesh, order, k_temp_next , c_o, c_i);
-                T_der_next = gen_sol_op_1st_der(mesh, order, k_temp_next , c_o, c_i);
-                T_der2_next = gen_sol_op_2nd_der(mesh, order, k_temp_next , c_o, c_i);
+                T_next = so.gen_sol_op(k_temp_next, c_o, c_i);
+                T_der_next = so.gen_sol_op_1st_der(k_temp_next, c_o, c_i);
+                T_der2_next = so.gen_sol_op_2nd_der(k_temp_next, c_o, c_i);
 
                 // set singular values to be computed, smallest only
                 unsigned count = 1;
@@ -144,7 +145,7 @@ int main(int argc, char** argv) {
                     } else if (k_in == k_temp_next.real()){
                         T_in = T_next;
                     } else {
-                       T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
+                       T_in = so.gen_sol_op(k_in, c_o, c_i);
                     }
                     return direct::sv(T_in, list, count)(m);
                 };
@@ -158,8 +159,8 @@ int main(int argc, char** argv) {
                         T_in = T_next;
                         T_der_in = T_der_next;
                     } else {
-                        T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-                        T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
+                        T_in = so.gen_sol_op(k_in, c_o, c_i);
+                        T_der_in = so.gen_sol_op_1st_der(k_in, c_o, c_i);
                     }
                     return direct::sv_1st_der(T_in, T_der_in, list, count)(m,1);
                 };

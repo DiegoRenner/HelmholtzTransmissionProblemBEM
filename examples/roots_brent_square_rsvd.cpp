@@ -140,12 +140,15 @@ int main(int argc, char** argv) {
 #else
                         ;
 #endif
+
+    SolutionsOperator so(mesh, order);
+
     std::iota(ind.begin(), ind.end(), 0);
     auto tic = high_resolution_clock::now();
 
     std::cout << "Approximating local extrema with randomized SVD..." << std::endl;
     std::transform(std::execution::par_unseq, ind.cbegin(), ind.cend(), rsv.begin(), [&](int i) {
-        return randomized_svd::sv(gen_sol_op(mesh, order, k_min + k_step * i, c_o, c_i), W, q);
+        return randomized_svd::sv(so.gen_sol_op(k_min + k_step * i, c_o, c_i), W, q);
     });
 #ifdef FIND_MIN_RSVD
     auto rsvd_sv = [&](double k) {
@@ -182,7 +185,7 @@ int main(int argc, char** argv) {
 
     // Routine for computing the smallest singular value by Arnoldi iterations
     auto arnoldi_sv = [&](double k) {
-        Eigen::MatrixXcd T = gen_sol_op(mesh, order, k, c_o, c_i);
+        Eigen::MatrixXcd T = so.gen_sol_op(k, c_o, c_i);
         return arnoldi::sv(T, 1, acc)(0);
     };
 

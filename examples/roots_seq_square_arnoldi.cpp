@@ -119,7 +119,8 @@ int main(int argc, char** argv){
     std::cout << std::endl;
 #endif
 
-    // loop over values of wavenumber 
+    SolutionsOperator so(mesh, order);
+
     auto duration_ops = milliseconds ::zero();
     auto duration = milliseconds::zero();
 
@@ -132,8 +133,7 @@ int main(int argc, char** argv){
     // define functions that return singular value and it's derivative
     auto sv_eval = [&] (double k_in) {
         auto start = high_resolution_clock::now();
-        Eigen::MatrixXcd T_in;
-        T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
+        Eigen::MatrixXcd T_in = so.gen_sol_op(k_in, c_o, c_i);
         auto end = high_resolution_clock::now();
         duration_ops += duration_cast<milliseconds>(end-start);
         return arnoldi::sv(T_in, count, acc)(m);
@@ -141,12 +141,9 @@ int main(int argc, char** argv){
     auto sv_eval_both = [&] (double k_in) {
         N_fct_calls += 1;
         auto start = high_resolution_clock::now();
-        Eigen::MatrixXcd T_in;
-        Eigen::MatrixXcd T_der_in;
-        Eigen::MatrixXcd T_der2_in;
-        T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-        T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
-        T_der2_in = gen_sol_op_2nd_der(mesh, order, k_in , c_o, c_i);
+        Eigen::MatrixXcd T_in = so.gen_sol_op(k_in, c_o, c_i);
+        Eigen::MatrixXcd T_der_in = so.gen_sol_op_1st_der(k_in, c_o, c_i);
+        Eigen::MatrixXcd T_der2_in = so.gen_sol_op_2nd_der(k_in, c_o, c_i);
         Eigen::MatrixXd res = arnoldi::sv_2nd_der(T_in, T_der_in, T_der2_in, count, acc).block(m,1,1,2);
         auto end = high_resolution_clock::now();
         duration_ops += duration_cast<milliseconds>(end-start);
@@ -154,10 +151,8 @@ int main(int argc, char** argv){
     };
     auto sv_eval_der = [&] (double k_in) {
         auto start = high_resolution_clock::now();
-        Eigen::MatrixXcd T_in;
-        Eigen::MatrixXcd T_der_in;
-        T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-        T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
+        Eigen::MatrixXcd T_in = so.gen_sol_op(k_in, c_o, c_i);
+        Eigen::MatrixXcd T_der_in = so.gen_sol_op_1st_der(k_in, c_o, c_i);
         double res = arnoldi::sv_1st_der(T_in, T_der_in, count, acc)(m,1);
         auto end = high_resolution_clock::now();
         duration_ops += duration_cast<milliseconds>(end-start);

@@ -62,20 +62,23 @@ int main(int argc, char** argv) {
     //set range in which to search for next approximated minima
     double step = 0.25;
     complex_t k_temp = k_0;
+
+    SolutionsOperator so(mesh, order);
+
     // define functions for evaluating singular values and their derivatives
     auto sv_eval = [&] (double k_in) {
-        Eigen::MatrixXcd T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
+        Eigen::MatrixXcd T_in = so.gen_sol_op(k_in, c_o, c_i);
         return direct::sv(T_in, list, count);
     };
     auto sv_eval_der = [&] (double k_in) {
-        Eigen::MatrixXcd T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-        Eigen::MatrixXcd T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
+        Eigen::MatrixXcd T_in = so.gen_sol_op(k_in, c_o, c_i);
+        Eigen::MatrixXcd T_der_in = so.gen_sol_op_1st_der(k_in, c_o, c_i);
         return direct::sv_1st_der(T_in, T_der_in, list, count).block(0,1,count,1);
     };
     auto sv_eval_der2 = [&] (double k_in) {
-        Eigen::MatrixXcd T_in = gen_sol_op(mesh, order, k_in , c_o, c_i);
-        Eigen::MatrixXcd T_der_in = gen_sol_op_1st_der(mesh, order, k_in , c_o, c_i);
-        Eigen::MatrixXcd T_der2_in = gen_sol_op_2nd_der(mesh, order, k_in , c_o, c_i);
+        Eigen::MatrixXcd T_in = so.gen_sol_op(k_in, c_o, c_i);
+        Eigen::MatrixXcd T_der_in = so.gen_sol_op_1st_der(k_in, c_o, c_i);
+        Eigen::MatrixXcd T_der2_in = so.gen_sol_op_2nd_der(k_in, c_o, c_i);
         Eigen::MatrixXd res = direct::sv_2nd_der(T_in, T_der_in, T_der2_in, list, count).block(0,2,count,1);
         return res;
     };

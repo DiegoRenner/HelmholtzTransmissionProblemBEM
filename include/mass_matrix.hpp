@@ -21,6 +21,7 @@
  * Galerkin Matrix using common and composite Gauss-Legendre quadrature rules.
  */
 namespace mass_matrix{
+#if 0
 /**
  * This function is used to evaluate the Interaction Matrix for a pair of
  * panels \f$\Pi\f$ and \f$\Pi\f$' for the bilinear form induced by the
@@ -75,7 +76,7 @@ namespace mass_matrix{
                                        const AbstractBEMSpace &test_space,
                                        const QuadRule &GaussQR,
                                        const QuadRule &CGaussQR);
-
+#endif
 /**
  * This function is used to evaluate the full Galerkin matrix based on the
  * Bilinear form Identity BIO. It uses the trial
