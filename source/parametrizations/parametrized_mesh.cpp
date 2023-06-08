@@ -29,7 +29,7 @@ ParametrizedMesh::ParametrizedMesh(PanelVector panels) : panels_(panels) {
   // std::cout << "split : " << split_ << std::endl;
 }
 
-PanelVector ParametrizedMesh::getPanels() const {
+const PanelVector &ParametrizedMesh::getPanels() const {
   // Returning a copy of the stored panels
   return panels_;
 }

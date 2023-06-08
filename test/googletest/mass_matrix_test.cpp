@@ -40,7 +40,7 @@ unsigned order = 11;
 // run test for continuous FEM-sapces
 TEST(SingleLayerTest, cont_sapce) {
     // compute operator and extract first row
-    Eigen::VectorXcd M = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, order).block(0,0,1,numpanels).transpose();
+    Eigen::VectorXcd M = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, getGaussQR(order, 0., 1.)).block(0,0,1,numpanels).transpose();
 
     // set variables for reading operator from file
     Eigen::VectorXcd M_expected(numpanels);
@@ -67,7 +67,7 @@ TEST(SingleLayerTest, cont_sapce) {
 // run test for discontinuous FEM-sapces
 TEST(SingleLayerTest, discont_spaces) {
     // compute operator and extract first row
-    Eigen::VectorXcd M = mass_matrix::GalerkinMatrix(mesh, cont_space, discont_space, order).block(0,0,1,numpanels).transpose();
+    Eigen::VectorXcd M = mass_matrix::GalerkinMatrix(mesh, cont_space, discont_space, getGaussQR(order, 0., 1.)).block(0,0,1,numpanels).transpose();
 
     // set variables for reading operator from file
     Eigen::VectorXcd M_expected(numpanels);

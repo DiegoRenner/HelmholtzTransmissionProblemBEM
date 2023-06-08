@@ -20,9 +20,7 @@
 #include "parametrized_circular_arc.hpp"
 #include "solvers.hpp"
 #include "continuous_space.hpp"
-#include "single_layer.hpp"
-#include "hypersingular.hpp"
-#include "double_layer.hpp"
+#include "gen_sol_op.hpp"
 
 // defince shorthand for compley data type and immaginary unit
 typedef std::complex<double> complex_t;
@@ -71,6 +69,8 @@ int main(int argc, char** argv) {
         file_out << "#panels = " << numpanels[i] << std::endl;
         ParametrizedMesh mesh(curve.split(numpanels[i]));
 
+        SolutionsOperator so(mesh, order);
+
         // compute EVs for each BIO at this resolution
         file_out << "Single Layer BIO" << std::endl;
         file_out << "k = [" << k[0] << " " << k[1] << " " << k[2] << "]" <<std::endl;
@@ -81,8 +81,7 @@ int main(int argc, char** argv) {
             };
             file_out << "n = " << j+1 << " : ";
             for (int l = 0; l < 3; l++) {
-                Eigen::MatrixXcd V =
-                        single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, order, k[l], 0., c_o);
+                Eigen::MatrixXcd V = so.V_cont(k[l], c_o);
                 Eigen::VectorXcd par_exp_N = cont_space.Interpolate_helmholtz(par_exp_n,mesh);
                 file_out << par_exp_N.conjugate().transpose()*V*par_exp_N << " ";
             }
@@ -98,8 +97,7 @@ int main(int argc, char** argv) {
             };
             file_out << "n = " << j+1 << " : ";
             for (int l = 0; l < 3; l++) {
-                Eigen::MatrixXcd K =
-                        double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, order, k[l], 0., c_o);
+                Eigen::MatrixXcd K = so.K_cont(k[l], c_o);
                 Eigen::VectorXcd par_exp_N = cont_space.Interpolate_helmholtz(par_exp_n,mesh);
                 file_out << par_exp_N.conjugate().transpose()*K*par_exp_N << " ";
             }
@@ -115,8 +113,7 @@ int main(int argc, char** argv) {
             };
             file_out << "n = " << j+1 << " : ";
             for (int l = 0; l < 3; l++) {
-                Eigen::MatrixXcd W =
-                        hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, order, k[l], 0., c_o);
+                Eigen::MatrixXcd W = so.W_cont(k[l], c_o);
                 Eigen::VectorXcd par_exp_N = cont_space.Interpolate_helmholtz(par_exp_n,mesh);
                 file_out << par_exp_N.conjugate().transpose()*W*par_exp_N << " ";
             }

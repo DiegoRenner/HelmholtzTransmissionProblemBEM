@@ -22,7 +22,7 @@
  * common and composite Gauss-Legendre quadrature rules.
  */
 namespace hypersingular_helmholtz_der2 {
-
+#if 0
 /**
  * This function is used to evaluate the Interaction Matrix for a pair of
  * panels \f$\Pi\f$ and \f$\Pi\f$' for the bilinear form induced by the second
@@ -173,7 +173,7 @@ namespace hypersingular_helmholtz_der2 {
                            const std::complex<double> &k,
                            const double c_i, const double c_o,
                            gq_workspace_t &ws);
-
+#endif
 /**
  * This function is used to evaluate the full Galerkin matrix based on the
  * second derivative in \p k of the bilinear form for Hypersingular BIO for
@@ -191,12 +191,13 @@ namespace hypersingular_helmholtz_der2 {
  * @param c refraction index
  * @return an Eigen::MatrixXd type Galerkin Matrix for the given mesh and space
  */
-    Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
+    Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh &mesh,
                                     const AbstractBEMSpace &space,
-                                    const unsigned int &N,
+                                    const QuadRule &GaussQR,
+                                    const QuadRule &CGaussQR,
                                     const std::complex<double> &k,
-                                    const double c_i,
-                                    const double c_o);
+                                    double c_i,
+                                    double c_o);
 
 } // namespace hypersingular_helmholtz
 #endif // HYPERSINGULARHPP

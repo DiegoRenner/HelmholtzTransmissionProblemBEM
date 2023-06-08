@@ -187,13 +187,14 @@ namespace double_layer_helmholtz {
  * @return the matrix K = K_o - K_i for Helmholtz kernel Double Layer
  * BIO bilinear form, set c_i to zero and c_o to c for K_c
  */
-    Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
+    Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh &mesh,
                                     const AbstractBEMSpace &trial_space,
                                     const AbstractBEMSpace &test_space,
-                                    const unsigned int &N,
+                                    const QuadRule &GaussQR,
+                                    const QuadRule &CGaussQR,
                                     const std::complex<double> &k,
-                                    const double c_i,
-                                    const double c_o);
+                                    double c_i,
+                                    double c_o);
 
 }
 

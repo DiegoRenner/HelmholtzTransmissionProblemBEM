@@ -9,22 +9,21 @@
 #define MAXIT 1000
 #define EPS std::numeric_limits<double>::epsilon()
 
-
 //using namespace std;
 typedef std::complex<double> complex_t;
-double zbrent( const function<double(double)> f,
-               double x1,
-               double x2,
-               double tol,
-               bool &root_found,
-               unsigned &num_iter){
+double zbrent(const function<double(double)> f,
+              double x1,
+              double x2,
+              double tol,
+              bool &root_found,
+              unsigned &num_iter){
     // counter for iterations
     int iter;
     // initialize function values and boundaries
     double a=x1, b=x2, c=x2, d, e, min1, min2;
     double fa=f(a), fb=f(b), fc, p, q, r, s, tol1, xm;
     // sanity checks
-    if ((fa > 0.0 && fb > 0.0) || (fa < 0.0 && fb < 0.0)) {
+    if (fa * fb > 0.) {
 #ifdef CMDL
         cout << "Root must be bracketed in zbrent" << endl;
 #endif
@@ -110,13 +109,13 @@ double zbrent( const function<double(double)> f,
     return 0.0;
 }
 
-double rtsafe( std::function<double(double)> fct,
-               std::function<Eigen::MatrixXd(double)> fct_both,
-               double x1,
-               double x2,
-               double tol,
-               bool &root_found,
-               unsigned &num_iter){
+double rtsafe(std::function<double(double)> fct,
+              std::function<Eigen::MatrixXd(double)> fct_both,
+              double x1,
+              double x2,
+              double tol,
+              bool &root_found,
+              unsigned &num_iter){
     // initialize counter, function values and boundaries
     int j;
     double df,dx,dxold,f,fh,fl;
@@ -124,15 +123,13 @@ double rtsafe( std::function<double(double)> fct,
     fl = fct(x1);
     fh = fct(x2);
     // sanity checks
-    if ((fl > 0.0 && fh > 0.0) || (fl < 0.0 && fh < 0.0)) {
+    if (fl * fh > 0.) {
 #ifdef CMDL
         std::cout << "Root must be bracketed in rtsafe" << std::endl;
 #endif
-        if (fl > fh){
+        if (fl > fh)
             return x1;
-        }else{
-            return x2;
-        };
+        return x2;
     }
     if (fl == 0.0) {
         root_found = true;
@@ -246,7 +243,7 @@ std::vector<double> findZeros( std::function<Eigen::MatrixXd(double)> fct_both,
     double tau = 1e-6;
     // minimal shrinkage parameter
     double mu = 0.1;
-    double mu_splitting = 0.1/(1+std::abs(a));
+    double mu_splitting = 0.1 / (1 + std::abs(a));
 
     // early stopping, might lose zeros when checking like this here
     // std::cout << f_a << " " << f_b << std::endl;

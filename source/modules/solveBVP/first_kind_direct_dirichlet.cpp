@@ -66,7 +66,7 @@ void FirstKindDirectDirichlet::run() {
         Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh,discont_space,discont_space,order);
 
         // setup mesh and QR for computing residuals
-        PanelVector panels_coarse = mesh.getPanels();
+        const PanelVector &panels_coarse = mesh.getPanels();
         unsigned N = 20;
         QuadRule GaussQR = getGaussQR(N,0.,1.);
 

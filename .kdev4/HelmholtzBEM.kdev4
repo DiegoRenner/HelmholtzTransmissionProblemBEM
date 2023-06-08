@@ -11,7 +11,7 @@ Build Type=Release
 CMake Binary=/usr/bin/cmake
 CMake Executable=/usr/bin/cmake
 Environment Profile=
-Extra Arguments=
+Extra Arguments=-DCML=ON
 Install Directory=/usr/local
 Runtime=Host System
 

@@ -34,7 +34,7 @@ public:
    *
    * @return A PanelVector containing all the parametrized panels in the mesh
    */
-  PanelVector getPanels() const;
+  const PanelVector &getPanels() const;
 
   /**
    * This function is used for getting the number of panels in the

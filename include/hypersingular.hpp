@@ -179,12 +179,13 @@ namespace hypersingular_helmholtz {
  * @param c_o refraction index outside
  * @return an Eigen::MatrixXd type Galerkin Matrix for the given mesh and space
  */
-    Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
+    Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh &mesh,
                                     const AbstractBEMSpace &space,
-                                    const unsigned int &N,
+                                    const QuadRule &GaussQR,
+                                    const QuadRule &CGaussQR,
                                     const std::complex<double> &k,
-                                    const double c_i,
-                                    const double c_o);
+                                    double c_i,
+                                    double c_o);
 
 
 } // namespace hypersingular_helmholtz

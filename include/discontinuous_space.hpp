@@ -55,7 +55,7 @@
             // The output vector
             unsigned coeffs_size = getSpaceDim(mesh.getNumPanels());
             Eigen::VectorXd coeffs(coeffs_size);
-            PanelVector panels = mesh.getPanels();
+            const PanelVector &panels = mesh.getPanels();
             // Filling the coefficients
             for (unsigned i = 0; i < coeffs_size; ++i) {
                 Eigen::Vector2d pt = panels[i]->operator()(0);
@@ -68,7 +68,7 @@
             // The output vector
             unsigned coeffs_size = getSpaceDim(mesh.getNumPanels());
             Eigen::VectorXcd coeffs(coeffs_size);
-            PanelVector panels = mesh.getPanels();
+            const PanelVector &panels = mesh.getPanels();
             // Filling the coefficients
             for (unsigned i = 0; i < coeffs_size; ++i) {
                 Eigen::Vector2d pt = panels[i]->operator[](0.);

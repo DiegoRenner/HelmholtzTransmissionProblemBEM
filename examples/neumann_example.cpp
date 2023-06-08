@@ -67,16 +67,15 @@ int main() {
         // compute mesh
         ParametrizedMesh mesh(curve.split(numpanels[i]));
         // compute Dirichlet data from Neumann data using 1st kind BIE
-        Eigen::VectorXcd res = bvp::direct_first_kind::solve_neumann(
-                mesh, fund_sol_neu, order, k);
+        Eigen::VectorXcd res = bvp::direct_first_kind::solve_neumann(mesh, fund_sol_neu, order, k);
         // compute interpolation coefficients of known solution Dirichlet data in FEM-sapce
         Eigen::VectorXcd res_known = cont_space.Interpolate_helmholtz(fund_sol_dir,mesh);
         // compute mass matrix for projection onto orthonormal basis functions
-        Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
+        Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, getGaussQR(order, 0., 1.));
         // setup mesh and QR for computing residuals
-        PanelVector panels_coarse = mesh.getPanels();
+        const PanelVector &panels_coarse = mesh.getPanels();
         unsigned N = 20;
-        QuadRule GaussQR = getGaussQR(N,0.,1.);
+        QuadRule GaussQR = getGaussQR(N, 0., 1.);
 
         // compute residual w.r.t. computed and exact solution
         complex_t res_val = 0.0;

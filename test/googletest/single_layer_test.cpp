@@ -10,7 +10,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
-#include <single_layer.hpp>
+#include "gen_sol_op.hpp"
 #include "parametrized_circular_arc.hpp"
 #include "abstract_bem_space.hpp"
 #include "continuous_space.hpp"
@@ -37,9 +37,10 @@ ParametrizedMesh mesh(curve.split(numpanels));
 // define order of quadrature rule with which to compute matrix entries of operator
 unsigned order = 11;
 
+SolutionsOperator so(mesh, order);
+
 // compute operator and extract first row
-Eigen::VectorXcd V =
-        single_layer_helmholtz::GalerkinMatrix(mesh, discont_space, order, k, 0., c_i).block(0,0,1,numpanels).transpose();
+Eigen::VectorXcd V = so.V_discont(k, c_i).block(0,0,1,numpanels).transpose();
 
 // set variables for reading operator from file
 Eigen::VectorXcd V_expected(numpanels);

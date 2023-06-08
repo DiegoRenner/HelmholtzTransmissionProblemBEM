@@ -92,10 +92,10 @@ namespace mass_matrix{
  * @param N the order for common/composite Gauss-Legendre quadrature rule
  * @return an Eigen::MatrixXd type Galerkin Matrix for the given mesh and space
  */
-    Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
+    Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh &mesh,
                                     const AbstractBEMSpace &trial_space,
                                     const AbstractBEMSpace &test_space,
-                                    const unsigned int &N);
+                                    const QuadRule &GaussQR);
 } //namespace mass_matrix
 
 #endif // SINGLELAYERHPP

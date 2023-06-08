@@ -22,6 +22,7 @@
  * quadrature rules.
  */
 namespace double_layer_helmholtz_der {
+#if 0
 /**
  * This function is used to evaluate the Interaction Matrix for a pair of
  * panels \f$\Pi\f$ and \f$\Pi\f$' for the bilinear form induced by the derivative
@@ -168,6 +169,7 @@ namespace double_layer_helmholtz_der {
                            const std::complex<double> &k,
                            const double c_i, const double c_o,
                            gq_workspace_t &ws);
+#endif
 /**
  * This function is used to evaluate the full Galerkin matrix based on the
  * derivative in \p k of the bilinear form for Double Layer BIO for the Helmholtz kernel.
@@ -186,13 +188,14 @@ namespace double_layer_helmholtz_der {
  * @param c refraction index
  * @return an Eigen::MatrixXd type Galerkin Matrix for the given mesh and space
  */
-    Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh mesh,
+    Eigen::MatrixXcd GalerkinMatrix(const ParametrizedMesh &mesh,
                                     const AbstractBEMSpace &trial_space,
                                     const AbstractBEMSpace &test_space,
-                                    const unsigned int &N,
+                                    const QuadRule &GaussQR,
+                                    const QuadRule &CGaussQR,
                                     const std::complex<double> &k,
-                                    const double c_i,
-                                    const double c_o);
+                                    double c_i,
+                                    double c_o);
 
 }
 

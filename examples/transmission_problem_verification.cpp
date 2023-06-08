@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
         // DEBUG auto duration = duration_cast<milliseconds>(end - start);
 
         // compute mass matrix for projection on to orthonromal basis functions
-        Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh,cont_space,cont_space,order);
+        Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, getGaussQR(order, 0., 1.));
         Eigen::MatrixXcd M(2*numpanels[i],2*numpanels[i]);
         M = Eigen::MatrixXcd::Zero(2*numpanels[i],2*numpanels[i]);
         M.block(0,0,numpanels[i],numpanels[i]) = M_cont;
@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
         Eigen::VectorXcd u_t_neu_N = cont_space.Interpolate_helmholtz(u_t_neu,mesh);
         Eigen::VectorXcd u_t_N(2*numpanels[i]);
         u_t_N << u_t_dir_N, u_t_neu_N;
-        PanelVector panels_coarse = mesh.getPanels();
+        const PanelVector &panels_coarse = mesh.getPanels();
         unsigned N = 20;
         QuadRule GaussQR = getGaussQR(N,0.,1.);
         std::cout << std::endl;

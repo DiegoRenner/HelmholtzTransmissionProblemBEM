@@ -8,7 +8,7 @@
 #include <complex>
 #include <Eigen/Dense>
 #include <gtest/gtest.h>
-#include "hypersingular.hpp"
+#include "gen_sol_op.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
@@ -38,9 +38,10 @@ ParametrizedMesh mesh(curve.split(numpanels));
 // define order of quadrature rule with which to compute matrix entries of operator
 unsigned order = 11;
 
+SolutionsOperator so(mesh, order);
+
 // compute operator and extract first row
-Eigen::VectorXcd W =
-        hypersingular_helmholtz::GalerkinMatrix(mesh,cont_space, order, k, 0., c_i).block(0,0,1,numpanels).transpose();
+Eigen::VectorXcd W = so.W_cont(k, c_i).block(0,0,1,numpanels).transpose();
 
 // set variables for reading operator from file
 Eigen::VectorXcd W_expected(numpanels);

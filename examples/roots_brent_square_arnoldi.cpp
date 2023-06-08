@@ -38,8 +38,6 @@
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 
-#define CMDL
-
 // define shorthand for time benchmarking tools, complex data type and immaginary unit
 using namespace std::chrono;
 typedef std::complex<double> complex_t;
