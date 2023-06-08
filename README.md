@@ -219,9 +219,7 @@ The next three columns contain the function value and the first two derivatives 
 The user also will get updates on the current best approximation for a minima and the value of the first derivatie at this point through the command line if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_brent_circle</tt>
-This target builds a script that computes minimas in the smallest singular value of the
-Galerkin BEM approximated solutions operator for the second-kind direct BIEs of the Helmholtz
-transmission problem using the Van Wijngaarden-Dekker-Brent method.
+This target builds a script that computes minimas in the smallest singular value of the Galerkin BEM approximated solutions operator for the second-kind direct BIEs of the Helmholtz transmission problem using the Van Wijngaarden-Dekker-Brent method.
 The scatterer is set to be a circle.
 The results are written to disk.
 The script can be run as follows:
@@ -317,7 +315,7 @@ progress of the algorithm
 if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_brent_square_rsvd</tt>
-This target builds a script that computes minimas in the smallest singular value of the Galerkin BEM approximated solutions operator for the sedond-kind direct BIEs of the Helmholtz transmission problem using the Brent method without derivatives. The scatterer is set to be a square. The results are written to the <tt>data</tt> directory. The script can be run as follows:
+This target builds a script that computes minimas in the smallest singular value of the Galerkin BEM approximated solutions operator for the sedond-kind direct BIEs of the Helmholtz transmission problem using the Van Wijngaarden-Dekker-Brent method. The scatterer is set to be a square. The results are written to the <tt>data</tt> directory. The script can be run as follows:
 ~~~
 /path/to/roots_brent_square_rsvd <half side length of square>
 <refraction inside> <refraction outside> <initial wavenumber>
