@@ -138,12 +138,21 @@ int main(int argc, char** argv) {
                         ;
 #endif
 
+    // Inform user of started computation.
+#ifdef CMDL
+    std::cout << "---------------------------------------------------------------" << std::endl;
+    std::cout << "Finding resonances using rSVD approximation and Brent's method." << std::endl;
+    std::cout << "Computing on user-defined problem using square domain." << std::endl;
+    std::cout << std::endl;
+#endif
+
     SolutionsOperator so(mesh, order);
 
     std::iota(ind.begin(), ind.end(), 0);
     auto tic = high_resolution_clock::now();
-
+#ifdef CMDL
     std::cout << "Approximating local extrema with randomized SVD..." << std::endl;
+#endif
     std::transform(std::execution::par_unseq, ind.cbegin(), ind.cend(), rsv.begin(), [&](int i) {
         return randomized_svd::sv(so.gen_sol_op(k_min + k_step * i, c_o, c_i), W, q);
     });
@@ -176,10 +185,11 @@ int main(int argc, char** argv) {
     auto toc = high_resolution_clock::now();
 
     size_t loc_min_count = bracket_left.size(); // number of local minima
-
+#ifdef CMDL
     std::cout << "Found " << loc_min_count << " candidates for local minima." << std::endl;
     std::cout << "Elapsed time: " << duration_cast<seconds>(toc - tic).count() << " sec" << std::endl;
-
+    std::cout << std::endl;
+#endif
     auto sv_eval = [&](double k_in) {
         Eigen::MatrixXcd T_in = so.gen_sol_op(k_in, c_o, c_i);
         return arnoldi::sv(T_in, 1, acc)(0);
@@ -188,15 +198,18 @@ int main(int argc, char** argv) {
         auto T_pair = so.gen_sol_op_with_1st_der(k_in, c_o, c_i);
         return arnoldi::sv_1st_der(T_pair.first, T_pair.second, 1, acc)(0, 1);
     };
-
     for (size_t i = 0; i < loc_min_count; ++i) {
         double a = bracket_left[i], b = bracket_right[i], r;
         unsigned ic;
         bool rf = false;
-        std::cout << "Local search " << i + 1 << " in [" << a << "," << b << "]..." << std::endl;
+#ifdef CMDL
+        std::cout << "Local search in [" << a << "," << b << "]...\t"; std::flush(std::cout);
+#endif
         r = zbrent(sv_eval_der, a, b, epsilon_fin, rf, ic);
         if (rf) {
-            std::cout << "Root found at " << r << " in " << ic << " iterations" << std::endl;
+#ifdef CMDL
+            std::cout << "Root found at " << r << " in " << ic << " iterations." << std::endl;
+#endif
             bnd_left.push_back(a);
             bnd_right.push_back(b);
             loc_min.push_back(r);
@@ -207,8 +220,10 @@ int main(int argc, char** argv) {
             loc_min_iter.push_back(ic);
         }
     }
-
+#ifdef CMDL
+    std::cout << std::endl;
     std::cout << "Found " << loc_min.size() << " local minima." << std::endl;
+#endif
     // output minima information to file
     file_out.open(file_minimas, std::ios_base::app);
     loc_min_count = loc_min.size();
@@ -221,9 +236,10 @@ int main(int argc, char** argv) {
                  << loc_min_iter[i] << std::endl;
     }
     file_out.close();
-
     toc = high_resolution_clock::now();
+#ifdef CMDL
     std::cout << "Total time: " << duration_cast<seconds>(toc - tic).count() << " sec" << std::endl;
-
+    std::cout << std::endl;
+#endif
     return 0;
 }

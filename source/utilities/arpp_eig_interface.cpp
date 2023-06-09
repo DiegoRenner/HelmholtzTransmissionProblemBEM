@@ -1,7 +1,5 @@
 #include <Eigen/Dense>
-#include "gen_sol.hpp"
 #include "arpp_eig_interface.hpp"
-#include "math.h"
 
 typedef std::complex<double> complex_t;
 
