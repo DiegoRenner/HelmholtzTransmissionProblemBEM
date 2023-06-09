@@ -49,12 +49,12 @@ namespace double_layer_helmholtz_der {
             normal << tangent_p(1), -tangent_p(0);
             // Normalizing the normal vector
             normal = normal / tp_norm;
-            Eigen::Vector2d v = pi[s]-pi_p[t];
-            double d = v.norm(), vdotn = v.dot(normal);
-            if (with_i && ksqrtca_i * d > epsilon ) // Away from singularity
-                result_i = complex_bessel::H1(0, ksqrtc_i * d) * ksqrtc_i * vdotn;
-            if (ksqrtca_o * d > epsilon ) // Away from singularity
-                result_o = complex_bessel::H1(0, ksqrtc_o * d) * ksqrtc_o * vdotn;
+            Eigen::Vector2d v = pi[s] - pi_p[t];
+            double v_norm = v.norm(), vdotn = v.dot(normal);
+            if (with_i && ksqrtca_i * v_norm > epsilon ) // Away from singularity
+                result_i = complex_bessel::H1(0, ksqrtc_i * v_norm) * ksqrtc_i * vdotn;
+            if (ksqrtca_o * v_norm > epsilon ) // Away from singularity
+                result_o = complex_bessel::H1(0, ksqrtc_o * v_norm) * ksqrtc_o * vdotn;
         });
         // Lambda expression for the integrand
         auto integrand = [&](int i, int j, int m) {
@@ -118,7 +118,7 @@ namespace double_layer_helmholtz_der {
             }
             // Normalizing the normal vector
             normal = normal / tp_norm;
-            Eigen::Vector2d v = swap ? pi[s]-pi_p.swapped_op(t) : pi.swapped_op(s)-pi_p[t];
+            Eigen::Vector2d v = swap ? pi[s] - pi_p.swapped_op(t) : pi.swapped_op(s) - pi_p[t];
             double d = v.norm(), vdotn = v.dot(normal);
             if (with_i && ksqrtca_i * d > epsilon)
                 result_i = complex_bessel::H1(0, ksqrtc_i * d) * ksqrtc_i * vdotn;
@@ -182,7 +182,7 @@ namespace double_layer_helmholtz_der {
             normal << tangent_p(1), -tangent_p(0);
             // Normalizing the normal vector
             normal = normal / tp_norm;
-            Eigen::Vector2d v = pi[s]-pi_p[t];
+            Eigen::Vector2d v = pi[s] - pi_p[t];
             double d = v.norm(), vdotn = v.dot(normal);
             if (with_i && ksqrtca_i * d > epsilon)
                 result_i = complex_bessel::H1(0, ksqrtc_i * d) * ksqrtc_i * vdotn;

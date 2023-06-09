@@ -1,5 +1,4 @@
 #include "hypersingular.hpp"
-#include "discontinuous_space.hpp"
 #include "cbessel.hpp"
 #include <numeric>
 #include <execution>
@@ -174,7 +173,6 @@ namespace hypersingular_helmholtz {
         unsigned N = GaussQR.n; // quadrature order for the GaussQR object.
         // The number of Reference Shape Functions in space
         int Q = space.getQ();
-        DiscontinuousSpace<0> discont_space;
         complex_t ksqrtc_i = k * sqrt(c_i), ksqrtc2_i = k * k * c_i;
         complex_t ksqrtc_o = k * sqrt(c_o), ksqrtc2_o = k * k * c_o;
         double ksqrtca_i = std::abs(ksqrtc_i), ksqrtca_o = std::abs(ksqrtc_o);

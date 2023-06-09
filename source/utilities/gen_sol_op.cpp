@@ -1,5 +1,7 @@
 #include "gen_sol_op.hpp"
 #include "mass_matrix.hpp"
+#include "galerkin_all.hpp"
+#include "galerkin_all_der.hpp"
 #include "single_layer.hpp"
 #include "single_layer_der.hpp"
 #include "single_layer_der2.hpp"
@@ -51,17 +53,36 @@ SolutionsOperator::SolutionsOperator(const ParametrizedMesh &mesh_in, unsigned o
 }
 
 Eigen::MatrixXcd SolutionsOperator::gen_sol_op(const complex_t &k, double c_o, double c_i) const {
-    // compute operator matrices and their derivatives on inner and outer domain
-    Eigen::MatrixXcd K = double_layer_helmholtz::GalerkinMatrix(mesh, cont_space, cont_space, GaussQR, CGaussQR, k, c_i, c_o);
-    Eigen::MatrixXcd W = hypersingular_helmholtz::GalerkinMatrix(mesh, cont_space, GaussQR, CGaussQR, k, c_i, c_o);
-    Eigen::MatrixXcd V = single_layer_helmholtz::GalerkinMatrix(mesh, cont_space, GaussQR, CGaussQR, k, c_i, c_o);
-    // build solutions operator and it's derivative, project them
-    Eigen::MatrixXcd T = Eigen::MatrixXcd::Zero(2 * numpanels, 2 * numpanels);
-    T.block(0, 0, numpanels, numpanels) = M - K;
-    T.block(0, numpanels, numpanels, numpanels) = V;
-    T.block(numpanels, 0, numpanels, numpanels) = W;
-    T.block(numpanels, numpanels, numpanels, numpanels) = M + K.transpose();
+    Eigen::MatrixXcd T;
+    T.setZero(2 * numpanels, 2 * numpanels);
+    auto ul = T.block(0, 0, numpanels, numpanels);
+    auto ur = T.block(0, numpanels, numpanels, numpanels);
+    auto dl = T.block(numpanels, 0, numpanels, numpanels);
+    auto dr = T.block(numpanels, numpanels, numpanels, numpanels);
+    GalerkinMatrices(mesh, cont_space, GaussQR, CGaussQR, k, c_i, c_o, ul, ur, dl);
+    dr = M + ul.transpose();
+    ul = M - ul;
     return tridiagonal_lu(tridiagonal_lu(T).transpose()).transpose();
+}
+
+std::pair<Eigen::MatrixXcd, Eigen::MatrixXcd> SolutionsOperator::gen_sol_op_with_1st_der(const complex_t &k, double c_o, double c_i) const {
+    Eigen::MatrixXcd T, T_der;
+    T.setZero(2 * numpanels, 2 * numpanels);
+    T_der.setZero(2 * numpanels, 2 * numpanels);
+    auto ul = T.block(0, 0, numpanels, numpanels);
+    auto ur = T.block(0, numpanels, numpanels, numpanels);
+    auto dl = T.block(numpanels, 0, numpanels, numpanels);
+    auto dr = T.block(numpanels, numpanels, numpanels, numpanels);
+    auto ul_der = T_der.block(0, 0, numpanels, numpanels);
+    auto ur_der = T_der.block(0, numpanels, numpanels, numpanels);
+    auto dl_der = T_der.block(numpanels, 0, numpanels, numpanels);
+    auto dr_der = T_der.block(numpanels, numpanels, numpanels, numpanels);
+    GalerkinMatrices_der(mesh, cont_space, GaussQR, CGaussQR, k, c_i, c_o, ul, ul_der, ur, ur_der, dl, dl_der);
+    dr = M + ul.transpose();
+    ul = M - ul;
+    dr_der = ul_der.transpose();
+    ul_der = -ul_der;
+    return std::make_pair(tridiagonal_lu(tridiagonal_lu(T).transpose()).transpose(), tridiagonal_lu(tridiagonal_lu(T_der).transpose()).transpose());
 }
 
 Eigen::MatrixXcd SolutionsOperator::gen_sol_op_1st_der(const complex_t &k, double c_o, double c_i) const {

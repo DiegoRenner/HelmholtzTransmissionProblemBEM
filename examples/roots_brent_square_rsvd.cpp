@@ -4,7 +4,7 @@
  * the smallest singular value of the Galerkin BEM
  * approximated solutions operator for the sedond-kind
  * direct BIEs of the Helmholtz transmission problem
- * using the Brent method without derivatives.
+ * using the Van Wijngaarden-Dekker-Brent method.
  * The scatterer is set to be a square. The results are
  * written to the <tt>data</tt> directory.
  * The script can be run as follows:
@@ -185,15 +185,8 @@ int main(int argc, char** argv) {
         return arnoldi::sv(T_in, 1, acc)(0);
     };
     auto sv_eval_der = [&](double k_in) {
-        Eigen::MatrixXcd T_in = so.gen_sol_op(k_in, c_o, c_i);
-        Eigen::MatrixXcd T_der_in = so.gen_sol_op_1st_der(k_in, c_o, c_i);
-        return arnoldi::sv_1st_der(T_in, T_der_in, 1, acc)(0, 1);
-    };
-    auto sv_eval_both = [&] (double k_in) {
-        Eigen::MatrixXcd T_in = so.gen_sol_op(k_in, c_o, c_i);
-        Eigen::MatrixXcd T_der_in = so.gen_sol_op_1st_der(k_in, c_o, c_i);
-        Eigen::MatrixXcd T_der2_in = so.gen_sol_op_2nd_der(k_in, c_o, c_i);
-        return arnoldi::sv_2nd_der(T_in, T_der_in, T_der2_in, 1, acc).block(0, 1, 1, 2);
+        auto T_pair = so.gen_sol_op_with_1st_der(k_in, c_o, c_i);
+        return arnoldi::sv_1st_der(T_pair.first, T_pair.second, 1, acc)(0, 1);
     };
 
     for (size_t i = 0; i < loc_min_count; ++i) {
@@ -201,11 +194,7 @@ int main(int argc, char** argv) {
         unsigned ic;
         bool rf = false;
         std::cout << "Local search " << i + 1 << " in [" << a << "," << b << "]..." << std::endl;
-#if 1
         r = zbrent(sv_eval_der, a, b, epsilon_fin, rf, ic);
-#else
-        r = rtsafe(sv_eval_der, sv_eval_both, a, b, epsilon_fin, rf, ic);
-#endif
         if (rf) {
             std::cout << "Root found at " << r << " in " << ic << " iterations" << std::endl;
             bnd_left.push_back(a);

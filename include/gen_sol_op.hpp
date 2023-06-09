@@ -55,6 +55,15 @@ public:
      */
     Eigen::MatrixXcd gen_sol_op(const std::complex<double> &k, double c_o, double c_i) const;
     /**
+     * Compute approximation of solutions operator and its 1st derivative
+     * for second-kind direct BIEs of Helmholtz transmission problem using Galerkin BEM.
+     * @param k wavenumber
+     * @param c_o refraction index of outer domain
+     * @param c_i refraction indef of inner domain
+     * @return solutions operator and its derivative approximations as a pair
+     */
+    std::pair<Eigen::MatrixXcd, Eigen::MatrixXcd> gen_sol_op_with_1st_der(const std::complex<double> &k, double c_o, double c_i) const;
+    /**
      * Compute approximation of derivative of
      * solutions operator for second-kind direct BIEs of
      * Helmholtz transmission problem using Galerkin BEM.

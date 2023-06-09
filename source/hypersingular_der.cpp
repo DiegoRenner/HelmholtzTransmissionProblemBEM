@@ -38,12 +38,12 @@ namespace hypersingular_helmholtz_der {
             s = t * (1. - GaussQR.x(I));
             w = t * GaussQR.w(I) * GaussQR.w(J);
             // Finding the tangent of pi_p to get its normal
-            Eigen::Vector2d tangent_p = pi_p.Derivative_01(t);
-            Eigen::Vector2d tangent = pi.Derivative_01(s);
+            const Eigen::Vector2d &tangent_p = pi_p.Derivative_01(t);
+            const Eigen::Vector2d &tangent = pi.Derivative_01(s);
             tp_norm = tangent_p.norm();
             t_norm = tangent.norm();
             n_dot_np = (tangent_p(1) * tangent(1) + tangent_p(0) * tangent(0)) / (tp_norm * t_norm);
-            double d = (pi[s]-pi_p[t]).norm();
+            double d = (pi[s] - pi_p[t]).norm();
             if (with_i && ksqrtca_i * d > epsilon) {
                 result_i = complex_bessel::H1(1, ksqrtc_i * d) * d;
                 result_ir = complex_bessel::H1(0, ksqrtc_i * d) * 2.0 * ksqrtc_i;
@@ -111,7 +111,7 @@ namespace hypersingular_helmholtz_der {
             tp_norm = tangent_p.norm();
             t_norm = tangent.norm();
             n_dot_np = (tangent_p(1) * tangent(1) + tangent_p(0) * tangent(0)) / (tp_norm * t_norm);
-            double d = swap ? (pi[s]-pi_p.swapped_op(t)).norm() : (pi.swapped_op(s)-pi_p[t]).norm();
+            double d = swap ? (pi[s] - pi_p.swapped_op(t)).norm() : (pi.swapped_op(s) - pi_p[t]).norm();
             if (with_i && ksqrtca_i * d > epsilon ) {
                 result_i = complex_bessel::H1(1, ksqrtc_i * d) * d;
                 result_ir = complex_bessel::H1(0, ksqrtc_i * d) * 2.0 * ksqrtc_i;
@@ -176,7 +176,7 @@ namespace hypersingular_helmholtz_der {
             tp_norm = tangent_p.norm();
             t_norm = tangent.norm();
             n_dot_np = (tangent_p(1) * tangent(1) + tangent_p(0) * tangent(0)) / (tp_norm * t_norm);
-            double d = (pi[s]-pi_p[t]).norm();
+            double d = (pi[s] - pi_p[t]).norm();
             if (with_i && ksqrtca_i * d > epsilon) {
                 result_i = complex_bessel::H1(1, ksqrtc_i * d) * d;
                 result_ir = complex_bessel::H1(0, ksqrtc_i * d) * 2.0 * ksqrtc_i;
