@@ -22,14 +22,14 @@ SolutionsOperator::SolutionsOperator(const ParametrizedMesh &mesh_in,
     Eigen::MatrixXd A;
     A.setZero(dim, dim);
     A.block(0, 0, dim_test, dim_trial) = M;
-    A.block(dim_test, dim_trial, dim_trial, dim_test) = M.transpose();
+    A.block(dim_test, dim_trial, dim_trial, dim_test) = M.transpose().eval();
     Eigen::LDLT<Eigen::MatrixXd> llt(A);
     lu = Eigen::PartialPivLU<Eigen::MatrixXcd>
         (llt.transpositionsP().transpose() * llt.matrixL().toDenseMatrix() * llt.vectorD().cwiseSqrt().asDiagonal());
 }
 
 Eigen::MatrixXcd SolutionsOperator::project(const Eigen::MatrixXcd &T) const {
-    return lu.solve(lu.solve(T).transpose()).transpose();
+    return lu.solve(lu.solve(T).transpose().eval()).transpose().eval();
 }
 
 

@@ -29,7 +29,8 @@ namespace randomized_svd {
 
     double sv(const Eigen::MatrixXcd &T, const Eigen::MatrixXcd &W, int q) {
         int nr = W.rows(), nc = W.cols();
-        Eigen::MatrixXcd Q, thinQ = Eigen::MatrixXcd::Identity(nr, nc);
+        Eigen::MatrixXcd Q, thinQ;
+        thinQ.setIdentity(nr, nc);
         Eigen::PartialPivLU<Eigen::MatrixXcd> lu_decomp(T);
         Q = lu_decomp.solve(W).householderQr().householderQ() * thinQ;
         for (int i = 0; i < q; ++i) {

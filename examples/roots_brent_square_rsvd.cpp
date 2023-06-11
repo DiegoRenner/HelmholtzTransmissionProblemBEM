@@ -59,6 +59,12 @@ double epsilon_fin = 1e-6;
 
 int main(int argc, char** argv) {
 
+    // check whether we have the correct number of input arguments
+    if (argc < 10)
+        throw std::runtime_error("Too few input arguments!");
+    if (argc > 10)
+        throw std::runtime_error("Too many input arguments!");
+
     // define radius of circle refraction index and initial wavenumber
     double eps = atof(argv[1]);
     double c_i = atof(argv[2]);
@@ -147,6 +153,7 @@ int main(int argc, char** argv) {
     std::cout << std::endl;
 #endif
 
+    // create objects for assembling solutions operator and its derivatives
     ContinuousSpace<1> cont_space;
     SolutionsOperator so(mesh, order, cont_space, cont_space);
     GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, so.get_GaussQR(), so.get_CGaussQR());
@@ -156,6 +163,8 @@ int main(int argc, char** argv) {
 #ifdef CMDL
     std::cout << "Approximating local extrema with randomized SVD..." << std::endl;
 #endif
+    // Sweep the k interval with subdivision of size n_points_k, do this in parallel.
+    // For each value k, approximate the smallest singular value by using rSVD.
     std::transform(std::execution::par_unseq, ind.cbegin(), ind.cend(), rsv.begin(), [&](int i) {
         Eigen::MatrixXcd T;
         so.gen_sol_op(k_min + k_step * i, c_o, c_i, T);
@@ -168,6 +177,12 @@ int main(int argc, char** argv) {
         return randomized_svd::sv(T, W, q);
     };
 #endif
+    // Bracket the local minima of the rSVD curve.
+    // If n_points_k is not too large, the obtained intervals will
+    // contain the true minima as well (rSVD approximates them
+    // with a relative error of about 1e-3).
+    // However, if n_points_k is too small, some minima may
+    // be missed or the curve may not be convex in the intervals.
     for (size_t i = 0; i < rsv.size() - 2; ++i) {
         double &c = rsv[i+1], L = c - rsv[i], R = rsv[i+2] - c;
         double k = k_min + i * k_step;
@@ -206,6 +221,15 @@ int main(int argc, char** argv) {
         so.gen_sol_op_1st_der(builder, k_in, c_o, c_i, T_in, T_der_in);
         return arnoldi::sv_1st_der(T_in, T_der_in, 1, acc)(0, 1);
     };
+    auto sv_eval_both = [&] (double k_in) {
+        Eigen::MatrixXcd T_in, T_der_in, T_der2_in;
+        so.gen_sol_op_2nd_der(builder, k_in, c_o, c_i, T_in, T_der_in, T_der2_in);
+        return arnoldi::sv_2nd_der(T_in, T_der_in, T_der2_in, 1, acc).block(0, 1, 1, 2);
+    };
+    // Search for true minima in the bracketed regions by using
+    // Arnoldi iterations with the ZBRENT routine.
+    // The builder created at the beginning is used for solutions operator
+    // assembly so that it is not created and destroyed in each pass.
     for (size_t i = 0; i < loc_min_count; ++i) {
         double a = bracket_left[i], b = bracket_right[i], r;
         unsigned ic;
@@ -213,7 +237,11 @@ int main(int argc, char** argv) {
 #ifdef CMDL
         std::cout << "Local search in [" << a << ", " << b << "]...\t"; std::flush(std::cout);
 #endif
+#if 0
+        r = rtsafe(sv_eval_der, sv_eval_both, a, b, epsilon_fin, rf, ic);
+#else
         r = zbrent(sv_eval_der, a, b, epsilon_fin, rf, ic);
+#endif
         if (rf) {
 #ifdef CMDL
             std::cout << "Root found at " << r << " in " << ic << " iterations." << std::endl;

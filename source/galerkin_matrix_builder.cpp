@@ -2,6 +2,7 @@
 #include "cbessel.hpp"
 #include <numeric>
 #include <execution>
+#include <iostream>
 
 typedef std::complex<double> complex_t;
 static const complex_t czero(0., 0.);
@@ -51,16 +52,14 @@ GalerkinMatrixBuilder::GalerkinMatrixBuilder(const ParametrizedMesh &mesh,
 }
 
 // compute values required for the coinciding panels case
-inline void GalerkinMatrixBuilder::compute_coinciding(const AbstractParametrizedCurve &pi, const AbstractParametrizedCurve &pi_p) throw() {
+inline void GalerkinMatrixBuilder::compute_coinciding(const AbstractParametrizedCurve &p) throw() {
     size_t N = CGaussQR.n;
-    std::for_each(std::execution::par_unseq, indN2.cbegin(), indN2.cend(), [&](size_t J) {
+    std::for_each(std::execution::par_unseq, indN2.cbegin(), indN2.cbegin() + N, [&](size_t J) {
         for (size_t I = 0; I < N; ++I) {
             double t = CGaussQR.x(J % N), s = t * (1. - CGaussQR.x(I));
-            if (J >= N)
-                std::swap(s, t);
-            Eigen::Vector2d tangent_p = pi_p.Derivative_01(t);
-            Eigen::Vector2d tangent = pi.Derivative_01(s);
-            Eigen::Vector2d v = pi[s] - pi_p[t];
+            Eigen::Vector2d tangent_p = p.Derivative_01(t);
+            Eigen::Vector2d tangent = p.Derivative_01(s);
+            Eigen::Vector2d v = p[s] - p[t];
             double v_norm = v.norm();
             complex_t arg = ksqrtc * v_norm;
             m_tangent_p(I, J) = complex_t(tangent_p(0), tangent_p(1));
@@ -73,6 +72,19 @@ inline void GalerkinMatrixBuilder::compute_coinciding(const AbstractParametrized
             m_h1(I, J) = complex_bessel::H1_1_i(arg);
         }
     });
+    // symmetry
+    auto tangent_p_left = m_tangent_p.block(0, 0, N, N), tangent_p_right = m_tangent_p.block(0, N, N, N);
+    auto tangent_left = m_tangent.block(0, 0, N, N), tangent_right = m_tangent.block(0, N, N, N);
+    auto v_left = m_v.block(0, 0, N, N), v_right = m_v.block(0, N, N, N);
+    auto v_norm_left = m_v_norm.block(0, 0, N, N), v_norm_right = m_v_norm.block(0, N, N, N);
+    auto h0_left = m_h0.block(0, 0, N, N), h0_right = m_h0.block(0, N, N, N);
+    auto h1_left = m_h1.block(0, 0, N, N), h1_right = m_h1.block(0, N, N, N);
+    tangent_p_right = tangent_left;
+    tangent_right = tangent_p_left;
+    v_right = -v_left;
+    v_norm_right = v_norm_left;
+    h0_right = h0_left;
+    h1_right = h1_left;
 }
 
 // compute values required for the adjacent panels case
@@ -242,6 +254,13 @@ inline void GalerkinMatrixBuilder::hypersingular_coinciding(int der) throw() {
     complex_t cf;
     for (j = 0; j < Qtrial; ++j) {
         for (i = 0; i < Qtrial; ++i) {
+            if (i < j) { // symmetry
+                hypersingular_interaction_matrix(i, j) = hypersingular_interaction_matrix(j, i);
+                if (der > 0)
+                    hypersingular_der_interaction_matrix(i, j) = hypersingular_der_interaction_matrix(j, i);
+                if (der > 1)
+                    hypersingular_der2_interaction_matrix(i, j) = hypersingular_der2_interaction_matrix(j, i);
+            }
             complex_t integral = czero, integral_der = czero, integral_der2 = czero;
             for (J = 0; J < 2 * N; ++J) {
                 for (I = 0; I < N; ++I) {
@@ -352,6 +371,13 @@ inline void GalerkinMatrixBuilder::single_layer_coinciding(int der) throw() {
     double t, s, w, fg, cf, v_norm;
     for (j = 0; j < Qtest; ++j) {
         for (i = 0; i < Qtest; ++i) {
+            if (i < j) { // symmetry
+                single_layer_interaction_matrix(i, j) = single_layer_interaction_matrix(j, i);
+                if (der > 0)
+                    single_layer_der_interaction_matrix(i, j) = single_layer_der_interaction_matrix(j, i);
+                if (der > 1)
+                    single_layer_der2_interaction_matrix(i, j) = single_layer_der2_interaction_matrix(j, i);
+            }
             complex_t integral = czero, integral_der = czero, integral_der2 = czero;
             for (J = 0; J < 2 * N; ++J) {
                 for (I = 0; I < N; ++I) {
@@ -469,6 +495,20 @@ bool GalerkinMatrixBuilder::is_adjacent(const AbstractParametrizedCurve& p1, con
     return false;
 }
 
+// swap data for reusing
+inline void GalerkinMatrixBuilder::swap_data(Eigen::MatrixXcd& m, bool neg) {
+    size_t N = m.rows();
+    auto l = m.block(0, 0, N, N), r = m.block(0, N, N, N);
+    l.swap(r);
+    if (neg)
+        m *= -1.0;
+}
+inline void GalerkinMatrixBuilder::swap_data(Eigen::MatrixXd& m) {
+    size_t N = m.rows();
+    auto l = m.block(0, 0, N, N), r = m.block(0, N, N, N);
+    l.swap(r);
+}
+
 void GalerkinMatrixBuilder::assembleDoubleLayer(const std::complex<double>& k_in, double c_in, int der) {
     initialize_parameters(k_in, c_in);
     double_layer_matrix.setZero();
@@ -485,7 +525,7 @@ void GalerkinMatrixBuilder::assembleDoubleLayer(const std::complex<double>& k_in
             const auto &pj = *panels[j];
             if (i == j) {
                 // coinciding panels
-                compute_coinciding(pi, pj);
+                compute_coinciding(pi);
                 double_layer_coinciding(der);
             } else if (is_adjacent(pi, pj, swap)) {
                 // adjacent panels
@@ -527,13 +567,14 @@ void GalerkinMatrixBuilder::assembleHypersingular(const std::complex<double>& k_
     size_t i, j, I, J, II, JJ;
     bool swap;
     // Panel oriented assembly
+    bool second_pass = false;
     for (i = 0; i < dim_trial; ++i) {
         const auto &pi = *panels[i];
-        for (j = 0; j < dim_trial; ++j) {
+        for (j = 0; j <= i; ++j) {
             const auto &pj = *panels[j];
             if (i == j) {
                 // coinciding panels
-                compute_coinciding(pi, pj);
+                compute_coinciding(pi);
                 hypersingular_coinciding(der);
             } else if (is_adjacent(pi, pj, swap)) {
                 // adjacent panels
@@ -545,16 +586,28 @@ void GalerkinMatrixBuilder::assembleHypersingular(const std::complex<double>& k_
                 hypersingular_general(der);
             }
             // Local to global mapping of the elements in interaction matrix
-            for (I = 0; I < Qtrial; ++I) {
-                for (J = 0; J < Qtrial; ++J) {
-                    II = trial_space.LocGlobMap(I + 1, i + 1, dim_trial) - 1;
-                    JJ = trial_space.LocGlobMap(J + 1, j + 1, dim_trial) - 1;
-                    hypersingular_matrix(II, JJ) += hypersingular_interaction_matrix(I, J);
-                    if (der > 0)
-                        hypersingular_der_matrix(II, JJ) += hypersingular_der_interaction_matrix(I, J);
-                    if (der > 1)
-                        hypersingular_der2_matrix(II, JJ) += hypersingular_der2_interaction_matrix(I, J);
+            while (true) {
+                for (I = 0; I < Qtrial; ++I) {
+                    for (J = 0; J < Qtrial; ++J) {
+                        II = trial_space.LocGlobMap(I + 1, (second_pass ? j : i) + 1, dim_trial) - 1;
+                        JJ = trial_space.LocGlobMap(J + 1, (second_pass ? i : j) + 1, dim_trial) - 1;
+                        hypersingular_matrix(II, JJ) += hypersingular_interaction_matrix(I, J);
+                        if (der > 0)
+                            hypersingular_der_matrix(II, JJ) += hypersingular_der_interaction_matrix(I, J);
+                        if (der > 1)
+                            hypersingular_der2_matrix(II, JJ) += hypersingular_der2_interaction_matrix(I, J);
+                    }
                 }
+                if (i == j || second_pass) {
+                    second_pass = false;
+                    break;
+                }
+                hypersingular_interaction_matrix.transposeInPlace();
+                if (der > 0)
+                    hypersingular_der_interaction_matrix.transposeInPlace();
+                if (der > 1)
+                    hypersingular_der2_interaction_matrix.transposeInPlace();
+                second_pass = true;
             }
         }
     }
@@ -575,13 +628,14 @@ void GalerkinMatrixBuilder::assembleSingleLayer(const std::complex<double>& k_in
     size_t i, j, I, J, II, JJ;
     bool swap;
     // Panel oriented assembly
+    bool second_pass = false;
     for (i = 0; i < dim_test; ++i) {
         const auto &pi = *panels[i];
-        for (j = 0; j < dim_test; ++j) {
+        for (j = 0; j <= i; ++j) {
             const auto &pj = *panels[j];
             if (i == j) {
                 // coinciding panels
-                compute_coinciding(pi, pj);
+                compute_coinciding(pi);
                 single_layer_coinciding(der);
             } else if (is_adjacent(pi, pj, swap)) {
                 // adjacent panels
@@ -593,16 +647,28 @@ void GalerkinMatrixBuilder::assembleSingleLayer(const std::complex<double>& k_in
                 single_layer_general(der);
             }
             // Local to global mapping of the elements in interaction matrix
-            for (I = 0; I < Qtest; ++I) {
-                for (J = 0; J < Qtest; ++J) {
-                    II = test_space.LocGlobMap(I + 1, i + 1, dim_test) - 1;
-                    JJ = test_space.LocGlobMap(J + 1, j + 1, dim_test) - 1;
-                    single_layer_matrix(II, JJ) += single_layer_interaction_matrix(I, J);
-                    if (der > 0)
-                        single_layer_der_matrix(II, JJ) += single_layer_der_interaction_matrix(I, J);
-                    if (der > 1)
-                        single_layer_der2_matrix(II, JJ) += single_layer_der2_interaction_matrix(I, J);
+            while (true) {
+                for (I = 0; I < Qtest; ++I) {
+                    for (J = 0; J < Qtest; ++J) {
+                        II = test_space.LocGlobMap(I + 1, (second_pass ? j : i) + 1, dim_test) - 1;
+                        JJ = test_space.LocGlobMap(J + 1, (second_pass ? i : j) + 1, dim_test) - 1;
+                        single_layer_matrix(II, JJ) += single_layer_interaction_matrix(I, J);
+                        if (der > 0)
+                            single_layer_der_matrix(II, JJ) += single_layer_der_interaction_matrix(I, J);
+                        if (der > 1)
+                            single_layer_der2_matrix(II, JJ) += single_layer_der2_interaction_matrix(I, J);
+                    }
                 }
+                if (i == j || second_pass) {
+                    second_pass = false;
+                    break;
+                }
+                single_layer_interaction_matrix.transposeInPlace();
+                if (der > 0)
+                    single_layer_der_interaction_matrix.transposeInPlace();
+                if (der > 1)
+                    single_layer_der2_interaction_matrix.transposeInPlace();
+                second_pass = true;
             }
         }
     }
@@ -630,20 +696,21 @@ void GalerkinMatrixBuilder::assembleAll(const std::complex<double>& k_in, double
         double_layer_der2_matrix.setZero();
         hypersingular_der2_matrix.setZero();
     }
-    size_t i, j, I, J, II, JJ, Q = Qtest, dim = dim_test;
+    size_t i, j, I, J, II, JJ, Q = Qtest, dim = dim_test, N = GaussQR.n;
     bool swap;
     // Panel oriented assembly
+    bool adj, second_pass = false;
     for (i = 0; i < dim; ++i) {
         const auto &pi = *panels[i];
-        for (j = 0; j < dim; ++j) {
+        for (j = 0; j <= i; ++j) {
             const auto &pj = *panels[j];
             if (i == j) {
                 // coinciding panels
-                compute_coinciding(pi, pj);
+                compute_coinciding(pi);
                 double_layer_coinciding(der);
                 hypersingular_coinciding(der);
                 single_layer_coinciding(der);
-            } else if (is_adjacent(pi, pj, swap)) {
+            } else if ((adj = is_adjacent(pi, pj, swap))) {
                 // adjacent panels
                 compute_adjacent(pi, pj, swap);
                 double_layer_adjacent(swap, der);
@@ -657,24 +724,73 @@ void GalerkinMatrixBuilder::assembleAll(const std::complex<double>& k_in, double
                 single_layer_general(der);
             }
             // Local to global mapping of the elements in interaction matrix
-            for (I = 0; I < Q; ++I) {
-                for (J = 0; J < Q; ++J) {
-                    II = test_space.LocGlobMap(I + 1, i + 1, dim) - 1;
-                    JJ = test_space.LocGlobMap(J + 1, j + 1, dim) - 1;
-                    double_layer_matrix(II, JJ) += double_layer_interaction_matrix(I, J);
-                    hypersingular_matrix(II, JJ) += hypersingular_interaction_matrix(I, J);
-                    single_layer_matrix(II, JJ) += single_layer_interaction_matrix(I, J);
-                    if (der > 0) {
-                        double_layer_der_matrix(II, JJ) += double_layer_der_interaction_matrix(I, J);
-                        hypersingular_der_matrix(II, JJ) += hypersingular_der_interaction_matrix(I, J);
-                        single_layer_der_matrix(II, JJ) += single_layer_der_interaction_matrix(I, J);
-                    }
-                    if (der > 1) {
-                        double_layer_der2_matrix(II, JJ) += double_layer_der2_interaction_matrix(I, J);
-                        hypersingular_der2_matrix(II, JJ) += hypersingular_der2_interaction_matrix(I, J);
-                        single_layer_der2_matrix(II, JJ) += single_layer_der2_interaction_matrix(I, J);
+            while (true) {
+                for (I = 0; I < Q; ++I) {
+                    for (J = 0; J < Q; ++J) {
+                        II = test_space.LocGlobMap(I + 1, (second_pass ? j : i) + 1, dim) - 1;
+                        JJ = test_space.LocGlobMap(J + 1, (second_pass ? i : j) + 1, dim) - 1;
+                        double_layer_matrix(II, JJ) += double_layer_interaction_matrix(I, J);
+                        hypersingular_matrix(II, JJ) += hypersingular_interaction_matrix(I, J);
+                        single_layer_matrix(II, JJ) += single_layer_interaction_matrix(I, J);
+                        if (der > 0) {
+                            double_layer_der_matrix(II, JJ) += double_layer_der_interaction_matrix(I, J);
+                            hypersingular_der_matrix(II, JJ) += hypersingular_der_interaction_matrix(I, J);
+                            single_layer_der_matrix(II, JJ) += single_layer_der_interaction_matrix(I, J);
+                        }
+                        if (der > 1) {
+                            double_layer_der2_matrix(II, JJ) += double_layer_der2_interaction_matrix(I, J);
+                            hypersingular_der2_matrix(II, JJ) += hypersingular_der2_interaction_matrix(I, J);
+                            single_layer_der2_matrix(II, JJ) += single_layer_der2_interaction_matrix(I, J);
+                        }
                     }
                 }
+                if (i == j || second_pass) {
+                    second_pass = false;
+                    break;
+                }
+                // use already computed data for the (j, i) case
+                if (adj) {
+                    swap_data(m_tangent_p, false);
+                    swap_data(m_tangent, false);
+                    swap_data(m_tangent_norm);
+                    swap_data(m_tangent_p_norm);
+                    m_tangent_p.swap(m_tangent);
+                    m_tangent_p_norm.swap(m_tangent_norm);
+                    swap_data(m_v_norm);
+                    swap_data(m_v, true);
+                    swap_data(m_h0, false);
+                    swap_data(m_h1, false);
+                    double_layer_adjacent(!swap, der);
+                } else {
+                    auto tpb = m_tangent_p.block(0, 0, N, N);
+                    auto tb = m_tangent.block(0, 0, N, N);
+                    auto tpnb = m_tangent_p_norm.block(0, 0, N, N);
+                    auto tnb = m_tangent_norm.block(0, 0, N, N);
+                    auto vb = m_v.block(0, 0, N, N);
+                    tpb.transposeInPlace();
+                    tb.transposeInPlace();
+                    tpb.swap(tb);
+                    tpnb.transposeInPlace();
+                    tnb.transposeInPlace();
+                    tpnb.swap(tnb);
+                    vb.transposeInPlace();
+                    vb *= -1.0;
+                    m_v_norm.block(0, 0, N, N).transposeInPlace();
+                    m_h0.block(0, 0, N, N).transposeInPlace();
+                    m_h1.block(0, 0, N, N).transposeInPlace();
+                    double_layer_general(der);
+                }
+                hypersingular_interaction_matrix.transposeInPlace();
+                single_layer_interaction_matrix.transposeInPlace();
+                if (der > 0) {
+                    hypersingular_der_interaction_matrix.transposeInPlace();
+                    single_layer_der_interaction_matrix.transposeInPlace();
+                }
+                if (der > 1) {
+                    hypersingular_der2_interaction_matrix.transposeInPlace();
+                    single_layer_der2_interaction_matrix.transposeInPlace();
+                }
+                second_pass = true;
             }
         }
     }
