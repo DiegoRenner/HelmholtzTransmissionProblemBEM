@@ -36,6 +36,7 @@
 #include "gen_sol_op.hpp"
 #include "singular_values.hpp"
 #include "singular_values_arnoldi.hpp"
+#include "continuous_space.hpp"
 
 // define shorthand for time benchmarking tools, complex data type and immaginary unit
 using namespace std::chrono;
@@ -95,7 +96,8 @@ int main(int argc, char** argv) {
     file_timings = file_timings.append(argv[2])+suffix;
     file_iter = file_iter.append(argv[2])+suffix;
 
-    SolutionsOperator so(mesh, order);
+    ContinuousSpace<1> cont_space;
+    SolutionsOperator so(mesh, order, cont_space, cont_space);
 
     // iterate over mesh on wavenumber
     for (unsigned j = 0; j < n_points_x; j++) {
@@ -108,9 +110,8 @@ int main(int argc, char** argv) {
 
             // compute solutions operator
             auto start_op = high_resolution_clock::now();
-            Eigen::MatrixXcd T = so.gen_sol_op(k_temp, c_o, c_i);
-            Eigen::MatrixXcd T_der = so.gen_sol_op_1st_der(k_temp, c_o, c_i);
-            Eigen::MatrixXcd T_der2 = so.gen_sol_op_2nd_der(k_temp, c_o, c_i);
+            Eigen::MatrixXcd T, T_der, T_der2;
+            so.gen_sol_op_2nd_der(k_temp, c_o, c_i, T, T_der, T_der2);
             auto end_op = high_resolution_clock::now();
             auto duration_op = duration_cast<milliseconds>(end_op-start_op);
 

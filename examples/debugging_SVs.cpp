@@ -20,7 +20,7 @@
 #include "parametrized_circular_arc.hpp"
 #include "solvers.hpp"
 #include "continuous_space.hpp"
-#include "gen_sol_op.hpp"
+#include "galerkin_matrix_builder.hpp"
 
 // defince shorthand for compley data type and immaginary unit
 typedef std::complex<double> complex_t;
@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
         file_out << "#panels = " << numpanels[i] << std::endl;
         ParametrizedMesh mesh(curve.split(numpanels[i]));
 
-        SolutionsOperator so(mesh, order);
+        GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, getGaussQR(order, 0., 1.), getCGaussQR(order));
 
         // compute EVs for each BIO at this resolution
         file_out << "Single Layer BIO" << std::endl;
@@ -81,7 +81,8 @@ int main(int argc, char** argv) {
             };
             file_out << "n = " << j+1 << " : ";
             for (int l = 0; l < 3; l++) {
-                Eigen::MatrixXcd V = so.V_cont(k[l], c_o);
+                builder.assembleSingleLayer(k[l], c_o);
+                Eigen::MatrixXcd V = builder.getSingleLayer();
                 Eigen::VectorXcd par_exp_N = cont_space.Interpolate_helmholtz(par_exp_n,mesh);
                 file_out << par_exp_N.conjugate().transpose()*V*par_exp_N << " ";
             }
@@ -97,7 +98,8 @@ int main(int argc, char** argv) {
             };
             file_out << "n = " << j+1 << " : ";
             for (int l = 0; l < 3; l++) {
-                Eigen::MatrixXcd K = so.K_cont(k[l], c_o);
+                builder.assembleDoubleLayer(k[l], c_o);
+                Eigen::MatrixXcd K = builder.getDoubleLayer();
                 Eigen::VectorXcd par_exp_N = cont_space.Interpolate_helmholtz(par_exp_n,mesh);
                 file_out << par_exp_N.conjugate().transpose()*K*par_exp_N << " ";
             }
@@ -113,7 +115,8 @@ int main(int argc, char** argv) {
             };
             file_out << "n = " << j+1 << " : ";
             for (int l = 0; l < 3; l++) {
-                Eigen::MatrixXcd W = so.W_cont(k[l], c_o);
+                builder.assembleHypersingular(k[l], c_o);
+                Eigen::MatrixXcd W = builder.getHypersingular();
                 Eigen::VectorXcd par_exp_N = cont_space.Interpolate_helmholtz(par_exp_n,mesh);
                 file_out << par_exp_N.conjugate().transpose()*W*par_exp_N << " ";
             }

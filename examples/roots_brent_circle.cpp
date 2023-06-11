@@ -38,6 +38,7 @@
 #include "singular_values.hpp"
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
+#include "continuous_space.hpp"
 
 // define shorthand for time benchmarking tools, complex data type and immaginary unit
 using namespace std::chrono;
@@ -90,7 +91,8 @@ int main(int argc, char** argv) {
     std::cout << std::endl;
 	#endif
 
-    SolutionsOperator so(mesh, order);
+    ContinuousSpace<1> cont_space;
+    SolutionsOperator so(mesh, order, cont_space, cont_space);
 
     // loop over values of wavenumber
     for (unsigned j = 0; j < n_points_x; j++) {
@@ -111,7 +113,8 @@ int main(int argc, char** argv) {
             // define functions that return singular value and it's derivative
             auto sv_eval = [&] (double k_in) {
                 auto start = high_resolution_clock::now();
-                Eigen::MatrixXcd T_in = so.gen_sol_op(k_in , c_o, c_i);
+                Eigen::MatrixXcd T_in;
+                so.gen_sol_op(k_in , c_o, c_i, T_in);
                 double res = direct::sv(T_in, list, count)(m);
                 auto end = high_resolution_clock::now();
                 duration_ops += duration_cast<milliseconds>(end-start);
@@ -119,8 +122,8 @@ int main(int argc, char** argv) {
             };
             auto sv_eval_der = [&] (double k_in) {
                 auto start = high_resolution_clock::now();
-                Eigen::MatrixXcd T_in = so.gen_sol_op(k_in , c_o, c_i);
-                Eigen::MatrixXcd T_der_in = so.gen_sol_op_1st_der(k_in , c_o, c_i);
+                Eigen::MatrixXcd T_in, T_der_in;
+                so.gen_sol_op_1st_der(k_in , c_o, c_i, T_in, T_der_in);
                 double res = direct::sv_1st_der(T_in, T_der_in, list, count)(m,1);
                 auto end = high_resolution_clock::now();
                 duration_ops += duration_cast<milliseconds>(end-start);

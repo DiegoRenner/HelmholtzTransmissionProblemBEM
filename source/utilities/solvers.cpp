@@ -3,7 +3,7 @@
 #include "continuous_space.hpp"
 #include "discontinuous_space.hpp"
 #include "parametrized_mesh.hpp"
-#include "gen_sol_op.hpp"
+#include "galerkin_matrix_builder.hpp"
 
 typedef std::complex<double> complex_t;
 namespace bvp {
@@ -18,10 +18,12 @@ namespace bvp {
             // compute interpolation coefficients for dirichlet data
             Eigen::VectorXcd u_dir_N = discont_space.Interpolate_helmholtz(u_dir, mesh);
             // compute operators for first kind direct Dirichlet problem BIE
-            SolutionsOperator so(mesh, order);
-            Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh, discont_space, cont_space, getGaussQR(order, 0., 1.));
-            Eigen::MatrixXcd K = so.K_discont_cont(k, 1.);
-            Eigen::MatrixXcd V = so.V_cont(k, 1.);
+            Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh, cont_space, discont_space, getGaussQR(order, 0., 1.));
+            GalerkinMatrixBuilder builder(mesh, discont_space, cont_space, getGaussQR(order, 0., 1.), getCGaussQR(order));
+            builder.assembleDoubleLayer(k, 1.);
+            Eigen::MatrixXcd K = builder.getDoubleLayer();
+            builder.assembleSingleLayer(k, 1.);
+            Eigen::MatrixXcd V = builder.getSingleLayer();
             // build rhs for solving
             Eigen::VectorXcd rhs = (0.5*M-K)*u_dir_N;
             // solve for coefficients
@@ -40,10 +42,12 @@ namespace bvp {
             // compute interpolation coefficients of Neumann data
             Eigen::VectorXcd u_neu_N = discont_space.Interpolate_helmholtz(u_neu, mesh);
             // compute operators for first kind direct Neumann problem BIE
-            SolutionsOperator so(mesh, order);
             Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh, cont_space, discont_space, getGaussQR(order, 0., 1.));
-            Eigen::MatrixXcd K = so.K_cont_discont(k, 1.);
-            Eigen::MatrixXcd W = so.W_cont(k, 1.);
+            GalerkinMatrixBuilder builder(mesh, cont_space, discont_space, getGaussQR(order, 0., 1.), getCGaussQR(order));
+            builder.assembleDoubleLayer(k, 1.);
+            Eigen::MatrixXcd K = builder.getDoubleLayer();
+            builder.assembleHypersingular(k, 1.);
+            Eigen::MatrixXcd W = builder.getHypersingular();
             // build rhs for solving
             Eigen::VectorXcd rhs = (0.5*M+K.transpose())*u_neu_N;
             // solve for coefficients
@@ -67,14 +71,16 @@ namespace tp {
             // space used for interpolation of Dirichlet data
             ContinuousSpace<1> cont_space;
             // compute operators of second kind direct BIEs for the Helmholtz Transmission problem
-            SolutionsOperator so(mesh, order);
-            Eigen::MatrixXcd K_o = so.K_cont(k, c_o);
-            Eigen::MatrixXcd K_i = so.K_cont(k, c_i);
-            Eigen::MatrixXcd W_i = so.W_cont(k, c_i);
-            Eigen::MatrixXcd W_o = so.W_cont(k, c_o);
-            Eigen::MatrixXcd V_o = so.V_cont(k, c_o);
-            Eigen::MatrixXcd V_i = so.V_cont(k, c_i);
-            Eigen::MatrixXcd M_cont = so.mass_matrix_cont();
+            Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, getGaussQR(order, 0., 1.));
+            GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, getGaussQR(order, 0., 1.), getCGaussQR(order));
+            builder.assembleAll(k, c_o);
+            Eigen::MatrixXcd K_o = builder.getDoubleLayer();
+            Eigen::MatrixXcd W_o = builder.getHypersingular();
+            Eigen::MatrixXcd V_o = builder.getSingleLayer();
+            builder.assembleAll(k, c_i);
+            Eigen::MatrixXcd K_i = builder.getDoubleLayer();
+            Eigen::MatrixXcd W_i = builder.getHypersingular();
+            Eigen::MatrixXcd V_i = builder.getSingleLayer();
             // Build matrices for solving linear system of equations
             Eigen::MatrixXcd A(K_o.rows() + W_o.rows(), K_o.cols() + V_o.cols());
             A.block(0, 0, K_o.rows(), K_o.cols()) = (-K_o + K_i)+M_cont;

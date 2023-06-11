@@ -32,6 +32,7 @@
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 #include "parametrized_line.hpp"
+#include "continuous_space.hpp"
 
 // define shorthand for complex data type and imaginary unit
 typedef std::complex<double> complex_t;
@@ -127,7 +128,8 @@ int main(int argc, char** argv) {
     std::cout << std::endl;
 	#endif
 
-    SolutionsOperator so(mesh, order);
+    ContinuousSpace<1> cont_space;
+    SolutionsOperator so(mesh, order, cont_space, cont_space);
 
     for (unsigned j = 0; j < n_points_x; j++) {
         for (unsigned k = 0; k < n_points_y; k++) {
@@ -136,7 +138,8 @@ int main(int argc, char** argv) {
             complex_t k_temp = (k_0+j*h_x+ii*double(k)*h_y);
 
             // compute solutions operator
-            Eigen::MatrixXcd T = so.gen_sol_op(k_temp, c_o, c_i);
+            Eigen::MatrixXcd T;
+            so.gen_sol_op(k_temp, c_o, c_i, T);
 
 
             // set singular values to be computed, all

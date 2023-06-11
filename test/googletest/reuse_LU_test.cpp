@@ -8,7 +8,6 @@
 #include <complex>
 #include <Eigen/Dense>
 #include <gtest/gtest.h>
-#include "hypersingular.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <fstream>

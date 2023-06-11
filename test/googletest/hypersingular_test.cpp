@@ -8,7 +8,7 @@
 #include <complex>
 #include <Eigen/Dense>
 #include <gtest/gtest.h>
-#include "gen_sol_op.hpp"
+#include "galerkin_matrix_builder.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
@@ -38,10 +38,8 @@ ParametrizedMesh mesh(curve.split(numpanels));
 // define order of quadrature rule with which to compute matrix entries of operator
 unsigned order = 11;
 
-SolutionsOperator so(mesh, order);
-
-// compute operator and extract first row
-Eigen::VectorXcd W = so.W_cont(k, c_i).block(0,0,1,numpanels).transpose();
+GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, getGaussQR(order, 0., 1.), getCGaussQR(order));
+Eigen::VectorXcd W;
 
 // set variables for reading operator from file
 Eigen::VectorXcd W_expected(numpanels);
@@ -54,6 +52,9 @@ std::string path = "/home/diego/Uni/Thesis/HelmholtzBEM/raw_data/hypersingular_i
 //std::string path = "/home/diego/Uni/Thesis/HelmholtzBEM/raw_data/hypersingular_o_" + std::to_string(numpanels) + ".dat";
 
 TEST(HypersingularTest, compare_row) {
+    // compute operator and extract first row
+    builder.assembleHypersingular(k, c_i);
+    W = builder.getHypersingular().block(0,0,1,numpanels).transpose();
     // read first row of operator from file
     fp_data.open(path);
     while(fp_data >> real >> imag) {

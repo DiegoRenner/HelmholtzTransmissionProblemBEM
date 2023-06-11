@@ -39,6 +39,7 @@
 #include "singular_values.hpp"
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
+#include "continuous_space.hpp"
 
 // define shorthand for complex data type and imaginary unit
 typedef std::complex<double> complex_t;
@@ -83,10 +84,10 @@ int main(int argc, char** argv) {
 	#endif
 
     // Initialize operators and mesh
-    SolutionsOperator so(mesh, order);
-    Eigen::MatrixXcd T_next = so.gen_sol_op(k_0, c_o, c_i);
-    Eigen::MatrixXcd T_der_next = so.gen_sol_op_1st_der(k_0, c_o, c_i);
-    Eigen::MatrixXcd T_der2_next = so.gen_sol_op_2nd_der(k_0, c_o, c_i);
+    ContinuousSpace<1> cont_space;
+    SolutionsOperator so(mesh, order, cont_space, cont_space);
+    Eigen::MatrixXcd T_next, T_der_next, T_der2_next;
+    so.gen_sol_op_2nd_der(k_0, c_o, c_i, T_next, T_der_next, T_der2_next);
     for (unsigned j = 0; j < n_points_x; j++) {
         for (unsigned k = 0; k < n_points_y; k++) {
             Eigen::MatrixXd res(2*numpanels,3);
@@ -98,9 +99,7 @@ int main(int argc, char** argv) {
             Eigen::MatrixXcd T = T_next;
             Eigen::MatrixXcd T_der = T_der_next;
             Eigen::MatrixXcd T_der2 = T_der2_next;
-            T_next = so.gen_sol_op(k_temp_next, c_o, c_i);
-            T_der_next = so.gen_sol_op_1st_der(k_temp_next, c_o, c_i);
-            T_der2_next = so.gen_sol_op_2nd_der(k_temp_next, c_o, c_i);
+            so.gen_sol_op_2nd_der(k_temp_next, c_o, c_i, T_next, T_der_next, T_der2_next);
 
             // set singular values and derivatives to compute, all
             unsigned count = T.cols();
@@ -123,8 +122,7 @@ int main(int argc, char** argv) {
                     T_in = T_next;
                     T_der_in = T_der_next;
                 } else {
-                    T_in = so.gen_sol_op(k_in, c_o, c_i);
-                    T_der_in = so.gen_sol_op_1st_der(k_in, c_o, c_i);
+                    so.gen_sol_op_1st_der(k_in, c_o, c_i, T_in, T_der_in);
                 }
                 return direct::sv_1st_der(T_in, T_der_in, list, count)(m,1);
             };
@@ -141,9 +139,7 @@ int main(int argc, char** argv) {
                     T_der_in = T_der_next;
                     T_der2_in = T_der2_next;
                 } else {
-                    T_in = so.gen_sol_op(k_in, c_o, c_i);
-                    T_der_in = so.gen_sol_op_1st_der(k_in, c_o, c_i);
-                    T_der2_in = so.gen_sol_op_2nd_der(k_in, c_o, c_i);
+                    so.gen_sol_op_2nd_der(k_in, c_o, c_i, T_in, T_der_in, T_der2_in);
                 }
                 Eigen::MatrixXd res = direct::sv_2nd_der(T_in, T_der_in, T_der2_in, list, count).block(m,1,1,2);
                 return res;

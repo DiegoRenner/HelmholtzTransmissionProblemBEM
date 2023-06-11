@@ -13,62 +13,6 @@
 #include <numeric>
 
 /**
- * This is workspace for Galerkin matrix construction
- */
-class gq_workspace_t {
-    std::vector<std::complex<double> >
-        m_result_i, m_result_o, m_result_iK, m_result_oK, m_result_ir, m_result_or,
-        m_result_i_der, m_result_o_der, m_result_iK_der, m_result_oK_der;
-    std::vector<double> m_s, m_t, m_w, m_t_norm, m_tp_norm, m_n_dot_np;
-    std::vector<int> m_ind;
-    std::vector<std::pair<int,int> > m_IJ;
-public:
-    gq_workspace_t(unsigned N, bool make_resultK = false, bool make_result_der = false) {
-        unsigned N2 = N * N;
-        m_result_i.resize(N2);
-        m_result_o.resize(N2);
-        m_result_ir.resize(N2);
-        m_result_or.resize(N2);
-        if (make_resultK) {
-            m_result_iK.resize(N2);
-            m_result_oK.resize(N2);
-        }
-        if (make_result_der) {
-            m_result_i_der.resize(N2);
-            m_result_o_der.resize(N2);
-            m_result_iK_der.resize(N2);
-            m_result_oK_der.resize(N2);
-        }
-        m_s.resize(N2);
-        m_t.resize(N2);
-        m_w.resize(N2);
-        m_t_norm.resize(N2);
-        m_tp_norm.resize(N2);
-        m_n_dot_np.resize(N2);
-        m_IJ.resize(N2);
-        m_ind.resize(N2);
-        std::iota (m_ind.begin(), m_ind.end(), 0);
-    }
-    std::complex<double> &result_i(int i, bool rest = false) { return rest ? m_result_ir[i] : m_result_i[i]; }
-    std::complex<double> &result_o(int i, bool rest = false) { return rest ? m_result_or[i] : m_result_o[i]; }
-    std::complex<double> &result_i_der(int i) { return m_result_i_der[i]; }
-    std::complex<double> &result_o_der(int i) { return m_result_o_der[i]; }
-    std::complex<double> &result_iK(int i) { return m_result_iK[i]; }
-    std::complex<double> &result_oK(int i) { return m_result_oK[i]; }
-    std::complex<double> &result_iK_der(int i) { return m_result_iK_der[i]; }
-    std::complex<double> &result_oK_der(int i) { return m_result_oK_der[i]; }
-    double &s(int i) { return m_s[i]; }
-    double &t(int i) { return m_t[i]; }
-    double &w(int i) { return m_w[i]; }
-    double &t_norm(int i) { return m_t_norm[i]; }
-    double &tp_norm(int i) { return m_tp_norm[i]; }
-    double &n_dot_np(int i) { return m_n_dot_np[i]; }
-    std::vector<std::pair<int,int> > &IJ() { return m_IJ; }
-    std::pair<int,int> &IJ(int i) { return m_IJ[i]; }
-    std::vector<int> &ind() { return m_ind; }
-};
-
-/**
  * This Struct object is used to store a quadrature Rule.
  */
 struct QuadRule {

@@ -10,7 +10,7 @@ add_library(compute_SV_der_arnoldi STATIC singular_values_arnoldi.cpp)
 target_link_libraries(compute_SV_der_arnoldi arpp_eig_interface)
 
 add_library(gen_sol_op STATIC gen_sol_op.cpp)
-target_link_libraries(gen_sol_op sol_op sol_op_der sol_op_der2)
+target_link_libraries(gen_sol_op sol_op)
 
 
 add_library(find_roots STATIC find_roots.cpp)

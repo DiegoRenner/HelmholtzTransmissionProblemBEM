@@ -30,6 +30,7 @@
 #include "singular_values.hpp"
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
+#include "continuous_space.hpp"
 
 // define shorthand for complex data type and imaginary unit
 typedef std::complex<double> complex_t;
@@ -73,10 +74,10 @@ int main(int argc, char** argv) {
     std::cout << std::endl;
 	#endif
     // initialize operators
-    SolutionsOperator so(mesh, order);
-    Eigen::MatrixXcd T_next = so.gen_sol_op(k_0 , c_o, c_i);
-    Eigen::MatrixXcd T_der_next = so.gen_sol_op_1st_der(k_0 , c_o, c_i);
-    Eigen::MatrixXcd T_der2_next = so.gen_sol_op_2nd_der(k_0 , c_o, c_i);
+    ContinuousSpace<1> cont_space;
+    SolutionsOperator so(mesh, order, cont_space, cont_space);
+    Eigen::MatrixXcd T_next, T_der_next, T_der2_next;
+    so.gen_sol_op_2nd_der(k_0, c_o, c_i, T_next, T_der_next, T_der2_next);
 
     // loop over wavenumber
     for (unsigned j = 0; j < n_points_x; j++) {
@@ -90,9 +91,7 @@ int main(int argc, char** argv) {
                 Eigen::MatrixXcd T = T_next;
                 Eigen::MatrixXcd T_der = T_der_next;
                 Eigen::MatrixXcd T_der2 = T_der2_next;
-                T_next = so.gen_sol_op(k_temp_next , c_o, c_i);
-                T_der_next = so.gen_sol_op_1st_der(k_temp_next, c_o, c_i);
-                T_der2_next = so.gen_sol_op_2nd_der(k_temp_next, c_o, c_i);
+                so.gen_sol_op_2nd_der(k_temp_next, c_o, c_i, T_next, T_der_next, T_der2_next);
 
                 // set singular values to be computed, smallest only
                 unsigned count = 1;
@@ -112,7 +111,7 @@ int main(int argc, char** argv) {
                     } else if (k_in == k_temp_next.real()){
                         T_in = T_next;
                     } else {
-                       T_in = so.gen_sol_op(k_in, c_o, c_i);
+                       so.gen_sol_op(k_in, c_o, c_i, T_in);
                     }
                     return direct::sv(T_in, list, count)(m);
                 };
@@ -126,8 +125,7 @@ int main(int argc, char** argv) {
                         T_in = T_next;
                         T_der_in = T_der_next;
                     } else {
-                        T_in = so.gen_sol_op(k_in, c_o, c_i);
-                        T_der_in = so.gen_sol_op_1st_der(k_in, c_o, c_i);
+                        so.gen_sol_op_1st_der(k_in, c_o, c_i, T_in, T_der_in);
                     }
                     return direct::sv_1st_der(T_in, T_der_in, list, count)(m,1);
                 };

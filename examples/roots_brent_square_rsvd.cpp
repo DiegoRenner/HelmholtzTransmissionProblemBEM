@@ -43,6 +43,7 @@
 #include "gen_sol_op.hpp"
 #include "randsvd.hpp"
 #include "find_roots.hpp"
+#include "continuous_space.hpp"
 
 //#define FIND_MIN_RSVD
 
@@ -146,7 +147,9 @@ int main(int argc, char** argv) {
     std::cout << std::endl;
 #endif
 
-    SolutionsOperator so(mesh, order);
+    ContinuousSpace<1> cont_space;
+    SolutionsOperator so(mesh, order, cont_space, cont_space);
+    GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, so.get_GaussQR(), so.get_CGaussQR());
 
     std::iota(ind.begin(), ind.end(), 0);
     auto tic = high_resolution_clock::now();
@@ -154,15 +157,19 @@ int main(int argc, char** argv) {
     std::cout << "Approximating local extrema with randomized SVD..." << std::endl;
 #endif
     std::transform(std::execution::par_unseq, ind.cbegin(), ind.cend(), rsv.begin(), [&](int i) {
-        return randomized_svd::sv(so.gen_sol_op(k_min + k_step * i, c_o, c_i), W, q);
+        Eigen::MatrixXcd T;
+        so.gen_sol_op(k_min + k_step * i, c_o, c_i, T);
+        return randomized_svd::sv(T, W, q);
     });
 #ifdef FIND_MIN_RSVD
     auto rsvd_sv = [&](double k) {
-        Eigen::MatrixXcd T = gen_sol_op(mesh, order, k, c_o, c_i);
+        Eigen::MatrixXcd T;
+        so.gen_sol_op(k, c_o, c_i, T);
         return randomized_svd::sv(T, W, q);
     };
 #endif
     for (size_t i = 0; i < rsv.size() - 2; ++i) {
+        std::cout << rsv[i] << " ";
         double &c = rsv[i+1], L = c - rsv[i], R = rsv[i+2] - c;
         double k = k_min + i * k_step;
         if (L < 0. && R > 0.) { // local minimum
@@ -191,19 +198,21 @@ int main(int argc, char** argv) {
     std::cout << std::endl;
 #endif
     auto sv_eval = [&](double k_in) {
-        Eigen::MatrixXcd T_in = so.gen_sol_op(k_in, c_o, c_i);
+        Eigen::MatrixXcd T_in;
+        so.gen_sol_op(builder, k_in, c_o, c_i, T_in);
         return arnoldi::sv(T_in, 1, acc)(0);
     };
     auto sv_eval_der = [&](double k_in) {
-        auto T_pair = so.gen_sol_op_with_1st_der(k_in, c_o, c_i);
-        return arnoldi::sv_1st_der(T_pair.first, T_pair.second, 1, acc)(0, 1);
+        Eigen::MatrixXcd T_in, T_der_in;
+        so.gen_sol_op_1st_der(builder, k_in, c_o, c_i, T_in, T_der_in);
+        return arnoldi::sv_1st_der(T_in, T_der_in, 1, acc)(0, 1);
     };
     for (size_t i = 0; i < loc_min_count; ++i) {
         double a = bracket_left[i], b = bracket_right[i], r;
         unsigned ic;
         bool rf = false;
 #ifdef CMDL
-        std::cout << "Local search in [" << a << "," << b << "]...\t"; std::flush(std::cout);
+        std::cout << "Local search in [" << a << ", " << b << "]...\t"; std::flush(std::cout);
 #endif
         r = zbrent(sv_eval_der, a, b, epsilon_fin, rf, ic);
         if (rf) {
