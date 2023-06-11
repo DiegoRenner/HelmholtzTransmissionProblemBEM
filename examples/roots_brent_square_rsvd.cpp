@@ -169,7 +169,6 @@ int main(int argc, char** argv) {
     };
 #endif
     for (size_t i = 0; i < rsv.size() - 2; ++i) {
-        std::cout << rsv[i] << " ";
         double &c = rsv[i+1], L = c - rsv[i], R = rsv[i+2] - c;
         double k = k_min + i * k_step;
         if (L < 0. && R > 0.) { // local minimum
