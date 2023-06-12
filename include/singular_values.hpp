@@ -27,7 +27,7 @@ namespace direct {
  */
     Eigen::VectorXd sv(const Eigen::MatrixXcd &T,
                        const double *list,
-                       const unsigned count);
+                       unsigned count);
 
 /**
  * Compute derivative of singular values defined by \p list and \p count of the
@@ -43,7 +43,7 @@ namespace direct {
     Eigen::MatrixXd sv_1st_der(const Eigen::MatrixXcd &T,
                                const Eigen::MatrixXcd &T_der,
                                const double *list,
-                               const unsigned count);
+                               unsigned count);
 
 /**
  * Compute second derivative of singular values defined by \p list and \p count of the
@@ -62,7 +62,7 @@ namespace direct {
                                const Eigen::MatrixXcd &T_der,
                                const Eigen::MatrixXcd &T_der2,
                                const double *list,
-                               const unsigned count);
+                               unsigned count);
 
 /**
  * Extrapolation based numerical differentation
@@ -77,11 +77,7 @@ namespace direct {
  * @param atol absolute tolerance
  * @return value of computed derivative
  */
-    double der_by_ext(std::function<double(double)> f,
-                      const double x,
-                      const double h0,
-                      const double rtol,
-                      const double atol);
+    double der_by_ext(double, std::function<double(double)> f, double x, double h0, double rtol, double atol);
 }
 #endif // SINGULAR_VALUESHPP
 

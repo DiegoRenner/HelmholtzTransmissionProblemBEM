@@ -192,7 +192,7 @@ namespace arnoldi {
             m += 1;
             complex_t rescale = res_vectors.coeff(m - 1, i);
             // normalize eigenvector
-            Eigen::MatrixXcd u = res_vectors.block(0, i, 2 * N, 1) / rescale;
+            Eigen::VectorXcd u = res_vectors.col(i) / rescale;
             // build matrix with deleted column from Wielandt matrix and eigenvector
             Eigen::VectorXcd diag = res_vals[i] * Eigen::VectorXcd::Ones(2 * N);
             W -= diag.asDiagonal();
