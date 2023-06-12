@@ -27,8 +27,8 @@ namespace arnoldi {
  * by \p list and \p count
  */
     Eigen::VectorXd sv(const Eigen::MatrixXcd &T,
-                       const unsigned count,
-                       const double acc=1e-16);
+                       unsigned count,
+                       double acc = std::numeric_limits<double>::epsilon());
 
 /**
  * Compute derivative of singular values defined by \p list and \p count of the
@@ -43,8 +43,8 @@ namespace arnoldi {
  */
     Eigen::MatrixXd sv_1st_der(const Eigen::MatrixXcd &T,
                                const Eigen::MatrixXcd &T_der,
-                               const unsigned count,
-                               const double acc=1e-16);
+                               unsigned count,
+                               double acc = std::numeric_limits<double>::epsilon());
 
 /**
  * Compute second derivative of singular values defined by \p list and \p count of the
@@ -62,8 +62,8 @@ namespace arnoldi {
     Eigen::MatrixXd sv_2nd_der(const Eigen::MatrixXcd &T,
                                const Eigen::MatrixXcd &T_der,
                                const Eigen::MatrixXcd &T_der2,
-                               const unsigned count,
-                               const double acc=1e-16);
+                               unsigned count,
+                               double acc = std::numeric_limits<double>::epsilon());
 
 }
 #endif // SINGULAR_VALUESHPP
