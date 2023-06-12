@@ -50,8 +50,8 @@ class GalerkinMatrixBuilder
     void compute_general(const AbstractParametrizedCurve &pi, const AbstractParametrizedCurve &pi_p) throw();
     // routines for interaction matrix construction
     void double_layer_coinciding(int der) throw();
-    void double_layer_adjacent(bool swap, int der) throw();
-    void double_layer_general(int der) throw();
+    void double_layer_adjacent(bool swap, int der, bool transp) throw();
+    void double_layer_general(int der, bool transp) throw();
     void hypersingular_coinciding(int der) throw();
     void hypersingular_adjacent(bool swap, int der) throw();
     void hypersingular_general(int der) throw();
@@ -60,8 +60,6 @@ class GalerkinMatrixBuilder
     void single_layer_general(int der) throw();
     void initialize_parameters(const std::complex<double> &k_in, double c_in);
     bool is_adjacent(const AbstractParametrizedCurve &p1, const AbstractParametrizedCurve &p2, bool &swap) const;
-    void swap_data(Eigen::MatrixXcd &m, bool neg);
-    void swap_data(Eigen::MatrixXd &m);
 
 public:
     /**

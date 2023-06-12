@@ -1,10 +1,10 @@
 /**
- * \file roots_brent_square_rsvd.cpp
+ * \file roots_newton_square_rsvd.cpp
  * \brief This target builds a script that computes minimas in
  * the smallest singular value of the Galerkin BEM
  * approximated solutions operator for the sedond-kind
  * direct BIEs of the Helmholtz transmission problem
- * using the Van Wijngaarden-Dekker-Brent method.
+ * using the Newton-Raphson method.
  * The scatterer is set to be a square. The results are
  * written to the <tt>data</tt> directory.
  * The script can be run as follows:
@@ -147,8 +147,8 @@ int main(int argc, char** argv) {
 
     // Inform user of started computation.
 #ifdef CMDL
-    std::cout << "---------------------------------------------------------------" << std::endl;
-    std::cout << "Finding resonances using rSVD approximation and Brent's method." << std::endl;
+    std::cout << "----------------------------------------------------------------" << std::endl;
+    std::cout << "Finding resonances using rSVD approximation and Newton's method." << std::endl;
     std::cout << "Computing on user-defined problem using square domain." << std::endl;
     std::cout << std::endl;
 #endif
@@ -221,6 +221,11 @@ int main(int argc, char** argv) {
         so.gen_sol_op_1st_der(builder, k_in, c_o, c_i, T_in, T_der_in);
         return arnoldi::sv_1st_der(T_in, T_der_in, 1, acc)(0, 1);
     };
+    auto sv_eval_both = [&] (double k_in) {
+        Eigen::MatrixXcd T_in, T_der_in, T_der2_in;
+        so.gen_sol_op_2nd_der(builder, k_in, c_o, c_i, T_in, T_der_in, T_der2_in);
+        return arnoldi::sv_2nd_der(T_in, T_der_in, T_der2_in, 1, acc).block(0, 1, 1, 2);
+    };
     // Search for true minima in the bracketed regions by using
     // Arnoldi iterations with the ZBRENT routine.
     // The builder created at the beginning is used for solutions operator
@@ -232,7 +237,7 @@ int main(int argc, char** argv) {
 #ifdef CMDL
         std::cout << "Local search in [" << a << ", " << b << "]...\t"; std::flush(std::cout);
 #endif
-        r = zbrent(sv_eval_der, a, b, epsilon_fin, rf, ic);
+        r = rtsafe(sv_eval_der, sv_eval_both, a, b, epsilon_fin, rf, ic);
         if (rf) {
 #ifdef CMDL
             std::cout << "Root found at " << r << " in " << ic << " iterations." << std::endl;

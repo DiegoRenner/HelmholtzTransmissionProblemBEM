@@ -472,6 +472,16 @@ The user will be updated through the command line about the
 progress of the algorithm.
 if <tt>-DCMDL</tt> is set.
 
+#### <tt>roots_newton_square_rsvd</tt>
+This target builds a script that computes minimas in the smallest singular value of the Galerkin BEM approximated solutions operator for the sedond-kind direct BIEs of the Helmholtz transmission problem using the Newton-Raphson method. The scatterer is set to be a square. The results are written to the <tt>data</tt> directory. The script can be run as follows:
+~~~
+/path/to/roots_newton_square_rsvd <half side length of square>
+<refraction inside> <refraction outside> <initial wavenumber>
+<#grid points for root search> <#panels> <order of quadrature rule>
+<accuracy of Arnoldi algorithm> <number of subspace iterations>
+~~~
+The resulting file will contain the boundaries of the interval used to compute the root in the first two columns, which are obtained by approximating the smallest singular value with randomized SVD. Then in the next two columns will be the point and the respective function value. The last column will contain the number of iterations used to find the root. The singular values are computed using the Arnoldi algorithm. The user will be updated through the command line about the progress of the algorithm.
+
 #### <tt>roots_seq_circle_arnoldi</tt>
 This target builds a script that computes minimas in the smallest singular value of the
 Galerkin BEM approximated solutions operator for the second-kind direct BIEs of the Helmholtz
