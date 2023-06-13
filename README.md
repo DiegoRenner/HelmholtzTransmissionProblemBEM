@@ -238,8 +238,7 @@ If no root was found the last four columns will be set to <tt>NAN</tt>.
 The singular values and their derivatives are computed using the direct
 Eigen algorithm.
 The user will be updated through the command line about the
-progress of the algorithm
-if <tt>-DCMDL</tt> is set.
+progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_brent_circle_arnoldi</tt>
 This target builds a script that computes minimas in the smallest singular value of the
@@ -262,8 +261,7 @@ The last column will contain the number of iterations used to find the root.
 If no root was found the last four columns will be set to <tt>NAN</tt>.
 The singular values and their derivatives are computed using the Arnoldi algorithm.
 The user will be updated through the command line about the
-progress of the algorithm
-if <tt>-DCMDL</tt> is set.
+progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_brent_square</tt>
 This target builds a script that computes minimas in the smallest singular value of the
@@ -287,8 +285,7 @@ If no root was found the last four columns will be set to <tt>NAN</tt>.
 The singular values and their derivatives are computed using the direct
 Eigen algorithm.
 The user will be updated through the command line about the
-progress of the algorithm
-if <tt>-DCMDL</tt> is set.
+progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_brent_square_arnoldi</tt>
 This target builds a script that computes minimas in the smallest singular value of the
@@ -322,7 +319,7 @@ This target builds a script that computes minimas in the smallest singular value
 <#grid points for root search> <#panels> <order of quadrature rule>
 <accuracy of Arnoldi algorithm> <number of subspace iterations>
 ~~~
-The resulting file will contain the boundaries of the interval used to compute the root in the first two columns, which are obtained by approximating the smallest singular value with randomized SVD. Then in the next two columns will be the point and the respective function value. The last column will contain the number of iterations used to find the root. The singular values are computed using the Arnoldi algorithm. The user will be updated through the command line about the progress of the algorithm.
+The resulting file will contain the boundaries of the interval used to compute the root in the first two columns, which are obtained by approximating the smallest singular value with randomized SVD. Then in the next two columns will be the point and the respective function value. The last column will contain the number of iterations used to find the root. The singular values are computed using the Arnoldi algorithm. The user will be updated through the command line about the progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_mixed_circle_arnoldi</tt>
 This target builds a script that computes minimas in the smallest singular value of the
@@ -346,8 +343,7 @@ The last column will contain the number of iterations used to find the root.
 If no root was found the last four columns will be set to <tt>NAN</tt>.
 The singular values and their derivatives are computed using the Arnoldi algorithm.
 The user will be updated through the command line about the
-progress of the algorithm
-if <tt>-DCMDL</tt> is set.
+progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_mixed_square_arnoldi</tt>
 This target builds a script that computes minimas in the smallest singular value of the
@@ -371,8 +367,7 @@ The last column will contain the number of iterations used to find the root.
 If no root was found the last four columns will be set to <tt>NAN</tt>.
 The singular values and their derivatives are computed using the Arnoldi algorithm.
 The user will be updated through the command line about the
-progress of the algorithm
-if <tt>-DCMDL</tt> is set.
+progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_newton_circle</tt>
 This target builds a sript that computes minimas in the smallest singular value of the
@@ -396,8 +391,7 @@ If no root was found the last four columns will be set to <tt>NAN</tt>.
 The singular values and their derivatives are computed using the direct
 Eigen algorithm.
 The user will be updated through the command line about the
-progress of the algorithm.
-if <tt>-DCMDL</tt> is set.
+progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_newton_circle_arnoldi</tt>
 This target builds a sript that computes minimas in the smallest singular value of the
@@ -420,8 +414,7 @@ The last column will contain the number of iterations used to find the root.
 If no root was found the last four columns will be set to <tt>NAN</tt>.
 The singular values and their derivatives are computed using the Arnoldi algorithm.
 The user will be updated through the command line about the
-progress of the algorithm.
-if <tt>-DCMDL</tt> is set.
+progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_newton_square</tt>
 This target builds a sript that computes minimas in the smallest singular value of the
@@ -445,8 +438,7 @@ If no root was found the last four columns will be set to <tt>NAN</tt>.
 The singular values and their derivatives are computed using the direct
 Eigen algorithm.
 The user will be updated through the command line about the
-progress of the algorithm.
-if <tt>-DCMDL</tt> is set.
+progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_newton_square_arnoldi</tt>
 This target builds a sript that computes minimas in the smallest singular value of the
@@ -469,8 +461,7 @@ The last column will contain the number of iterations used to find the root.
 If no root was found the last four columns will be set to <tt>NAN</tt>.
 The singular values and their derivatives are computed using the Arnoldi algorithm.
 The user will be updated through the command line about the
-progress of the algorithm.
-if <tt>-DCMDL</tt> is set.
+progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_newton_square_rsvd</tt>
 This target builds a script that computes minimas in the smallest singular value of the Galerkin BEM approximated solutions operator for the sedond-kind direct BIEs of the Helmholtz transmission problem using the Newton-Raphson method. The scatterer is set to be a square. The results are written to the <tt>data</tt> directory. The script can be run as follows:
@@ -480,7 +471,7 @@ This target builds a script that computes minimas in the smallest singular value
 <#grid points for root search> <#panels> <order of quadrature rule>
 <accuracy of Arnoldi algorithm> <number of subspace iterations>
 ~~~
-The resulting file will contain the boundaries of the interval used to compute the root in the first two columns, which are obtained by approximating the smallest singular value with randomized SVD. Then in the next two columns will be the point and the respective function value. The last column will contain the number of iterations used to find the root. The singular values are computed using the Arnoldi algorithm. The user will be updated through the command line about the progress of the algorithm.
+The resulting file will contain the local minima in a single column. The singular values are computed using the Arnoldi algorithm. The user will be updated through the command line about the progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_seq_circle_arnoldi</tt>
 This target builds a script that computes minimas in the smallest singular value of the
@@ -504,8 +495,7 @@ The last column will contain the number of iterations used to find the root.
 If no root was found the last four columns will be set to <tt>NAN</tt>.
 The singular values and their derivatives are computed using the Arnoldi algorithm.
 The user will be updated through the command line about the
-progress of the algorithm
-if <tt>-DCMDL</tt> is set.
+progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>roots_seq_square_arnoldi</tt>
 This target builds a script that computes minimas in the smallest singular value of the
@@ -529,8 +519,7 @@ The last column will contain the number of iterations used to find the root.
 If no root was found the last four columns will be set to <tt>NAN</tt>.
 The singular values and their derivatives are computed using the Arnoldi algorithm.
 The user will be updated through the command line about the
-progress of the algorithm
-if <tt>-DCMDL</tt> is set.
+progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>sv_circle</tt>
 This target builds a script that computes the singular values
@@ -552,8 +541,7 @@ The resulting file will contain the value of <tt>k</tt> in the first column.
 The rest of the columns contain the singular values from
 smallest to largest for this <tt>k</tt>.
 The user will be updated through the command line about the
-progress of the algorithm
-if <tt>-DCMDL</tt> is set.
+progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>sv_circle_arnoldi</tt>
 This target builds a script that computes the singular values
@@ -575,8 +563,7 @@ The resulting file will contain the value of <tt>k</tt> in the first column.
 The rest of the columns contain the singular values from
 smallest to largest for this <tt>k</tt>.
 The user will be updated through the command line about the
-progress of the algorithm
-if <tt>-DCMDL</tt> is set.
+progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>sv_derivative_full</tt>
 This target builds a script that computes the singular values and
@@ -657,8 +644,7 @@ The resulting file will contain the value of <tt>k</tt> in the first column.
 The rest of the columns contain the singular values from
 smallest to largest for this <tt>k</tt>.
 The user will be updated through the command line about the
-progress of the algorithm
-if <tt>-DCMDL</tt> is set.
+progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>sv_square_arnoldi</tt>
 This target builds a script that computes the singular values
@@ -680,8 +666,7 @@ The resulting file will contain the value of <tt>k</tt> in the first column.
 The rest of the columns contain the singular values from
 smallest to largest for this <tt>k</tt>.
 The user will be updated through the command line about the
-progress of the algorithm
-if <tt>-DCMDL</tt> is set.
+progress of the algorithm if <tt>-DCMDL</tt> is set.
 
 #### <tt>transmission_problem_verification</tt>
 This target builds a script that computes solutions to
