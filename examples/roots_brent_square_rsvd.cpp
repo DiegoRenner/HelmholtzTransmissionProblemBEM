@@ -127,8 +127,8 @@ int main(int argc, char** argv) {
     std::ofstream file_out;
     file_out.open(file_minimas, std::ofstream::out | std::ofstream::trunc);
     file_out.close();
-    file_out.open(file_plot, std::ofstream::out | std::ofstream::trunc);
-    file_out.close();
+    //file_out.open(file_plot, std::ofstream::out | std::ofstream::trunc);
+    //file_out.close();
 
     int nc = 2;
     int nr = 2 * numpanels;

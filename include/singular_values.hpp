@@ -77,7 +77,7 @@ namespace direct {
  * @param atol absolute tolerance
  * @return value of computed derivative
  */
-    double der_by_ext(double, std::function<double(double)> f, double x, double h0, double rtol, double atol);
+    double der_by_ext(std::function<double(double)> f, double x, double h0, double rtol, double atol);
 }
 #endif // SINGULAR_VALUESHPP
 

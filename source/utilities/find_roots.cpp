@@ -988,3 +988,187 @@ double secant_method(const function<double(double)> f,
         cout << "There might not be a root in this interval." << endl;
     return 0.0;
 }
+
+double BrentMinimizer::local_min_rc (int &status, double value) {
+//
+//  STATUS (INPUT) = 0, startup.
+//
+  if ( status == 0 )
+  {
+    a = A;
+    b = B;
+    if ( b <= a )
+    {
+      throw std::runtime_error("a < b is required for Brent algorithm!");
+    }
+    c = 0.5 * ( 3.0 - sqrt ( 5.0 ) );
+
+    v = a + c * ( b - a );
+    w = v;
+    x = v;
+    e = 0.0;
+
+    status = 1;
+    arg = x;
+
+    return arg;
+  }
+//
+//  STATUS (INPUT) = 1, return with initial function value of FX.
+//
+  else if ( status == 1 )
+  {
+    fx = value;
+    fv = fx;
+    fw = fx;
+  }
+//
+//  STATUS (INPUT) = 2 or more, update the data.
+//
+  else if ( 2 <= status )
+  {
+    fu = value;
+
+    if ( fu <= fx )
+    {
+      if ( x <= u )
+      {
+        a = x;
+      }
+      else
+      {
+        b = x;
+      }
+      v = w;
+      fv = fw;
+      w = x;
+      fw = fx;
+      x = u;
+      fx = fu;
+    }
+    else
+    {
+      if ( u < x )
+      {
+        a = u;
+      }
+      else
+      {
+        b = u;
+      }
+
+      if ( fu <= fw || w == x )
+      {
+        v = w;
+        fv = fw;
+        w = u;
+        fw = fu;
+      }
+      else if ( fu <= fv || v == x || v == w )
+      {
+        v = u;
+        fv = fu;
+      }
+    }
+  }
+//
+//  Take the next step.
+//
+  midpoint = 0.5 * ( a + b );
+  tol1 = eps * fabs ( x ) + tol / 3.0;
+  tol2 = 2.0 * tol1;
+//
+//  If the stopping criterion is satisfied, we can exit.
+//
+  if ( fabs ( x - midpoint ) <= ( tol2 - 0.5 * ( b - a ) ) )
+  {
+    status = 0;
+    return arg;
+  }
+//
+//  Is golden-section necessary?
+//
+  if ( fabs ( e ) <= tol1 )
+  {
+    if ( midpoint <= x )
+    {
+      e = a - x;
+    }
+    else
+    {
+      e = b - x;
+    }
+    d = c * e;
+  }
+//
+//  Consider fitting a parabola.
+//
+  else
+  {
+    r = ( x - w ) * ( fx - fv );
+    q = ( x - v ) * ( fx - fw );
+    p = ( x - v ) * q - ( x - w ) * r;
+    q = 2.0 * ( q - r );
+    if ( 0.0 < q )
+    {
+      p = - p;
+    }
+    q = fabs ( q );
+    r = e;
+    e = d;
+//
+//  Choose a golden-section step if the parabola is not advised.
+//
+    if (
+      ( fabs ( 0.5 * q * r ) <= fabs ( p ) ) ||
+      ( p <= q * ( a - x ) ) ||
+      ( q * ( b - x ) <= p ) )
+    {
+      if ( midpoint <= x )
+      {
+        e = a - x;
+      }
+      else
+      {
+        e = b - x;
+      }
+      d = c * e;
+    }
+//
+//  Choose a parabolic interpolation step.
+//
+    else
+    {
+      d = p / q;
+      u = x + d;
+
+      if ( ( u - a ) < tol2 )
+      {
+        d = tol1 * sign ( midpoint - x );
+      }
+
+      if ( ( b - u ) < tol2 )
+      {
+        d = tol1 * sign ( midpoint - x );
+      }
+    }
+  }
+//
+//  F must not be evaluated too close to X.
+//
+  if ( tol1 <= fabs ( d ) )
+  {
+    u = x + d;
+  }
+  if ( fabs ( d ) < tol1 )
+  {
+    u = x + tol1 * sign ( d );
+  }
+//
+//  Request value of F(U).
+//
+  arg = u;
+  status = status + 1;
+
+  return arg;
+}

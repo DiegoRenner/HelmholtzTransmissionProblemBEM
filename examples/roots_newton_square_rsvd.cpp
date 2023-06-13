@@ -16,14 +16,9 @@
  *     \<number of subspace iterations\>.
  * </tt>
  *
- * The resulting file will contain the boundaries of the interval
- * used to compute the root in the first two columns.
- * Then in the next two columns will be the point and the
- * respective function value. The last column will contain the
- * number of iterations used to find the root.
- * The singular values are computed using the Arnoldi algorithm.
+ * The resulting file will contain the roots in a single column.
  * The user will be updated through the command line about the
- * progress of the algorithm.
+ * progress of the algorithm if <tt>CMDL</tt> is set.
  *
  * This File is a part of the HelmholtzTransmissionProblemBEM library.
  *
@@ -45,17 +40,16 @@
 #include "find_roots.hpp"
 #include "continuous_space.hpp"
 
-//#define FIND_MIN_RSVD
+//#define BRENT_REFINE
 
 // define shorthand for time benchmarking tools, complex data type and immaginary unit
 using namespace std::chrono;
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
 
-// tolerance when verifying root
-double epsilon_ver = 1e-3;
 // tolerance when finding root
 double epsilon_fin = 1e-6;
+int MAX_CORR = 1 + (int)std::ceil(log2(1.0 / epsilon_fin));
 
 int main(int argc, char** argv) {
 
@@ -116,7 +110,7 @@ int main(int argc, char** argv) {
     int q = atoi(argv[9]);
 
     // generate output filename with set parameters
-    std::string base_name = "../data/file_roots_brent_square_rsvd_";
+    std::string base_name = "../data/file_roots_newton_square_rsvd_";
     std::string file_plot = base_name + "plot.m";
     std::string suffix = ".dat";
     std::string sep = "_";
@@ -127,8 +121,8 @@ int main(int argc, char** argv) {
     std::ofstream file_out;
     file_out.open(file_minimas, std::ofstream::out | std::ofstream::trunc);
     file_out.close();
-    file_out.open(file_plot, std::ofstream::out | std::ofstream::trunc);
-    file_out.close();
+    //file_out.open(file_plot, std::ofstream::out | std::ofstream::trunc);
+    //file_out.close();
 
     int nc = 2;
     int nr = 2 * numpanels;
@@ -136,14 +130,8 @@ int main(int argc, char** argv) {
 
     double k_max = 10.0, k_step = (k_max - k_min) / (n_points_k - 1);
 
-    std::vector<int> ind(n_points_k), loc_min_iter;
-    std::vector<double> rsv(n_points_k),
-                        loc_min, loc_min_approx, bracket_left, bracket_right, val, bnd_left, bnd_right
-#ifdef FIND_MIN_RSVD
-                       ,rsvd_min;
-#else
-                        ;
-#endif
+    std::vector<size_t> ind(n_points_k), loc_min_pos;
+    std::vector<double> rsv(n_points_k), loc_min, bracket_left, bracket_right;
 
     // Inform user of started computation.
 #ifdef CMDL
@@ -163,20 +151,15 @@ int main(int argc, char** argv) {
 #ifdef CMDL
     std::cout << "Approximating local extrema with randomized SVD..." << std::endl;
 #endif
+
     // Sweep the k interval with subdivision of size n_points_k, do this in parallel.
     // For each value k, approximate the smallest singular value by using rSVD.
-    std::transform(std::execution::par_unseq, ind.cbegin(), ind.cend(), rsv.begin(), [&](int i) {
+    std::transform(std::execution::par, ind.cbegin(), ind.cend(), rsv.begin(), [&](size_t i) {
         Eigen::MatrixXcd T;
         so.gen_sol_op(k_min + k_step * i, c_o, c_i, T);
         return randomized_svd::sv(T, W, q);
     });
-#ifdef FIND_MIN_RSVD
-    auto rsvd_sv = [&](double k) {
-        Eigen::MatrixXcd T;
-        so.gen_sol_op(k, c_o, c_i, T);
-        return randomized_svd::sv(T, W, q);
-    };
-#endif
+
     // Bracket the local minima of the rSVD curve.
     // If n_points_k is not too large, the obtained intervals will
     // contain the true minima as well (rSVD approximates them
@@ -188,87 +171,177 @@ int main(int argc, char** argv) {
         double k = k_min + i * k_step;
         if (L < 0. && R > 0.) { // local minimum
             bracket_left.push_back(k);
+            loc_min_pos.push_back(i + 1);
             bracket_right.push_back(k + k_step * 2.0);
-#ifdef FIND_MIN_RSVD
-            int status = 0;
-            double arg, a = bracket_left.back(), b = bracket_right.back();
-            arg = local_min_rc(a, b, status, 0., epsilon_fin);
-            while (status)
-                arg = local_min_rc(a, b, status, rsvd_sv(arg), epsilon_fin);
-            rsvd_min.push_back(arg);
-#endif
         }
     }
     if (bracket_right.size() < bracket_left.size())
         bracket_right.push_back(k_max);
     assert (bracket_left.size() == bracket_right.size());
+    size_t disc = 0, loc_min_count = bracket_left.size(); // number of local minima
+#ifdef CMDL
+    std::cout << "Found " << loc_min_count << " candidates. Validating..." << std::endl;
+#endif
 
-    auto toc = high_resolution_clock::now();
-
-    size_t loc_min_count = bracket_left.size(); // number of local minima
-#ifdef CMDL
-    std::cout << "Found " << loc_min_count << " candidates for local minima." << std::endl;
-    std::cout << "Elapsed time: " << duration_cast<seconds>(toc - tic).count() << " sec" << std::endl;
-    std::cout << std::endl;
-#endif
-    auto sv_eval = [&](double k_in) {
-        Eigen::MatrixXcd T_in;
-        so.gen_sol_op(builder, k_in, c_o, c_i, T_in);
-        return arnoldi::sv(T_in, 1, acc)(0);
-    };
-    auto sv_eval_der = [&](double k_in) {
-        Eigen::MatrixXcd T_in, T_der_in;
-        so.gen_sol_op_1st_der(builder, k_in, c_o, c_i, T_in, T_der_in);
-        return arnoldi::sv_1st_der(T_in, T_der_in, 1, acc)(0, 1);
-    };
-    auto sv_eval_both = [&] (double k_in) {
-        Eigen::MatrixXcd T_in, T_der_in, T_der2_in;
-        so.gen_sol_op_2nd_der(builder, k_in, c_o, c_i, T_in, T_der_in, T_der2_in);
-        return arnoldi::sv_2nd_der(T_in, T_der_in, T_der2_in, 1, acc).block(0, 1, 1, 2);
-    };
-    // Search for true minima in the bracketed regions by using
-    // Arnoldi iterations with the ZBRENT routine.
-    // The builder created at the beginning is used for solutions operator
-    // assembly so that it is not created and destroyed in each pass.
-    for (size_t i = 0; i < loc_min_count; ++i) {
-        double a = bracket_left[i], b = bracket_right[i], r;
-        unsigned ic;
-        bool rf = false;
-#ifdef CMDL
-        std::cout << "Local search in [" << a << ", " << b << "]...\t"; std::flush(std::cout);
-#endif
-        r = rtsafe(sv_eval_der, sv_eval_both, a, b, epsilon_fin, rf, ic);
-        if (rf) {
-#ifdef CMDL
-            std::cout << "Root found at " << r << " in " << ic << " iterations." << std::endl;
-#endif
-            bnd_left.push_back(a);
-            bnd_right.push_back(b);
-            loc_min.push_back(r);
-            val.push_back(sv_eval(r));
-#ifdef FIND_MIN_RSVD
-            loc_min_approx.push_back(rsvd_min[i]);
-#endif
-            loc_min_iter.push_back(ic);
+    // Discard candidates which do not approximate local minima
+    unsigned N = 2 * numpanels;
+    Eigen::MatrixXcd Tall(N, N * loc_min_count), Tall_right(N, N * loc_min_count);
+    Eigen::MatrixXcd Tall_der(N, N * loc_min_count), Tall_der_right(N, N * loc_min_count);
+    ind.resize(loc_min_count);
+    std::iota(ind.begin(), ind.end(), 0);
+    std::for_each(std::execution::par, ind.cbegin(), ind.cend(), [&](size_t i) {
+        Eigen::MatrixXcd T_left, T_right, T_der_left, T_der_right;
+        so.gen_sol_op_1st_der(bracket_left[i], c_o, c_i, T_left, T_der_left);
+        so.gen_sol_op_1st_der(bracket_right[i], c_o, c_i, T_right, T_der_right);
+        Tall.block(0, i * N, N, N) = T_left;
+        Tall_right.block(0, i * N, N, N) = T_right;
+        Tall_der.block(0, i * N, N, N) = T_der_left;
+        Tall_der_right.block(0, i * N, N, N) = T_der_right;
+    });
+    for (size_t i = loc_min_count; i--> 0;) {
+        const Eigen::MatrixXcd &T = Tall.block(0, i * N, N, N), &T_der = Tall_der.block(0, i * N, N, N);
+        const Eigen::MatrixXcd &T_right = Tall_right.block(0, i * N, N, N), &T_der_right = Tall_der_right.block(0, i * N, N, N);
+        if (arnoldi::sv_1st_der(T, T_der, 1, acc)(0, 1) * arnoldi::sv_1st_der(T_right, T_der_right, 1, acc)(0, 1) > 0.) {
+            bracket_left.erase(bracket_left.begin() + i);
+            bracket_right.erase(bracket_right.begin() + i);
+            loc_min_pos.erase(loc_min_pos.begin() + i);
+            loc_min_count--;
+            disc++;
         }
     }
 #ifdef CMDL
-    std::cout << std::endl;
-    std::cout << "Found " << loc_min.size() << " local minima." << std::endl;
+    if (disc > 0)
+        std::cout << "Discarded " << disc << " candidates." << std::endl;
 #endif
-    // output minima information to file
+
+    loc_min.resize(loc_min_count);
+#ifdef BRENT_REFINE
+    // Find approximations of local minima by using Brent's algorithm.
+#ifdef CMDL
+    std::cout << "Refining with Brent's method..." << std::endl;
+#endif
+    ind.resize(loc_min_count);
+    auto rsvd_sv = [&](double k) {
+        Eigen::MatrixXcd T;
+        so.gen_sol_op(k, c_o, c_i, T);
+        return randomized_svd::sv(T, W, q);
+    };
+    std::transform(std::execution::par, ind.cbegin(), ind.cend(), loc_min.begin(), [&](size_t i) {
+        int status = 0;
+        double arg, a = bracket_left[i], b = bracket_right[i];
+        BrentMinimizer brent_minimizer(a, b, epsilon_fin);
+        arg = brent_minimizer.local_min_rc(status, 0.);
+        while (status)
+            arg = brent_minimizer.local_min_rc(status, rsvd_sv(arg));
+        return arg;
+    });
+#else
+    // Do a single Newton iteration with first and second derivative
+    // approximated from five-point finite difference stencils.
+#ifdef CMDL
+    //std::cout << "Refining with five-point stencils..." << std::endl;
+#endif
+    for (size_t i = 0; i < loc_min_count; ++i) {
+        size_t p = loc_min_pos[i];
+        loc_min[i] = k_min + p * k_step;
+        if (p > 1 && p < n_points_k - 1) {
+            double num = -rsv[p - 2] + 8. * rsv[p - 1] - 8. * rsv[p + 1] + rsv[p + 2];
+            double den = -rsv[p - 2] + 16. * rsv[p - 1] -30. * rsv[p] + 16. * rsv[p + 1] - rsv[p + 2];
+            double pos = loc_min[i] - k_step * num / den;
+            if (std::abs(loc_min[i] - pos) < k_step)
+                loc_min[i] = pos;
+        }
+    }
+#endif
+
+#ifdef CMDL
+    std::cout << "Found approximate locations of " << loc_min_count << " local minima." << std::endl;
+#endif
+    // Search for true minima in the bracketed regions by using
+    // Arnoldi iterations with Newton-Raphson method.
+    // The builder created at the beginning is used for solutions operator
+    // assembly so that it is not created and destroyed in each pass.
+    int ic = (int)std::round(-log10(epsilon_fin)/2. - 1.); // number of Newton iterations
+#ifdef CMDL
+    std::cout << "Refining with Newton's method (" << ic << " iterations)..." << std::endl;
+#endif
+    Eigen::MatrixXcd Tall_der2 (N, N * loc_min_count);
+    disc = 0;
+    for (size_t j = 0; j < ic; ++j) {
+        std::for_each(std::execution::par, ind.cbegin(), ind.cend(), [&](size_t i) {
+            Eigen::MatrixXcd T, T_der, T_der2;
+            so.gen_sol_op_2nd_der(loc_min[i], c_o, c_i, T, T_der, T_der2);
+            Tall.block(0, i * N, N, N) = T;
+            Tall_der.block(0, i * N, N, N) = T_der;
+            Tall_der2.block(0, i * N, N, N) = T_der2;
+        });
+        for (size_t i = loc_min_count; i--> 0;) {
+            Eigen::MatrixXcd T = Tall.block(0, i * N, N, N);
+            Eigen::MatrixXcd T_der = Tall_der.block(0, i * N, N, N);
+            Eigen::MatrixXcd T_der2 = Tall_der2.block(0, i * N, N, N);
+            double a = bracket_left[i], b = bracket_right[i], update = NAN, d1, d2;
+            if (b - a < epsilon_fin)
+                continue; // refinement done by bisection
+            size_t corr_count = 0;
+            while (true) {
+                auto der = arnoldi::sv_2nd_der(T, T_der, T_der2, 1, acc).block(0, 1, 1, 2);
+                if (update == update) {
+                    if (der(0, 0) < 0. && d1 > 0.)
+                        a = update, b = loc_min[i];
+                    else if (der(0, 0) > 0. && d1 < 0.)
+                        a = loc_min[i], b = update;
+                    else if (d1 > 0.)
+                        b = update;
+                    else a = update;
+                    bracket_left[i] = a;
+                    bracket_right[i] = b;
+                    if (b - a < epsilon_fin) {
+                        loc_min[i] = (a + b) / 2.;
+                        break;
+                    }
+                    loc_min[i] = update;
+                }
+                d1 = der(0, 0);
+                d2 = der(0, 1);
+                double k = loc_min[i] - d1 / d2;
+                if (k > b || k < a) {
+                    ++corr_count;
+                    if (corr_count > MAX_CORR)
+                        break; // discard this candidate
+                    // bisect and recompute solutions matrix and derivatives,
+                    // then do Newton step again
+                    if (d1 < 0.)
+                        update = (loc_min[i] + b) / 2.;
+                    else update = (loc_min[i] + a) / 2.;
+                    so.gen_sol_op_2nd_der(builder, update, c_o, c_i, T, T_der, T_der2);
+                } else {
+                    // Newton step accepted
+                    loc_min[i] = k;
+                    break;
+                }
+            }
+            if (corr_count > MAX_CORR) {
+                // discard candidate
+                loc_min.erase(loc_min.begin() + i);
+                ind.erase(ind.begin() + i);
+                bracket_left.erase(bracket_left.begin() + i);
+                bracket_right.erase(bracket_right.begin() + i);
+                loc_min_count--;
+                disc++;
+            }
+        }
+    }
+#ifdef CMDL
+    if (disc > 0)
+        std::cout << "Discarded " << disc << " candidates." << std::endl;
+#endif
+    // output results to file
     file_out.open(file_minimas, std::ios_base::app);
     loc_min_count = loc_min.size();
-    for (size_t i = 0; i < loc_min_count; ++i) {
-        file_out << bnd_left[i] << "\t" << bnd_right[i] << "\t"
-                 << loc_min[i] << "\t" << val[i] << "\t"
-#ifdef FIND_MIN_RSVD
-                 << loc_min_approx[i] << "\t"
-#endif
-                 << loc_min_iter[i] << std::endl;
-    }
+    for (size_t i = 0; i < loc_min_count; ++i)
+        file_out << loc_min[i] << std::endl;
     file_out.close();
-    toc = high_resolution_clock::now();
+    auto toc = high_resolution_clock::now();
 #ifdef CMDL
     std::cout << "Total time: " << duration_cast<seconds>(toc - tic).count() << " sec" << std::endl;
     std::cout << std::endl;

@@ -18,7 +18,6 @@
 #include <ostream>
 #include "operators.hpp"
 
-using namespace std;
 /**
  * Search for roots using Van Wijngaarden-Dekker-Brent method.
  * If there is a root of the function \p f within the interval defined by [\p x1, \p x2]
@@ -160,4 +159,72 @@ std::vector<double> general_cubic_formula(double a, double b, double c, double d
 std::vector<double> zerosquadpolstab( double b, double c, double x0, double x1);
 
 void min_shrinkage(double mu, std::vector<double> &pot_zeros, double init_len);
+
+/**
+ *  Local minimum finder by Brent method
+ *
+ *  Licensing:
+ *
+ *    This code is distributed under the GNU LGPL license.
+ *
+ *  Modified:
+ *
+ *    17 July 2011
+ *
+ *  Author:
+ *
+ *    John Burkardt
+ *    Luka Marohnić (wrapper class)
+ */
+class BrentMinimizer {
+    // bounds
+    double A, B;
+    // tolerance
+    double tol, eps;
+    // workspace
+    double arg, a, b, c, d, e, fu, fv, fw, fx, midpoint, p, q, r, tol1, tol2, u, v, w, x;
+    double sign(double x) { return x < 0.0 ? -1.0 : 1.0; }
+public:
+    /**
+     * This constructs Brent minimizer with the given precision
+     * on the given interval.
+     * @param a_in left bound
+     * @param b_in right bound
+     * @param tol_in tolerance
+     */
+    BrentMinimizer(double a_in, double b_in, double tol_in) : A(a_in), B(b_in), tol(tol_in) { eps = sqrt(tol); }
+    /**
+     * This routine seeks an approximation to the point where a function
+     * F attains a minimum on the interval (A,B).
+     *
+     * The method used is a combination of golden section search and
+     * successive parabolic interpolation.  Convergence is never much
+     * slower than that for a Fibonacci search.  If F has a continuous
+     * second derivative which is positive at the minimum (which is not
+     * at A or B), then convergence is superlinear, and usually of the
+     * order of about 1.324...
+     *
+     * The routine is a revised version of the Brent local minimization
+     * algorithm, using reverse communication.
+     *
+     * It is worth stating explicitly that this routine will NOT be
+     * able to detect a minimizer that occurs at either initial endpoint
+     * A or B.  If this is a concern to the user, then the user must
+     * either ensure that the initial interval is larger, or to check
+     * the function value at the returned minimizer against the values
+     * at either endpoint.
+     *
+     * @param status used to communicate between the user and the routine.
+     * The user only sets STATUS to zero on the first call, to indicate
+     * that this is a startup call.  The routine returns STATUS positive
+     * to request that the function be evaluated at ARG, or returns STATUS
+     * as 0, to indicate that the iteration is complete and that ARG is
+     * the estimated minimizer.
+     * @param arg the function value at ARG, as requested by the routine
+     * on the previous call.
+     * @return estimated minimizer
+     */
+     double local_min_rc (int &status, double value);
+};
+
 #endif //FIND_ROOTSHPP
