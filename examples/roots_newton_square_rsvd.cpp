@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
     unsigned order = atoi(argv[7]);
 
     // define accurracy of arnoldi algorithm
-    double acc = atof(argv[8]);
+    double acc = std::max(atof(argv[8]), std::numeric_limits<double>::epsilon());
 
     // define the number of subspace iterations
     int q = atoi(argv[9]);
@@ -175,9 +175,6 @@ int main(int argc, char** argv) {
             bracket_right.push_back(k + k_step * 2.0);
         }
     }
-    if (bracket_right.size() < bracket_left.size())
-        bracket_right.push_back(k_max);
-    assert (bracket_left.size() == bracket_right.size());
     size_t disc = 0, loc_min_count = bracket_left.size(); // number of local minima
 #ifdef CMDL
     std::cout << "Found " << loc_min_count << " candidates. Validating..." << std::endl;
@@ -223,10 +220,10 @@ int main(int argc, char** argv) {
     ind.resize(loc_min_count);
     auto rsvd_sv = [&](double k) {
         Eigen::MatrixXcd T;
-        so.gen_sol_op(k, c_o, c_i, T);
+        so.gen_sol_op(builder, k, c_o, c_i, T);
         return randomized_svd::sv(T, W, q);
     };
-    std::transform(std::execution::par, ind.cbegin(), ind.cend(), loc_min.begin(), [&](size_t i) {
+    std::transform(ind.cbegin(), ind.cend(), loc_min.begin(), [&](size_t i) {
         int status = 0;
         double arg, a = bracket_left[i], b = bracket_right[i];
         BrentMinimizer brent_minimizer(a, b, epsilon_fin);
@@ -236,14 +233,10 @@ int main(int argc, char** argv) {
         return arg;
     });
 #else
-    // Do a single Newton iteration with first and second derivative
-    // approximated from five-point finite difference stencils.
-#ifdef CMDL
-    //std::cout << "Refining with five-point stencils..." << std::endl;
-#endif
     for (size_t i = 0; i < loc_min_count; ++i) {
         size_t p = loc_min_pos[i];
         loc_min[i] = k_min + p * k_step;
+#if 0
         if (p > 1 && p < n_points_k - 1) {
             double num = -rsv[p - 2] + 8. * rsv[p - 1] - 8. * rsv[p + 1] + rsv[p + 2];
             double den = -rsv[p - 2] + 16. * rsv[p - 1] -30. * rsv[p] + 16. * rsv[p + 1] - rsv[p + 2];
@@ -251,6 +244,7 @@ int main(int argc, char** argv) {
             if (std::abs(loc_min[i] - pos) < k_step)
                 loc_min[i] = pos;
         }
+#endif
     }
 #endif
 

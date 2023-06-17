@@ -40,6 +40,7 @@ namespace randomized_svd {
      */
     double sv(const Eigen::MatrixXcd &T, const Eigen::MatrixXcd &W, int q = 0);
 
+    Eigen::Vector2d sv_der(const Eigen::MatrixXcd &T, const Eigen::MatrixXcd &T_der, const Eigen::MatrixXcd &W, int q = 0);
 }
 
 #endif // RANDSVD_HPP

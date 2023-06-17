@@ -24,7 +24,7 @@ namespace randomized_svd {
         for (int i = 0; i < nr; ++i) for (int j = 0; j < nc; ++j) {
             W(i, j) = std::complex<double>(d(gen), d(gen));
         }
-        return W / M_SQRT2;
+        return W * M_SQRT1_2;
     }
 
     double sv(const Eigen::MatrixXcd &T, const Eigen::MatrixXcd &W, int q) {
@@ -37,7 +37,29 @@ namespace randomized_svd {
             Q = lu_decomp.adjoint().solve(Q).householderQr().householderQ() * thinQ;
             Q = lu_decomp.solve(Q).householderQr().householderQ() * thinQ;
         }
-        return 1.0 / lu_decomp.adjoint().solve(Q).bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).singularValues()(0);
+        auto svd = lu_decomp.adjoint().solve(Q).bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
+        return 1.0 / svd.singularValues()(0);
+    }
+
+    Eigen::Vector2d sv_der(const Eigen::MatrixXcd &T, const Eigen::MatrixXcd &T_der, const Eigen::MatrixXcd &W, int q) {
+        unsigned int N = W.rows();
+        Eigen::Vector2d res;
+        Eigen::MatrixXcd Wi, Wi_der;
+        Wi.setZero(2 * N, 2 * N);
+        Wi_der.setZero(2 * N, 2 * N);
+        Wi.block(0, N, N, N) = T;
+        Wi.block(N, 0, N, N) = T.adjoint();
+        Wi_der.block(0, N, N, N) = T_der;
+        Wi_der.block(N, 0, N, N) = T_der.adjoint();
+        double s = sv(T, W, q);
+        Eigen::MatrixXcd A = Wi - (s * Eigen::VectorXcd::Ones(2 * N)).asDiagonal().toDenseMatrix();
+        auto qr = A.colPivHouseholderQr();
+        Eigen::MatrixXcd Q = qr.householderQ(), R = qr.matrixR();
+        Eigen::VectorXcd x = Q.col(2 * N - 1);
+        x.normalize();
+        res(0) = s;
+        res(1) = (x.dot(Wi_der * x)).real();
+        return res;
     }
 
 }

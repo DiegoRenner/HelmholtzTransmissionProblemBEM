@@ -28,6 +28,7 @@
 #define CBESSEL_HPP
 
 #include <complex>
+#include <Eigen/Dense>
 
 using namespace std;
 
@@ -141,8 +142,10 @@ namespace complex_bessel {
      * @param scaled if true, the value is scaled by exp(-i*z)
      */
     Cplx H1 (Real v,const Cplx &z,bool scaled=false);
-    Cplx H1_0_i (const Cplx &z,bool scaled=false);
-    Cplx H1_1_i (const Cplx &z,bool scaled=false);
+    // real input, vectorized
+    void H1_0(const Eigen::ArrayXXd &x,Eigen::ArrayXXcd &h0);
+    void H1_01(const Eigen::ArrayXXd &x,Eigen::ArrayXXcd &h0,Eigen::ArrayXXcd &h1);
+    void H1_01_i(const Eigen::ArrayXXd &x,Eigen::ArrayXXcd &h0,Eigen::ArrayXXcd &h1);
 
     /**
      * This function computes the nth derivative of the

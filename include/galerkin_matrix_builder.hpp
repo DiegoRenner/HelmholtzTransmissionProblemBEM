@@ -30,11 +30,22 @@ class GalerkinMatrixBuilder
     // wavenumber and refraction index
     complex_t k, ksqrtc, kkc;
     double c, sqrtc, ksqrtca;
+    bool k_real_positive;
     // dimensions
     size_t numpanels, Qtest, Qtrial, dim_test, dim_trial;
     // workspace
-    Eigen::MatrixXcd m_h0, m_h1, m_v, m_tangent, m_tangent_p;
-    Eigen::MatrixXd m_v_norm, m_tangent_norm, m_tangent_p_norm;
+    Eigen::ArrayXXcd m_h0, m_h1, m_v, m_tangent, m_tangent_p, m_h0_res_half, m_h1_res_half, m_h0_res_small, m_h1_res_small;
+    Eigen::ArrayXXd m_v_norm, m_tangent_norm, m_tangent_p_norm, m_h_arg, m_h_arg_half, m_h_arg_small;
+    Eigen::ArrayXXd m_tc, m_ta, m_tg, m_sc, m_sa, m_sg, m_wc, m_wa, m_wg;
+    Eigen::ArrayXXd m_double_layer_coinciding_fg, m_double_layer_adjacent_fg, m_double_layer_adjacent_fg_swap, m_double_layer_general_fg,
+                    m_double_layer_coinciding_fg_t, m_double_layer_adjacent_fg_t, m_double_layer_adjacent_fg_swap_t,
+                    m_double_layer_general_fg_t;
+    Eigen::ArrayXXd m_single_layer_coinciding_fg, m_single_layer_adjacent_fg, m_single_layer_adjacent_fg_swap, m_single_layer_general_fg;
+    Eigen::ArrayXXd m_hypersingular_coinciding_fg, m_hypersingular_adjacent_fg, m_hypersingular_adjacent_fg_swap, m_hypersingular_general_fg,
+                    m_hypersingular_coinciding_fg_arc, m_hypersingular_adjacent_fg_arc, m_hypersingular_adjacent_fg_arc_swap,
+                    m_hypersingular_general_fg_arc;
+    Eigen::ArrayXXd m_zero, m_vdotn;
+    Eigen::ArrayXXcd m_cf, m_temp;
     std::vector<size_t> indN2;
     // interaction matrices
     Eigen::MatrixXcd double_layer_interaction_matrix, hypersingular_interaction_matrix, single_layer_interaction_matrix;

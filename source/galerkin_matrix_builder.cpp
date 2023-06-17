@@ -1,8 +1,9 @@
 #include "galerkin_matrix_builder.hpp"
 #include "cbessel.hpp"
 #include <numeric>
-#include <execution>
 #include <iostream>
+
+using namespace std::complex_literals;
 
 typedef std::complex<double> complex_t;
 static const complex_t czero(0., 0.);
@@ -20,15 +21,155 @@ GalerkinMatrixBuilder::GalerkinMatrixBuilder(const ParametrizedMesh &mesh,
     dim_trial = trial_space_in.getSpaceDim(numpanels);
     Qtest = test_space.getQ();
     Qtrial = trial_space.getQ();
-    size_t N = CGaussQR.n;
+    size_t N = CGaussQR.n, Ns = GaussQR.n;
     m_h0.resize(N, 2 * N);
     m_h1.resize(N, 2 * N);
+    m_h_arg.resize(N, 2 * N);
+    m_h_arg_half.resize(N, N);
+    m_h_arg_small.resize(Ns, Ns);
+    m_h0_res_half.resize(N, N);
+    m_h1_res_half.resize(N, N);
+    m_h0_res_small.resize(Ns, Ns);
+    m_h1_res_small.resize(Ns, Ns);
     m_v.resize(N, 2 * N);
     m_v_norm.resize(N, 2 * N);
     m_tangent.resize(N, 2 * N);
     m_tangent_p.resize(N, 2 * N);
     m_tangent_norm.resize(N, 2 * N);
     m_tangent_p_norm.resize(N, 2 * N);
+    m_zero.setZero(N, N);
+    m_cf.resize(N, N);
+    m_vdotn.resize(N, N);
+    m_temp.resize(N, N);
+    m_tc.resize(N, N);
+    m_ta.resize(N, N);
+    m_tg.resize(Ns, Ns);
+    m_sc.resize(N, N);
+    m_sa.resize(N, N);
+    m_sg.resize(Ns, Ns);
+    m_wc.resize(N, N);
+    m_wa.resize(N, N);
+    m_wg.resize(Ns, Ns);
+    for (size_t I = 0; I < N; ++I) {
+        for (size_t J = 0; J < N; ++J) {
+            double t = CGaussQR.x(J), s = t * (1. - CGaussQR.x(I)), w = t * CGaussQR.w(I) * CGaussQR.w(J);
+            m_tc(I, J) = t; m_sc(I, J) = s; m_wc(I, J) = w;
+            t = CGaussQR.x(I), s = t * CGaussQR.x(J), w = t * CGaussQR.w(I) * CGaussQR.w(J);
+            m_ta(I, J) = t; m_sa(I, J) = s; m_wa(I, J) = w;
+            if (I < Ns && J < Ns) {
+                t = GaussQR.x(J), s = GaussQR.x(I), w = GaussQR.w(I) * GaussQR.w(J);
+                m_tg(I, J) = t; m_sg(I, J) = s; m_wg(I, J) = w;
+            }
+        }
+    }
+    m_double_layer_coinciding_fg.resize(Qtest * N, Qtrial * N);
+    m_double_layer_coinciding_fg_t.resize(Qtest * N, Qtrial * N);
+    m_double_layer_adjacent_fg.resize(Qtest * N, Qtrial * N);
+    m_double_layer_adjacent_fg_swap.resize(Qtest * N, Qtrial * N);
+    m_double_layer_adjacent_fg_t.resize(Qtest * N, Qtrial * N);
+    m_double_layer_adjacent_fg_swap_t.resize(Qtest * N, Qtrial * N);
+    m_double_layer_general_fg.resize(Qtest * Ns, Qtrial * Ns);
+    m_double_layer_general_fg_t.resize(Qtest * Ns, Qtrial * Ns);
+    m_hypersingular_coinciding_fg.resize(Qtrial * N, Qtrial * N);
+    m_hypersingular_coinciding_fg_arc.resize(Qtrial * N, Qtrial * N);
+    m_hypersingular_adjacent_fg.resize(Qtrial * N, Qtrial * N);
+    m_hypersingular_adjacent_fg_swap.resize(Qtrial * N, Qtrial * N);
+    m_hypersingular_adjacent_fg_arc.resize(Qtrial * N, Qtrial * N);
+    m_hypersingular_adjacent_fg_arc_swap.resize(Qtrial * N, Qtrial * N);
+    m_hypersingular_general_fg.resize(Qtrial * Ns, Qtrial * Ns);
+    m_hypersingular_general_fg_arc.resize(Qtrial * Ns, Qtrial * Ns);
+    m_single_layer_coinciding_fg.resize(Qtest * N, Qtest * N);
+    m_single_layer_adjacent_fg.resize(Qtest * N, Qtest * N);
+    m_single_layer_adjacent_fg_swap.resize(Qtest * N, Qtest * N);
+    m_single_layer_general_fg.resize(Qtest * Ns, Qtest * Ns);
+    for (size_t j = 0; j < Qtrial; ++j) {
+        for (size_t i = 0; i < Qtest; ++i) {
+            auto dbl_g_fg = m_double_layer_general_fg.block(i * Ns, j * Ns, Ns, Ns);
+            auto dbl_g_fg_t = m_double_layer_general_fg_t.block(i * Ns, j * Ns, Ns, Ns);
+            for (size_t J = 0; J < N; ++J) {
+                for (size_t I = 0; I < N; ++I) {
+                    double sc = m_sc(I, J), sa = m_sa(I, J), tc = m_tc(I, J), ta = m_ta(I, J);
+                    m_double_layer_coinciding_fg(i * N + I, j * N + J) =
+                        test_space.evaluateShapeFunction(i, sc) * trial_space.evaluateShapeFunction(j, tc);
+                    m_double_layer_coinciding_fg_t(i * N + I, j * N + J) =
+                        test_space.evaluateShapeFunction(i, tc) * trial_space.evaluateShapeFunction(j, sc);
+                    m_double_layer_adjacent_fg(i * N + I, j * N + J) =
+                        trial_space.evaluateShapeFunction_01_swapped(j, ta) * test_space.evaluateShapeFunction(i, sa);
+                    m_double_layer_adjacent_fg_swap(i * N + I, j * N + J) =
+                        trial_space.evaluateShapeFunction(j, ta) * test_space.evaluateShapeFunction_01_swapped(i, sa);
+                    m_double_layer_adjacent_fg_t(i * N + I, j * N + J) =
+                        trial_space.evaluateShapeFunction_01_swapped(j, sa) * test_space.evaluateShapeFunction(i, ta);
+                    m_double_layer_adjacent_fg_swap_t(i * N + I, j * N + J) =
+                        trial_space.evaluateShapeFunction(j, sa) * test_space.evaluateShapeFunction_01_swapped(i, ta);
+                    if (I < Ns && J < Ns) {
+                        double s = m_sg(I, J), t = m_tg(I, J);
+                        dbl_g_fg(I, J) =
+                            test_space.evaluateShapeFunction(i, s) * trial_space.evaluateShapeFunction(j, t);
+                        dbl_g_fg_t(I, J) =
+                            test_space.evaluateShapeFunction(i, t) * trial_space.evaluateShapeFunction(j, s);
+                    }
+                }
+            }
+        }
+        for (size_t i = 0; i < Qtrial; ++i) {
+            auto hyp_c_fg = m_hypersingular_coinciding_fg.block(i * N, j * N, N, N);
+            auto hyp_c_fg_arc = m_hypersingular_coinciding_fg_arc.block(i * N, j * N, N, N);
+            auto hyp_a_fg = m_hypersingular_adjacent_fg.block(i * N, j * N, N, N);
+            auto hyp_a_fg_swap = m_hypersingular_adjacent_fg_swap.block(i * N, j * N, N, N);
+            auto hyp_a_fg_arc = m_hypersingular_adjacent_fg_arc.block(i * N, j * N, N, N);
+            auto hyp_a_fg_arc_swap = m_hypersingular_adjacent_fg_arc_swap.block(i * N, j * N, N, N);
+            auto hyp_g_fg = m_hypersingular_general_fg.block(i * Ns, j * Ns, Ns, Ns);
+            auto hyp_g_fg_arc = m_hypersingular_general_fg_arc.block(i * Ns, j * Ns, Ns, Ns);
+            for (size_t J = 0; J < N; ++J) {
+                for (size_t I = 0; I < N; ++I) {
+                    double sc = m_sc(I, J), sa = m_sa(I, J), tc = m_tc(I, J), ta = m_ta(I, J);
+                    hyp_c_fg(I, J) =
+                        trial_space.evaluateShapeFunction(i, sc) * trial_space.evaluateShapeFunction(j, tc);
+                    hyp_c_fg_arc(I, J) =
+                        trial_space.evaluateShapeFunctionDot_01(i, sc) * trial_space.evaluateShapeFunctionDot_01(j, tc);
+                    hyp_a_fg(I, J) =
+                        trial_space.evaluateShapeFunction_01_swapped(i, sa) * trial_space.evaluateShapeFunction(j, ta);
+                    hyp_a_fg_swap(I, J) =
+                        trial_space.evaluateShapeFunction(i, sa) * trial_space.evaluateShapeFunction_01_swapped(j, ta);
+                    hyp_a_fg_arc(I, J) =
+                        trial_space.evaluateShapeFunctionDot_01_swapped(i, sa) * trial_space.evaluateShapeFunctionDot_01(j, ta);
+                    hyp_a_fg_arc_swap(I, J) =
+                        trial_space.evaluateShapeFunctionDot_01(i, sa) * trial_space.evaluateShapeFunctionDot_01_swapped(j, ta);
+                    if (I < Ns && J < Ns) {
+                        double s = m_sg(I, J), t = m_tg(I, J);
+                        hyp_g_fg(I, J) =
+                            trial_space.evaluateShapeFunction(i, s) * trial_space.evaluateShapeFunction(j, t);
+                        hyp_g_fg_arc(I, J) =
+                            trial_space.evaluateShapeFunctionDot_01(i, s) * trial_space.evaluateShapeFunctionDot_01(j, t);
+                    }
+                }
+            }
+        }
+    }
+    for (size_t i = 0; i < Qtest; ++i) {
+        for (size_t j = 0; j < Qtest; ++j) {
+            auto sng_c_fg = m_single_layer_coinciding_fg.block(i * N, j * N, N, N);
+            auto sng_a_fg = m_single_layer_adjacent_fg.block(i * N, j * N, N, N);
+            auto sng_a_fg_swap = m_single_layer_adjacent_fg_swap.block(i * N, j * N, N, N);
+            auto sng_g_fg = m_single_layer_general_fg.block(i * Ns, j * Ns, Ns, Ns);
+            for (size_t J = 0; J < N; ++J) {
+                for (size_t I = 0; I < N; ++I) {
+                    double sc = m_sc(I, J), sa = m_sa(I, J), tc = m_tc(I, J), ta = m_ta(I, J);
+                    sng_c_fg(I, J) =
+                        test_space.evaluateShapeFunction(i, sc) * test_space.evaluateShapeFunction(j, tc);
+                    sng_a_fg(I, J) =
+                        test_space.evaluateShapeFunction_01_swapped(i, sa) * test_space.evaluateShapeFunction(j, ta);
+                    sng_a_fg_swap(I, J) =
+                        test_space.evaluateShapeFunction(i, sa) * test_space.evaluateShapeFunction_01_swapped(j, ta);
+                    if (I < Ns && J < Ns) {
+                        double s = m_sg(I, J), t = m_tg(I, J);
+                        sng_g_fg(I, J) =
+                            test_space.evaluateShapeFunction(i, s) * test_space.evaluateShapeFunction(j, t);
+                    }
+                }
+            }
+        }
+    }
     indN2.resize(2 * N);
     std::iota(indN2.begin(), indN2.end(), 0);
     double_layer_interaction_matrix.resize(Qtest, Qtrial);
@@ -54,9 +195,9 @@ GalerkinMatrixBuilder::GalerkinMatrixBuilder(const ParametrizedMesh &mesh,
 // compute values required for the coinciding panels case
 inline void GalerkinMatrixBuilder::compute_coinciding(const AbstractParametrizedCurve &p) throw() {
     size_t N = CGaussQR.n;
-    std::for_each(std::execution::par_unseq, indN2.cbegin(), indN2.cbegin() + N, [&](size_t J) {
+    std::for_each(indN2.cbegin(), indN2.cbegin() + N, [&](size_t J) {
         for (size_t I = 0; I < N; ++I) {
-            double t = CGaussQR.x(J % N), s = t * (1. - CGaussQR.x(I));
+            double t = m_tc(I, J), s = m_sc(I, J);
             Eigen::Vector2d tangent_p = p.Derivative_01(t);
             Eigen::Vector2d tangent = p.Derivative_01(s);
             Eigen::Vector2d v = p[s] - p[t];
@@ -68,18 +209,25 @@ inline void GalerkinMatrixBuilder::compute_coinciding(const AbstractParametrized
             m_tangent_norm(I, J) = tangent.norm();
             m_v(I, J) = complex_t(v(0), v(1));
             m_v_norm(I, J) = v_norm;
-            m_h0(I, J) = complex_bessel::H1_0_i(arg);
-            m_h1(I, J) = complex_bessel::H1_1_i(arg);
+            if (!k_real_positive) {
+                m_h0(I, J) = 1i * complex_bessel::H1(0, arg);
+                m_h1(I, J) = 1i * complex_bessel::H1(1, arg);
+            } else m_h_arg_half(I, J) = arg.real();
         }
     });
+    if (k_real_positive) {
+        complex_bessel::H1_01_i(m_h_arg_half, m_h0_res_half, m_h1_res_half);
+        m_h0.block(0, 0, N, N) = m_h0_res_half;
+        m_h1.block(0, 0, N, N) = m_h1_res_half;
+    }
 }
 
 // compute values required for the adjacent panels case
 inline void GalerkinMatrixBuilder::compute_adjacent(const AbstractParametrizedCurve &pi, const AbstractParametrizedCurve &pi_p, bool swap) throw() {
     size_t N = CGaussQR.n;
-    std::for_each(std::execution::par_unseq, indN2.cbegin(), indN2.cend(), [&](size_t J) {
+    std::for_each(indN2.cbegin(), indN2.cend(), [&](size_t J) {
         for (size_t I = 0; I < N; ++I) {
-            double t = CGaussQR.x(I), s = t * CGaussQR.x(J % N);
+            double t = m_ta(I, J % N), s = m_sa(I, J % N);
             if (J >= N)
                 std::swap(s, t);
             Eigen::Vector2d tangent_p = swap ? -pi_p.Derivative_01_swapped(t) : pi_p.Derivative_01(t);
@@ -93,10 +241,14 @@ inline void GalerkinMatrixBuilder::compute_adjacent(const AbstractParametrizedCu
             m_tangent_norm(I, J) = tangent.norm();
             m_v(I, J) = complex_t(v(0), v(1));
             m_v_norm(I, J) = v_norm;
-            m_h0(I, J) = complex_bessel::H1_0_i(arg);
-            m_h1(I, J) = complex_bessel::H1_1_i(arg);
+            if (!k_real_positive) {
+                m_h0(I, J) = 1i * complex_bessel::H1(0, arg);
+                m_h1(I, J) = 1i * complex_bessel::H1(1, arg);
+            } else m_h_arg(I, J) = arg.real();
         }
     });
+    if (k_real_positive)
+        complex_bessel::H1_01_i(m_h_arg, m_h0, m_h1);
 }
 
 // compute values required for the disjoint panels case
@@ -112,7 +264,7 @@ inline void GalerkinMatrixBuilder::compute_general(const AbstractParametrizedCur
     auto h1_block = m_h1.block(0, 0, N, N);
     for (J = 0; J < N; ++J) {
         for (I = 0; I < N; ++I) {
-            double t = GaussQR.x(J), s = GaussQR.x(I);
+            double t = m_tg(I, J), s = m_sg(I, J);
             Eigen::Vector2d tangent_p = pi_p.Derivative_01(t);
             Eigen::Vector2d tangent = pi.Derivative_01(s);
             Eigen::Vector2d v = pi[s] - pi_p[t];
@@ -124,40 +276,43 @@ inline void GalerkinMatrixBuilder::compute_general(const AbstractParametrizedCur
             tangent_norm_block(I, J) = tangent.norm();
             v_block(I, J) = complex_t(v(0), v(1));
             v_norm_block(I, J) = v_norm;
-            h0_block(I, J) = complex_bessel::H1_0_i(arg);
-            h1_block(I, J) = complex_bessel::H1_1_i(arg);
+            if (!k_real_positive) {
+                h0_block(I, J) = 1i * complex_bessel::H1(0, arg);
+                h1_block(I, J) = 1i * complex_bessel::H1(1, arg);
+            } else m_h_arg_small(I, J) = arg.real();
         }
+    }
+    if (k_real_positive) {
+        complex_bessel::H1_01_i(m_h_arg_small, m_h0_res_small, m_h1_res_small);
+        h0_block = m_h0_res_small;
+        h1_block = m_h1_res_small;
     }
 }
 
 // compute interaction matrices for the K submatrix, coinciding panels case
 inline void GalerkinMatrixBuilder::double_layer_coinciding(int der) throw() {
-    size_t i, j, I, J, K, N = CGaussQR.n;
-    double s, t, w, fg, vdotn, v_norm, cf;
+    size_t i, j, K, N = CGaussQR.n;
+    auto v = m_v.block(0, 0, N, N);
+    auto v_norm = m_v_norm.block(0, 0, N, N);
+    auto h1 = m_h1.block(0, 0, N, N), h0 = m_h0.block(0, 0, N, N);
+    auto mask1 = (ksqrtca * v_norm) > epsilon;
+    auto mask2 = v_norm > epsilon;
+    auto otherwise = mask2.select(M_2_PI / (v_norm * v_norm), m_zero);
+    m_temp = h0 - h1 * ksqrtc * v_norm;
     for (j = 0; j < Qtrial; ++j) {
         for (i = 0; i < Qtest; ++i) {
             complex_t integral = czero, integral_der = czero, integral_der2 = czero;
             for (K = 0; K < 2; ++K) {
-                for (J = 0; J < N; ++J) {
-                    for (I = 0; I < N; ++I) {
-                        t = CGaussQR.x(J), s = t * (1. - CGaussQR.x(I)), w = t * CGaussQR.w(I) * CGaussQR.w(J);
-                        if (K > 0)
-                            std::swap(s, t);
-                        fg = test_space.evaluateShapeFunction(i, s) * trial_space.evaluateShapeFunction(j, t);
-                        const complex_t &tangent = K == 0 ? m_tangent_p(I, J) : m_tangent(I, J), &v = m_v(I, J);
-                        const complex_t &h1 = m_h1(I, J), &h0 = m_h0(I, J);
-                        vdotn = (K * 2 - 1) * (v.imag() * tangent.real() - v.real() * tangent.imag());
-                        cf = w * (K == 0 ? m_tangent_norm(I, J) : m_tangent_p_norm(I, J)) * vdotn * fg, v_norm = m_v_norm(I, J);
-                        if (ksqrtca * v_norm > epsilon) {
-                            integral += ksqrtc * h1 * cf / v_norm;
-                            if (der > 0)
-                                integral_der += ksqrtc * h0 * cf;
-                            if (der > 1)
-                                integral_der2 += (h0 - h1 * ksqrtc * v_norm) * cf;
-                        } else if (v_norm > epsilon)
-                            integral += M_2_PI * cf / (v_norm * v_norm);
-                    }
-                }
+                auto fg = (K == 0 ? m_double_layer_coinciding_fg : m_double_layer_coinciding_fg_t).block(i * N, j * N, N, N);
+                auto tangent = (K == 0 ? m_tangent_p : m_tangent).block(0, 0, N, N);
+                auto t_norm = (K == 0 ? m_tangent_norm : m_tangent_p_norm).block(0, 0, N, N);
+                m_vdotn = (K * 2 - 1) * (v.imag() * tangent.real() - v.real() * tangent.imag());
+                m_cf = m_wc * t_norm * m_vdotn * fg;
+                integral += (m_cf * mask1.select(ksqrtc * h1 / v_norm, otherwise)).sum();
+                if (der > 0)
+                    integral_der += ksqrtc * mask1.select(h0 * m_cf, m_zero).sum();
+                if (der > 1)
+                    integral_der2 += mask1.select(m_temp * m_cf, m_zero).sum();
             }
             double_layer_interaction_matrix(i, j) = integral;
             if (der > 0)
@@ -170,31 +325,28 @@ inline void GalerkinMatrixBuilder::double_layer_coinciding(int der) throw() {
 
 // compute interaction matrices for the K submatrix, adjacent panels case
 inline void GalerkinMatrixBuilder::double_layer_adjacent(bool swap, int der, bool transp) throw() {
-    size_t i, j, I, J, N = CGaussQR.n;
-    double s, t, w, fg, vdotn, v_norm, cf, sgn = transp? -1.0 : 1.0;
+    size_t i, j, K, N = CGaussQR.n;
     for (j = 0; j < Qtrial; ++j) {
         for (i = 0; i < Qtest; ++i) {
             complex_t integral = czero, integral_der = czero, integral_der2 = czero;
-            for (J = 0; J < 2 * N; ++J) {
-                for (I = 0; I < N; ++I) {
-                    t = CGaussQR.x(I), s = t * CGaussQR.x(J % N), w = t * CGaussQR.w(I) * CGaussQR.w(J % N);
-                    if (transp ? J < N : J >= N)
-                        std::swap(s, t);
-                    fg = swap ? trial_space.evaluateShapeFunction_01_swapped(j, t) * test_space.evaluateShapeFunction(i, s)
-                              : trial_space.evaluateShapeFunction(j, t) * test_space.evaluateShapeFunction_01_swapped(i, s);
-                    const complex_t &tangent = transp ? m_tangent(I, J) : m_tangent_p(I, J), &v = m_v(I, J);
-                    const complex_t &h1 = m_h1(I, J), &h0 = m_h0(I, J);
-                    vdotn = sgn * (v.real() * tangent.imag() - v.imag() * tangent.real());
-                    cf = w * (transp ? m_tangent_p_norm(I, J) : m_tangent_norm(I, J)) * vdotn * fg, v_norm = m_v_norm(I, J);
-                    if (ksqrtca * v_norm > epsilon) {
-                        integral += ksqrtc * h1 * cf / v_norm;
-                        if (der > 0)
-                            integral_der += ksqrtc * h0 * cf;
-                        if (der > 1)
-                            integral_der2 += (h0 - h1 * ksqrtc * v_norm) * cf;
-                    } else if (v_norm > epsilon)
-                        integral += M_2_PI * cf / (v_norm * v_norm);
-                }
+            for (K = 0; K < 2; ++K) {
+                auto fg = (swap ? ((transp ? K == 0 : K == 1) ? m_double_layer_adjacent_fg_swap_t
+                                                              : m_double_layer_adjacent_fg_swap)
+                                : ((transp ? K == 0 : K == 1) ? m_double_layer_adjacent_fg_t
+                                                              : m_double_layer_adjacent_fg)).block(i * N, j * N, N, N);
+                auto tangent = (transp ? m_tangent : m_tangent_p).block(0, K * N, N, N);
+                auto t_norm = (transp ? m_tangent_p_norm : m_tangent_norm).block(0, K * N, N, N);
+                auto v = m_v.block(0, K * N, N, N);
+                auto v_norm = m_v_norm.block(0, K * N, N, N);
+                auto h1 = m_h1.block(0, K * N, N, N), h0 = m_h0.block(0, K * N, N, N);
+                auto mask = (ksqrtca * v_norm) > epsilon;
+                m_vdotn = (transp? 1.0 : -1.0) * (v.imag() * tangent.real() - v.real() * tangent.imag());
+                m_cf = m_wa * t_norm * m_vdotn * fg;
+                integral += (m_cf * mask.select(ksqrtc * h1 / v_norm, (v_norm > epsilon).select(M_2_PI / (v_norm * v_norm), m_zero))).sum();
+                if (der > 0)
+                    integral_der += ksqrtc * mask.select(h0 * m_cf, m_zero).sum();
+                if (der > 1)
+                    integral_der2 += mask.select((h0 - h1 * ksqrtc * v_norm) * m_cf, m_zero).sum();
             }
             double_layer_interaction_matrix(i, j) = integral;
             if (der > 0)
@@ -207,31 +359,28 @@ inline void GalerkinMatrixBuilder::double_layer_adjacent(bool swap, int der, boo
 
 // compute interaction matrices for the K submatrix, disjoint panels case
 inline void GalerkinMatrixBuilder::double_layer_general(int der, bool transp) throw() {
-    size_t i, j, I, J, N = GaussQR.n;
-    double s, t, w, fg, vdotn, v_norm, cf, sgn = transp? -1.0 : 1.0;
+    size_t i, j, N = GaussQR.n;
+    auto tangent = (transp ? m_tangent : m_tangent_p).block(0, 0, N, N), v = m_v.block(0, 0, N, N);
+    auto t_norm = (transp ? m_tangent_p_norm : m_tangent_norm).block(0, 0, N, N);
+    auto v_norm = m_v_norm.block(0, 0, N, N);
+    auto h1 = m_h1.block(0, 0, N, N), h0 = m_h0.block(0, 0, N, N);
+    auto mask = ksqrtca * v_norm > epsilon;
+    auto cf = m_cf.block(0, 0, N, N), temp = m_temp.block(0, 0, N, N);
+    auto vdotn = m_vdotn.block(0, 0, N, N);
+    auto zmat = m_zero.block(0, 0, N, N);
+    auto otherwise = (v_norm > epsilon).select(M_2_PI / (v_norm * v_norm), zmat);
+    vdotn = (transp? -1.0 : 1.0) * (v.real() * tangent.imag() - v.imag() * tangent.real());
+    temp = h0 - h1 * ksqrtc * v_norm;
     for (j = 0; j < Qtrial; ++j) {
         for (i = 0; i < Qtest; ++i) {
             complex_t integral = czero, integral_der = czero, integral_der2 = czero;
-            for (J = 0; J < N; ++J) {
-                for (I = 0; I < N; ++I) {
-                    t = GaussQR.x(J), s = GaussQR.x(I), w = GaussQR.w(I) * GaussQR.w(J);
-                    if (transp)
-                        std::swap(s, t);
-                    fg = test_space.evaluateShapeFunction(i, s) * trial_space.evaluateShapeFunction(j, t);
-                    const complex_t &tangent = transp ? m_tangent(I, J) : m_tangent_p(I, J), &v = m_v(I, J);
-                    const complex_t &h1 = m_h1(I, J), &h0 = m_h0(I, J);
-                    vdotn = sgn * (v.real() * tangent.imag() - v.imag() * tangent.real());
-                    cf = w * (transp ? m_tangent_p_norm(I, J) : m_tangent_norm(I, J)) * vdotn * fg, v_norm = m_v_norm(I, J);
-                    if (ksqrtca * v_norm > epsilon) {
-                        integral += ksqrtc * h1 * cf / v_norm;
-                        if (der > 0)
-                            integral_der += ksqrtc * h0 * cf;
-                        if (der > 1)
-                            integral_der2 += (h0 - h1 * ksqrtc * v_norm) * cf;
-                    } else if (v_norm > epsilon)
-                        integral += M_2_PI * cf / (v_norm * v_norm);
-                }
-            }
+            auto fg = (transp ? m_double_layer_general_fg_t : m_double_layer_general_fg).block(i * N, j * N, N, N);
+            cf = m_wg * t_norm * vdotn * fg;
+            integral += (cf * mask.select(ksqrtc * h1 / v_norm, otherwise)).sum();
+            if (der > 0)
+                integral_der += ksqrtc * mask.select(h0 * cf, zmat).sum();
+            if (der > 1)
+                integral_der2 += mask.select(temp * cf, zmat).sum();
             double_layer_interaction_matrix(i, j) = integral;
             if (der > 0)
                 double_layer_der_interaction_matrix(i, j) = sqrtc * integral_der;
@@ -243,9 +392,13 @@ inline void GalerkinMatrixBuilder::double_layer_general(int der, bool transp) th
 
 // compute interaction matrices for the W submatrix, coinciding panels case
 inline void GalerkinMatrixBuilder::hypersingular_coinciding(int der) throw() {
-    size_t i, j, I, J, K, N = CGaussQR.n;
-    double t, s, w, fg, fg_arc, v_norm;
-    complex_t cf;
+    size_t i, j, K, N = CGaussQR.n;
+    auto tangent_p = m_tangent_p.block(0, 0, N, N), tangent = m_tangent.block(0, 0, N, N);
+    auto tdottp = tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real();
+    auto h0 = m_h0.block(0, 0, N, N), h1 = m_h1.block(0, 0, N, N);
+    auto v_norm = m_v_norm.block(0, 0, N, N);
+    auto mask = ksqrtca * v_norm > epsilon;
+    auto otherwise = (v_norm > epsilon).select(-M_2_PI * v_norm.log(), m_zero);
     for (j = 0; j < Qtrial; ++j) {
         for (i = 0; i < Qtrial; ++i) {
             if (i < j) { // symmetry
@@ -254,30 +407,19 @@ inline void GalerkinMatrixBuilder::hypersingular_coinciding(int der) throw() {
                     hypersingular_der_interaction_matrix(i, j) = hypersingular_der_interaction_matrix(j, i);
                 if (der > 1)
                     hypersingular_der2_interaction_matrix(i, j) = hypersingular_der2_interaction_matrix(j, i);
+                continue;
             }
             complex_t integral = czero, integral_der = czero, integral_der2 = czero;
             for (K = 0; K < 2; ++K) {
-                for (J = 0; J < N; ++J) {
-                    for (I = 0; I < N; ++I) {
-                        t = CGaussQR.x(J), s = t * (1. - CGaussQR.x(I)), w = t * CGaussQR.w(I) * CGaussQR.w(J);
-                        if (K > 0)
-                            std::swap(s, t);
-                        fg = trial_space.evaluateShapeFunction(i, s) * trial_space.evaluateShapeFunction(j, t);
-                        fg_arc = trial_space.evaluateShapeFunctionDot_01(i, s) * trial_space.evaluateShapeFunctionDot_01(j, t);
-                        const complex_t &tangent_p = m_tangent_p(I, J), &tangent = m_tangent(I, J), &h0 = m_h0(I, J), &h1 = m_h1(I, J);
-                        fg *= tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real();
-                        cf = fg_arc - kkc * fg, v_norm = m_v_norm(I, J);
-                        if (ksqrtca * v_norm > epsilon) {
-                            integral += w * h0 * cf;
-                            if (der > 0)
-                                integral_der += w * (h1 * v_norm * cf + 2.0 * h0 * ksqrtc * fg);
-                            if (der > 1) {
-                                integral_der2 += w * ((h0 * v_norm - h1 / ksqrtc) * cf * v_norm - 2.0 * fg * (2.0 * h1 * ksqrtc * v_norm - h0));
-                            }
-                        } else if (v_norm > epsilon)
-                            integral -= w * M_2_PI * log(v_norm) * cf;
-                    }
-                }
+                auto fg = m_hypersingular_coinciding_fg.block((K > 0 ? j : i) * N, (K > 0 ? i : j) * N, N, N);
+                auto fg_arc = m_hypersingular_coinciding_fg_arc.block((K > 0 ? j : i) * N, (K > 0 ? i : j) * N, N, N);
+                m_cf = fg_arc - kkc * (m_temp = fg * tdottp);
+                integral += (m_wc * m_cf * mask.select(h0, otherwise)).sum();
+                if (der > 0)
+                    integral_der += mask.select(m_wc * (h1 * v_norm * m_cf + 2.0 * h0 * ksqrtc * m_temp), m_zero).sum();
+                if (der > 1)
+                    integral_der2 += mask.select(
+                        m_wc * ((h0 * v_norm - h1 / ksqrtc) * m_cf * v_norm - 2.0 * m_temp * (2.0 * h1 * ksqrtc * v_norm - h0)), m_zero).sum();
             }
             hypersingular_interaction_matrix(i, j) = integral;
             if (der > 0)
@@ -290,33 +432,32 @@ inline void GalerkinMatrixBuilder::hypersingular_coinciding(int der) throw() {
 
 // compute interaction matrices for the W submatrix, adjacent panels case
 inline void GalerkinMatrixBuilder::hypersingular_adjacent(bool swap, int der) throw() {
-    size_t i, j, I, J, N = CGaussQR.n;
-    double t, s, w, fg, fg_arc, v_norm;
-    complex_t cf;
+    size_t i, j, K, N = CGaussQR.n;
     for (j = 0; j < Qtrial; ++j) {
         for (i = 0; i < Qtrial; ++i) {
             complex_t integral = czero, integral_der = czero, integral_der2 = czero;
-            for (J = 0; J < 2 * N; ++J) {
-                for (I = 0; I < N; ++I) {
-                    t = CGaussQR.x(I), s = t * CGaussQR.x(J % N), w = t * CGaussQR.w(I) * CGaussQR.w(J % N);
-                    if (J >= N)
-                        std::swap(s, t);
-                    fg = swap ? trial_space.evaluateShapeFunction(i, s) * trial_space.evaluateShapeFunction_01_swapped(j, t)
-                              : trial_space.evaluateShapeFunction_01_swapped(i, s) * trial_space.evaluateShapeFunction(j, t);
-                    fg_arc = swap ? trial_space.evaluateShapeFunctionDot_01(i, s) * trial_space.evaluateShapeFunctionDot_01_swapped(j, t)
-                                  : trial_space.evaluateShapeFunctionDot_01_swapped(i, s) * trial_space.evaluateShapeFunctionDot_01(j, t);
-                    const complex_t &tangent_p = m_tangent_p(I, J), &tangent = m_tangent(I, J), &h0 = m_h0(I, J), &h1 = m_h1(I, J);
-                    fg *= tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real();
-                    cf = fg_arc - kkc * fg, v_norm = m_v_norm(I, J);
-                    if (ksqrtca * v_norm > epsilon) {
-                        integral += w * h0 * cf;
-                        if (der > 0)
-                            integral_der += w * (h1 * v_norm * cf + 2.0 * h0 * ksqrtc * fg);
-                        if (der > 1)
-                            integral_der2 += w * ((h0 * v_norm - h1 / ksqrtc) * cf * v_norm - 2.0 * fg * (2.0 * h1 * ksqrtc * v_norm - h0));
-                    } else if (v_norm > epsilon)
-                        integral -= w * M_2_PI * log(v_norm) * cf;
-                }
+            for (K = 0; K < 2; ++K) {
+                auto fg = swap ? (K > 0 ? m_hypersingular_adjacent_fg.block(j * N, i * N, N, N)
+                                        : m_hypersingular_adjacent_fg_swap.block(i * N, j * N, N, N))
+                               : (K > 0 ? m_hypersingular_adjacent_fg_swap.block(j * N, i * N, N, N)
+                                        : m_hypersingular_adjacent_fg.block(i * N, j * N, N, N));
+                auto fg_arc = swap ? (K > 0 ? m_hypersingular_adjacent_fg_arc.block(j * N, i * N, N, N)
+                                            : m_hypersingular_adjacent_fg_arc_swap.block(i * N, j * N, N, N))
+                                   : (K > 0 ? m_hypersingular_adjacent_fg_arc_swap.block(j * N, i * N, N, N)
+                                            : m_hypersingular_adjacent_fg_arc.block(i * N, j * N, N, N));
+                auto tangent_p = m_tangent_p.block(0, K * N, N, N), tangent = m_tangent.block(0, K * N, N, N);
+                auto tdottp = tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real();
+                auto h0 = m_h0.block(0, K * N, N, N), h1 = m_h1.block(0, K * N, N, N);
+                auto v_norm = m_v_norm.block(0, K * N, N, N);
+                auto mask = ksqrtca * v_norm > epsilon;
+                auto otherwise = (v_norm > epsilon).select(-M_2_PI * v_norm.log(), m_zero);
+                m_cf = fg_arc - kkc * (m_temp = fg * tdottp);
+                integral += (m_wa * m_cf * mask.select(h0, otherwise)).sum();
+                if (der > 0)
+                    integral_der += mask.select(m_wa * (h1 * v_norm * m_cf + 2.0 * h0 * ksqrtc * m_temp), m_zero).sum();
+                if (der > 1)
+                    integral_der2 += mask.select(
+                        m_wa * ((h0 * v_norm - h1 / ksqrtc) * m_cf * v_norm - 2.0 * m_temp * (2.0 * h1 * ksqrtc * v_norm - h0)), m_zero).sum();
             }
             hypersingular_interaction_matrix(i, j) = integral;
             if (der > 0)
@@ -329,30 +470,27 @@ inline void GalerkinMatrixBuilder::hypersingular_adjacent(bool swap, int der) th
 
 // compute interaction matrices for the W submatrix, disjoint panels case
 inline void GalerkinMatrixBuilder::hypersingular_general(int der) throw() {
-    size_t i, j, I, J, N = GaussQR.n;
-    double t, s, w, fg, fg_arc, v_norm;
-    complex_t cf;
+    size_t i, j, N = GaussQR.n;
+    auto tangent_p = m_tangent_p.block(0, 0, N, N), tangent = m_tangent.block(0, 0, N, N);
+    auto tdottp = tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real();
+    auto h0 = m_h0.block(0, 0, N, N), h1 = m_h1.block(0, 0, N, N);
+    auto v_norm = m_v_norm.block(0, 0, N, N);
+    auto zmat = m_zero.block(0, 0, N, N);
+    auto cf = m_cf.block(0, 0, N, N);
+    auto mask = ksqrtca * v_norm > epsilon;
+    auto otherwise = (v_norm > epsilon).select(-M_2_PI * v_norm.log(), zmat);
     for (j = 0; j < Qtrial; ++j) {
         for (i = 0; i < Qtrial; ++i) {
             complex_t integral = czero, integral_der = czero, integral_der2 = czero;
-            for (I = 0; I < N; ++I) {
-                for (J = 0; J < N; ++J) {
-                    t = GaussQR.x(J), s = GaussQR.x(I), w = GaussQR.w(I) * GaussQR.w(J);
-                    fg = trial_space.evaluateShapeFunction(i, s) * trial_space.evaluateShapeFunction(j, t);
-                    fg_arc = trial_space.evaluateShapeFunctionDot_01(i, s) * trial_space.evaluateShapeFunctionDot_01(j, t);
-                    const complex_t &tangent_p = m_tangent_p(I, J), &tangent = m_tangent(I, J), &h0 = m_h0(I, J), &h1 = m_h1(I, J);
-                    fg *= tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real();
-                    cf = fg_arc - kkc * fg, v_norm = m_v_norm(I, J);
-                    if (ksqrtca * v_norm > epsilon) {
-                        integral += w * h0 * cf;
-                        if (der > 0)
-                            integral_der += w * (h1 * v_norm * cf + 2.0 * h0 * ksqrtc * fg);
-                        if (der > 1)
-                            integral_der2 += w * ((h0 * v_norm - h1 / ksqrtc) * cf * v_norm - 2.0 * fg * (2.0 * h1 * ksqrtc * v_norm - h0));
-                    } else if (v_norm > epsilon)
-                        integral -= w * M_2_PI * log(v_norm) * cf;
-                }
-            }
+            auto fg = m_hypersingular_general_fg.block(i * N, j * N, N, N);
+            auto fg_arc = m_hypersingular_general_fg_arc.block(i * N, j * N, N, N);
+            cf = fg_arc - kkc * (m_temp = fg * tdottp);
+            integral += (m_wg * cf * mask.select(h0, otherwise)).sum();
+            if (der > 0)
+                integral_der += mask.select(m_wg * (h1 * v_norm * cf + 2.0 * h0 * ksqrtc * m_temp), zmat).sum();
+            if (der > 1)
+                integral_der2 += mask.select(
+                    m_wg * ((h0 * v_norm - h1 / ksqrtc) * cf * v_norm - 2.0 * m_temp * (2.0 * h1 * ksqrtc * v_norm - h0)), zmat).sum();
             hypersingular_interaction_matrix(i, j) = integral;
             if (der > 0)
                 hypersingular_der_interaction_matrix(i, j) = -sqrtc * integral_der;
@@ -364,8 +502,13 @@ inline void GalerkinMatrixBuilder::hypersingular_general(int der) throw() {
 
 // compute interaction matrices for the V submatrix, coinciding panels case
 inline void GalerkinMatrixBuilder::single_layer_coinciding(int der) throw() {
-    size_t i, j, I, J, K, N = CGaussQR.n;
-    double t, s, w, fg, cf, v_norm;
+    size_t i, j, K, N = CGaussQR.n;
+    auto t_norm = m_tangent_norm.block(0, 0, N, N);
+    auto tp_norm = m_tangent_p_norm.block(0, 0, N, N);
+    auto v_norm = m_v_norm.block(0, 0, N, N);
+    auto h0 = m_h0.block(0, 0, N, N), h1 = m_h1.block(0, 0, N, N);
+    auto mask = ksqrtca * v_norm > epsilon;
+    auto otherwise = (v_norm > epsilon).select(-M_2_PI * v_norm.log(), m_zero);
     for (j = 0; j < Qtest; ++j) {
         for (i = 0; i < Qtest; ++i) {
             if (i < j) { // symmetry
@@ -374,27 +517,17 @@ inline void GalerkinMatrixBuilder::single_layer_coinciding(int der) throw() {
                     single_layer_der_interaction_matrix(i, j) = single_layer_der_interaction_matrix(j, i);
                 if (der > 1)
                     single_layer_der2_interaction_matrix(i, j) = single_layer_der2_interaction_matrix(j, i);
+                continue;
             }
             complex_t integral = czero, integral_der = czero, integral_der2 = czero;
             for (K = 0; K < 2; ++K) {
-                for (J = 0; J < N; ++J) {
-                    for (I = 0; I < N; ++I) {
-                        t = CGaussQR.x(J), s = t * (1. - CGaussQR.x(I)), w = t * CGaussQR.w(I) * CGaussQR.w(J);
-                        if (K > 0)
-                            std::swap(s, t);
-                        fg = test_space.evaluateShapeFunction(i, s) * test_space.evaluateShapeFunction(j, t);
-                        cf = m_tangent_p_norm(I, J) * m_tangent_norm(I, J) * fg * w, v_norm = m_v_norm(I, J);
-                        const complex_t &h0 = m_h0(I, J), &h1 = m_h1(I, J);
-                        if (ksqrtca * v_norm > epsilon) {
-                            integral += h0 * cf;
-                            if (der > 0)
-                                integral_der += h1 * v_norm * cf;
-                            if (der > 1)
-                                integral_der2 += (h1 / ksqrtc - h0 * v_norm) * v_norm * cf;
-                        } else if (v_norm > epsilon)
-                            integral -= M_2_PI * log(v_norm) * cf;
-                    }
-                }
+                auto fg = m_single_layer_coinciding_fg.block((K > 0 ? j : i) * N, (K > 0 ? i : j) * N, N, N);
+                m_cf = tp_norm * t_norm * fg * m_wc;
+                integral += (m_cf * mask.select(h0, otherwise)).sum();
+                if (der > 0)
+                    integral_der += mask.select(h1 * v_norm * m_cf, m_zero).sum();
+                if (der > 1)
+                    integral_der2 += mask.select((h1 / ksqrtc - h0 * v_norm) * v_norm * m_cf, m_zero).sum();
             }
             single_layer_interaction_matrix(i, j) = integral;
             if (der > 0)
@@ -407,29 +540,27 @@ inline void GalerkinMatrixBuilder::single_layer_coinciding(int der) throw() {
 
 // compute interaction matrices for the V submatrix, adjacent panels case
 inline void GalerkinMatrixBuilder::single_layer_adjacent(bool swap, int der) throw() {
-    size_t i, j, I, J, N = CGaussQR.n;
-    double t, s, w, fg, cf, v_norm;
+    size_t i, j, K, N = CGaussQR.n;
     for (j = 0; j < Qtest; ++j) {
         for (i = 0; i < Qtest; ++i) {
             complex_t integral = czero, integral_der = czero, integral_der2 = czero;
-            for (J = 0; J < 2 * N; ++J) {
-                for (I = 0; I < N; ++I) {
-                    t = CGaussQR.x(I), s = t * CGaussQR.x(J % N), w = t * CGaussQR.w(I) * CGaussQR.w(J % N);
-                    if (J >= N)
-                        std::swap(s, t);
-                    fg = swap ? test_space.evaluateShapeFunction(i, s) * test_space.evaluateShapeFunction_01_swapped(j, t)
-                              : test_space.evaluateShapeFunction_01_swapped(i, s) * test_space.evaluateShapeFunction(j, t);
-                    cf = m_tangent_p_norm(I, J) * m_tangent_norm(I, J) * fg * w, v_norm = m_v_norm(I, J);
-                    const complex_t &h0 = m_h0(I, J), &h1 = m_h1(I, J);
-                    if (ksqrtca * v_norm > epsilon) {
-                        integral += h0 * cf;
-                        if (der > 0)
-                            integral_der += h1 * v_norm * cf;
-                        if (der > 1)
-                            integral_der2 += (h1 / ksqrtc - h0 * v_norm) * v_norm * cf;
-                    } else if (v_norm > epsilon)
-                        integral -= M_2_PI * log(v_norm) * cf;
-                }
+            for (K = 0; K < 2; ++K) {
+                auto fg = swap ? (K > 0 ? m_single_layer_adjacent_fg.block(j * N, i * N, N, N)
+                                        : m_single_layer_adjacent_fg_swap.block(i * N, j * N, N, N))
+                               : (K > 0 ? m_single_layer_adjacent_fg_swap.block(j * N, i * N, N, N)
+                                        : m_single_layer_adjacent_fg.block(i * N, j * N, N, N));
+                auto t_norm = m_tangent_norm.block(0, K * N, N, N);
+                auto tp_norm = m_tangent_p_norm.block(0, K * N, N, N);
+                auto v_norm = m_v_norm.block(0, K * N, N, N);
+                auto h0 = m_h0.block(0, K * N, N, N), h1 = m_h1.block(0, K * N, N, N);
+                auto mask = ksqrtca * v_norm > epsilon;
+                auto otherwise = (v_norm > epsilon).select(-M_2_PI * v_norm.log(), m_zero);
+                m_cf = tp_norm * t_norm * fg * m_wa;
+                integral += (m_cf * mask.select(h0, otherwise)).sum();
+                if (der > 0)
+                    integral_der += mask.select(h1 * v_norm * m_cf, m_zero).sum();
+                if (der > 1)
+                    integral_der2 += mask.select((h1 / ksqrtc - h0 * v_norm) * v_norm * m_cf, m_zero).sum();
             }
             single_layer_interaction_matrix(i, j) = integral;
             if (der > 0)
@@ -442,27 +573,25 @@ inline void GalerkinMatrixBuilder::single_layer_adjacent(bool swap, int der) thr
 
 // compute interaction matrices for the V submatrix, disjoint panels case
 inline void GalerkinMatrixBuilder::single_layer_general(int der) throw() {
-    size_t i, j, I, J, N = GaussQR.n;
-    double t, s, w, fg, cf, v_norm;
+    size_t i, j, N = GaussQR.n;
+    auto t_norm = m_tangent_norm.block(0, 0, N, N);
+    auto tp_norm = m_tangent_p_norm.block(0, 0, N, N);
+    auto v_norm = m_v_norm.block(0, 0, N, N);
+    auto h0 = m_h0.block(0, 0, N, N), h1 = m_h1.block(0, 0, N, N);
+    auto zmat = m_zero.block(0, 0, N, N);
+    auto cf = m_cf.block(0, 0, N, N);
+    auto mask = ksqrtca * v_norm > epsilon;
+    auto otherwise = (v_norm > epsilon).select(-M_2_PI * v_norm.log(), zmat);
     for (j = 0; j < Qtest; ++j) {
         for (i = 0; i < Qtest; ++i) {
             complex_t integral = czero, integral_der = czero, integral_der2 = czero;
-            for (J = 0; J < N; ++J) {
-                for (I = 0; I < N; ++I) {
-                    t = GaussQR.x(J), s = GaussQR.x(I), w = GaussQR.w(I) * GaussQR.w(J);
-                    fg = test_space.evaluateShapeFunction(i, s) * test_space.evaluateShapeFunction(j, t);
-                    cf = m_tangent_p_norm(I, J) * m_tangent_norm(I, J) * fg * w, v_norm = m_v_norm(I, J);
-                    const complex_t &h0 = m_h0(I, J), &h1 = m_h1(I, J);
-                    if (ksqrtca * v_norm > epsilon) {
-                        integral += h0 * cf;
-                        if (der > 0)
-                            integral_der += h1 * v_norm * cf;
-                        if (der > 1)
-                            integral_der2 += (h1 / ksqrtc - h0 * v_norm) * v_norm * cf;
-                    } else if (v_norm > epsilon)
-                        integral -= M_2_PI * log(v_norm) * cf;
-                }
-            }
+            auto fg = m_single_layer_general_fg.block(i * N, j * N, N, N);
+            cf = tp_norm * t_norm * fg * m_wg;
+            integral += (cf * mask.select(h0, otherwise)).sum();
+            if (der > 0)
+                integral_der += mask.select(h1 * v_norm * cf, zmat).sum();
+            if (der > 1)
+                integral_der2 += mask.select((h1 / ksqrtc - h0 * v_norm) * v_norm * cf, zmat).sum();
             single_layer_interaction_matrix(i, j) = integral;
             if (der > 0)
                 single_layer_der_interaction_matrix(i, j) = -sqrtc * integral_der;
@@ -482,6 +611,7 @@ void GalerkinMatrixBuilder::initialize_parameters(const std::complex<double>& k_
     ksqrtc = k * sqrtc;
     ksqrtca = std::abs(ksqrtc);
     kkc = ksqrtc * ksqrtc;
+    k_real_positive = k.imag() == 0. && k.real() > 0;
 }
 
 // return true iff the panels P1 and P2 are adjacent, compute the SWAP boolean alongside

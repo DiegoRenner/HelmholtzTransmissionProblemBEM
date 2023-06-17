@@ -45,8 +45,6 @@
 #include "find_roots.hpp"
 #include "continuous_space.hpp"
 
-//#define FIND_MIN_RSVD
-
 // define shorthand for time benchmarking tools, complex data type and immaginary unit
 using namespace std::chrono;
 typedef std::complex<double> complex_t;
@@ -110,7 +108,7 @@ int main(int argc, char** argv) {
     unsigned order = atoi(argv[7]);
 
     // define accurracy of arnoldi algorithm
-    double acc = atof(argv[8]);
+    double acc = std::max(atof(argv[8]), std::numeric_limits<double>::epsilon());
 
     // define the number of subspace iterations
     int q = atoi(argv[9]);
@@ -170,13 +168,6 @@ int main(int argc, char** argv) {
         so.gen_sol_op(k_min + k_step * i, c_o, c_i, T);
         return randomized_svd::sv(T, W, q);
     });
-#ifdef FIND_MIN_RSVD
-    auto rsvd_sv = [&](double k) {
-        Eigen::MatrixXcd T;
-        so.gen_sol_op(k, c_o, c_i, T);
-        return randomized_svd::sv(T, W, q);
-    };
-#endif
     // Bracket the local minima of the rSVD curve.
     // If n_points_k is not too large, the obtained intervals will
     // contain the true minima as well (rSVD approximates them
@@ -189,14 +180,6 @@ int main(int argc, char** argv) {
         if (L < 0. && R > 0.) { // local minimum
             bracket_left.push_back(k);
             bracket_right.push_back(k + k_step * 2.0);
-#ifdef FIND_MIN_RSVD
-            int status = 0;
-            double arg, a = bracket_left.back(), b = bracket_right.back();
-            arg = local_min_rc(a, b, status, 0., epsilon_fin);
-            while (status)
-                arg = local_min_rc(a, b, status, rsvd_sv(arg), epsilon_fin);
-            rsvd_min.push_back(arg);
-#endif
         }
     }
     if (bracket_right.size() < bracket_left.size())
@@ -241,9 +224,6 @@ int main(int argc, char** argv) {
             bnd_right.push_back(b);
             loc_min.push_back(r);
             val.push_back(sv_eval(r));
-#ifdef FIND_MIN_RSVD
-            loc_min_approx.push_back(rsvd_min[i]);
-#endif
             loc_min_iter.push_back(ic);
         }
     }
@@ -257,9 +237,6 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < loc_min_count; ++i) {
         file_out << bnd_left[i] << "\t" << bnd_right[i] << "\t"
                  << loc_min[i] << "\t" << val[i] << "\t"
-#ifdef FIND_MIN_RSVD
-                 << loc_min_approx[i] << "\t"
-#endif
                  << loc_min_iter[i] << std::endl;
     }
     file_out.close();

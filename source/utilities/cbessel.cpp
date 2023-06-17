@@ -14,6 +14,7 @@
 #include <vector>
 #include <numeric>
 #include <cmath>
+#include <iostream>
 
 #define MAXITER 10000
 //#define CBESSEL_EXCEPT 1
@@ -1276,15 +1277,77 @@ namespace complex_bessel {
         }
         return H(v,z,2,scaled);
     }
-    Cplx H1_0_i(const Cplx &z,bool scaled) {
-        if (zero(imag(z)))
-            return Cplx(-y0(real(z)),j0(real(z)));
-        return i*H_v0(z,1,scaled);
+    void Bessel_JY_0(const Eigen::ArrayXXd &x,Eigen::ArrayXXd &J0,Eigen::ArrayXXd &Y0) {
+        size_t nr=x.rows(),nc=x.cols();
+        Eigen::Index max_i,max_j;
+        x.maxCoeff(&max_i,&max_j);
+        Eigen::ArrayXXd x_2=x/2.0,x2_4=x_2.square(),t,log_x_2_plus_gamma=x_2.log()-D[9];
+        t.setOnes(nr,nc);
+        J0.setOnes();
+        Y0.setZero();
+        unsigned int k=1,maxiter=MAXITER;
+        double Hk=0;
+        do {
+            t*=x2_4;
+            Hk+=1.0/k;
+            t/=-k*k;
+            J0+=t;
+            Y0-=Hk*t;
+        } while (std::abs(t(max_i,max_j))>eps && k++<maxiter);
+        Y0+=log_x_2_plus_gamma*J0;
+        Y0*=M_2_PI;
     }
-    Cplx H1_1_i(const Cplx &z,bool scaled) {
-        if (zero(imag(z)))
-            return Cplx(-y1(real(z)),j1(real(z)));
-        return i*H_v1(z,1,scaled);
+    void Bessel_JY_01(const Eigen::ArrayXXd &x,Eigen::ArrayXXd &J0,Eigen::ArrayXXd &Y0,Eigen::ArrayXXd &J1,Eigen::ArrayXXd &Y1) {
+        size_t nr=x.rows(),nc=x.cols();
+        Eigen::Index max_i,max_j;
+        x.maxCoeff(&max_i,&max_j);
+        Eigen::ArrayXXd x2_4=x.square()/4.0,t,log_x_2_plus_gamma=(x/2.0).log()-D[9];
+        t.setOnes(nr,nc);
+        J0.setOnes();
+        J1.setOnes();
+        Y0.setZero();
+        Y1.setZero();
+        double Hk=0,k=1.0,maxiter=MAXITER;
+        do {
+            t*=-x2_4/(k*k);
+            Hk+=1.0/k;
+            J0+=t;
+            Y0-=Hk*t;
+            k+=1.0;
+            J1+=t/k;
+            Y1-=(Hk/k)*t;
+        } while (Hk*std::abs(t(max_i,max_j))>eps && k<=maxiter);
+        J1*=x/2.0;
+        Y0+=log_x_2_plus_gamma*J0;
+        Y0*=M_2_PI;
+        Y1*=x;
+        Y1+=2.0*(log_x_2_plus_gamma*J1+(J0-2.0)/x);
+        Y1*=M_1_PI;
+    }
+    void H1_0(const Eigen::ArrayXXd &x,Eigen::ArrayXXcd &h0) {
+        size_t nr=x.rows(),nc=x.cols();
+        Eigen::ArrayXXd J0(nr,nc),Y0(nr,nc),J1(nr,nc),Y1(nr,nc);
+        Bessel_JY_01(x,J0,Y0,J1,Y1);
+        h0.real()=J0;
+        h0.imag()=Y0;
+    }
+    void H1_01(const Eigen::ArrayXXd &x,Eigen::ArrayXXcd &h0,Eigen::ArrayXXcd &h1) {
+        size_t nr=x.rows(),nc=x.cols();
+        Eigen::ArrayXXd J0(nr,nc),Y0(nr,nc),J1(nr,nc),Y1(nr,nc);
+        Bessel_JY_01(x,J0,Y0,J1,Y1);
+        h0.real()=J0;
+        h0.imag()=Y0;
+        h1.real()=J1;
+        h1.imag()=Y1;
+    }
+    void H1_01_i(const Eigen::ArrayXXd &x,Eigen::ArrayXXcd &h0,Eigen::ArrayXXcd &h1) {
+        size_t nr=x.rows(),nc=x.cols();
+        Eigen::ArrayXXd J0(nr,nc),Y0(nr,nc),J1(nr,nc),Y1(nr,nc);
+        Bessel_JY_01(x,J0,Y0,J1,Y1);
+        h0.real()=-Y0;
+        h0.imag()=J0;
+        h1.real()=-Y1;
+        h1.imag()=J1;
     }
 
     /* n-th derivative of Bessel function f_v(z) */
