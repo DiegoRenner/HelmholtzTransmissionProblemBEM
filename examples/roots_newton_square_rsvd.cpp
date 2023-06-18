@@ -255,7 +255,7 @@ int main(int argc, char** argv) {
     // Arnoldi iterations with Newton-Raphson method.
     // The builder created at the beginning is used for solutions operator
     // assembly so that it is not created and destroyed in each pass.
-    int ic = (int)std::round(-log10(epsilon_fin)/2. - 1.); // number of Newton iterations
+    int ic = 1 + (int)std::round(-log10(epsilon_fin)/2. - 1.); // number of Newton iterations
 #ifdef CMDL
     std::cout << "Refining with Newton's method (" << ic << " iterations)..." << std::endl;
 #endif

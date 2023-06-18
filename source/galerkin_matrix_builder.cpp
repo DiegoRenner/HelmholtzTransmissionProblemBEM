@@ -2,6 +2,7 @@
 #include "cbessel.hpp"
 #include <numeric>
 #include <iostream>
+#include <execution>
 
 using namespace std::complex_literals;
 
@@ -94,13 +95,13 @@ GalerkinMatrixBuilder::GalerkinMatrixBuilder(const ParametrizedMesh &mesh,
                     m_double_layer_coinciding_fg_t(i * N + I, j * N + J) =
                         test_space.evaluateShapeFunction(i, tc) * trial_space.evaluateShapeFunction(j, sc);
                     m_double_layer_adjacent_fg(i * N + I, j * N + J) =
-                        trial_space.evaluateShapeFunction_01_swapped(j, ta) * test_space.evaluateShapeFunction(i, sa);
+                        trial_space.evaluateShapeFunction_01_swapped(i, sa) * test_space.evaluateShapeFunction(j, ta);
                     m_double_layer_adjacent_fg_swap(i * N + I, j * N + J) =
-                        trial_space.evaluateShapeFunction(j, ta) * test_space.evaluateShapeFunction_01_swapped(i, sa);
+                        trial_space.evaluateShapeFunction(i, sa) * test_space.evaluateShapeFunction_01_swapped(j, ta);
                     m_double_layer_adjacent_fg_t(i * N + I, j * N + J) =
-                        trial_space.evaluateShapeFunction_01_swapped(j, sa) * test_space.evaluateShapeFunction(i, ta);
+                        trial_space.evaluateShapeFunction_01_swapped(i, ta) * test_space.evaluateShapeFunction(j, sa);
                     m_double_layer_adjacent_fg_swap_t(i * N + I, j * N + J) =
-                        trial_space.evaluateShapeFunction(j, sa) * test_space.evaluateShapeFunction_01_swapped(i, ta);
+                        trial_space.evaluateShapeFunction(i, ta) * test_space.evaluateShapeFunction_01_swapped(j, sa);
                     if (I < Ns && J < Ns) {
                         double s = m_sg(I, J), t = m_tg(I, J);
                         dbl_g_fg(I, J) =
@@ -195,7 +196,7 @@ GalerkinMatrixBuilder::GalerkinMatrixBuilder(const ParametrizedMesh &mesh,
 // compute values required for the coinciding panels case
 inline void GalerkinMatrixBuilder::compute_coinciding(const AbstractParametrizedCurve &p) throw() {
     size_t N = CGaussQR.n;
-    std::for_each(indN2.cbegin(), indN2.cbegin() + N, [&](size_t J) {
+    std::for_each(std::execution::par_unseq, indN2.cbegin(), indN2.cbegin() + N, [&](size_t J) {
         for (size_t I = 0; I < N; ++I) {
             double t = m_tc(I, J), s = m_sc(I, J);
             Eigen::Vector2d tangent_p = p.Derivative_01(t);
@@ -225,7 +226,7 @@ inline void GalerkinMatrixBuilder::compute_coinciding(const AbstractParametrized
 // compute values required for the adjacent panels case
 inline void GalerkinMatrixBuilder::compute_adjacent(const AbstractParametrizedCurve &pi, const AbstractParametrizedCurve &pi_p, bool swap) throw() {
     size_t N = CGaussQR.n;
-    std::for_each(indN2.cbegin(), indN2.cend(), [&](size_t J) {
+    std::for_each(std::execution::par_unseq, indN2.cbegin(), indN2.cend(), [&](size_t J) {
         for (size_t I = 0; I < N; ++I) {
             double t = m_ta(I, J % N), s = m_sa(I, J % N);
             if (J >= N)
