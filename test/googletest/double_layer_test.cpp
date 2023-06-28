@@ -70,4 +70,3 @@ TEST(DoubleLayerTest, compare_row) {
     ASSERT_TRUE((K-K_expected).lpNorm<2>() < 5*1e-4);
     fp_data.close();
 }
-

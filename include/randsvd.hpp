@@ -35,12 +35,34 @@ namespace randomized_svd {
      * subspace iterations (by default 0).
      *
      * @param T an invertible matrix
-     * @param W a thin Gaussian random matrix (2 columns is enough)
+     * @param R a thin Gaussian random matrix (2 columns is enough)
      * @param q a positive integer (optional number of subspace iterations)
      */
-    double sv(const Eigen::MatrixXcd &T, const Eigen::MatrixXcd &W, int q = 0);
+    double sv(const Eigen::MatrixXcd &T, const Eigen::MatrixXcd &R, int q = 0);
 
-    Eigen::Vector2d sv_der(const Eigen::MatrixXcd &T, const Eigen::MatrixXcd &T_der, const Eigen::MatrixXcd &W, int q = 0);
+    /**
+     * This function returns a vector with two elements, an approximation of
+     * the smallest singular value of the given matrix and its derivative.
+     *
+     * @param T an invertible matrix
+     * @param T_der the first derivative of T
+     * @param R a thin Gaussian random matrix (2 columns is enough)
+     * @param q a positive integer (optional number of subspace iterations)
+     */
+    Eigen::Vector2d sv_der(const Eigen::MatrixXcd &T, const Eigen::MatrixXcd &T_der, const Eigen::MatrixXcd &R, int q = 0);
+
+    /**
+     * This function returns a vector with three elements, an approximation
+     * of the smallest singular value of the given matrix and its first two
+     * derivatives.
+     *
+     * @param T an invertible matrix
+     * @param T_der the first derivative of T
+     * @param T_der2 the second derivative of T
+     * @param R a thin Gaussian random matrix (2 columns is enough)
+     * @param q a positive integer (optional number of subspace iterations)
+     */
+    Eigen::Vector3d sv_der2(const Eigen::MatrixXcd &T, const Eigen::MatrixXcd &T_der, const Eigen::MatrixXcd T_der2, const Eigen::MatrixXcd &R, int q);
 }
 
 #endif // RANDSVD_HPP

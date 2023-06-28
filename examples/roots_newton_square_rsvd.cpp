@@ -33,23 +33,19 @@
 #include <algorithm>
 #include <string>
 #include "parametrized_line.hpp"
-#include "singular_values_arnoldi.hpp"
+//#include "singular_values_arnoldi.hpp"
 #include "find_roots.hpp"
 #include "gen_sol_op.hpp"
 #include "randsvd.hpp"
 #include "find_roots.hpp"
 #include "continuous_space.hpp"
 
-//#define BRENT_REFINE
+#define REFINE
 
 // define shorthand for time benchmarking tools, complex data type and immaginary unit
 using namespace std::chrono;
 typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
-
-// tolerance when finding root
-double epsilon_fin = 1e-6;
-int MAX_CORR = 1 + (int)std::ceil(log2(1.0 / epsilon_fin));
 
 int main(int argc, char** argv) {
 
@@ -124,14 +120,11 @@ int main(int argc, char** argv) {
     //file_out.open(file_plot, std::ofstream::out | std::ofstream::trunc);
     //file_out.close();
 
-    int nc = 2;
+    int nc = 10;
     int nr = 2 * numpanels;
     Eigen::MatrixXcd W = randomized_svd::randGaussian(nr, nc);
 
     double k_max = 10.0, k_step = (k_max - k_min) / (n_points_k - 1);
-
-    std::vector<size_t> ind(n_points_k), loc_min_pos;
-    std::vector<double> rsv(n_points_k), loc_min, bracket_left, bracket_right;
 
     // Inform user of started computation.
 #ifdef CMDL
@@ -146,11 +139,14 @@ int main(int argc, char** argv) {
     SolutionsOperator so(mesh, order, cont_space, cont_space);
     GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, so.get_GaussQR(), so.get_CGaussQR());
 
-    std::iota(ind.begin(), ind.end(), 0);
     auto tic = high_resolution_clock::now();
 #ifdef CMDL
-    std::cout << "Approximating local extrema with randomized SVD..." << std::endl;
+    std::cout << "Bracketing local extrema..." << std::endl;
 #endif
+
+    std::vector<size_t> ind(n_points_k);
+    std::vector<double> rsv(n_points_k), loc_min, pos_left, val, val_left, val_right;
+    std::iota(ind.begin(), ind.end(), 0);
 
     // Sweep the k interval with subdivision of size n_points_k, do this in parallel.
     // For each value k, approximate the smallest singular value by using rSVD.
@@ -167,170 +163,134 @@ int main(int argc, char** argv) {
     // However, if n_points_k is too small, some minima may
     // be missed or the curve may not be convex in the intervals.
     for (size_t i = 0; i < rsv.size() - 2; ++i) {
-        double &c = rsv[i+1], L = c - rsv[i], R = rsv[i+2] - c;
+        double &c = rsv[i+1], L = rsv[i], R = rsv[i+2];
         double k = k_min + i * k_step;
-        if (L < 0. && R > 0.) { // local minimum
-            bracket_left.push_back(k);
-            loc_min_pos.push_back(i + 1);
-            bracket_right.push_back(k + k_step * 2.0);
+        if (L - c > 0. && R - c > 0.) { // local minimum
+            pos_left.push_back(k);
+            val.push_back(c);
+            val_left.push_back(L);
+            val_right.push_back(R);
         }
     }
-    size_t disc = 0, loc_min_count = bracket_left.size(); // number of local minima
+    size_t disc = 0, loc_min_count = pos_left.size(); // number of local minima
 #ifdef CMDL
     std::cout << "Found " << loc_min_count << " candidates. Validating..." << std::endl;
 #endif
 
+    auto sv_der = [&](double k) {
+        Eigen::MatrixXcd T, T_der;
+        so.gen_sol_op_1st_der(k, c_o, c_i, T, T_der);
+        return randomized_svd::sv_der(T, T_der, W, q)(1);
+    };
+    auto sv_der2 = [&](double k) {
+        Eigen::MatrixXcd T, T_der, T_der2;
+        Eigen::MatrixXd res(1, 2);
+        so.gen_sol_op_2nd_der(k, c_o, c_i, T, T_der, T_der2);
+        auto v = randomized_svd::sv_der2(T, T_der, T_der2, W, q);
+        res(0, 0) = v(1);
+        res(0, 1) = v(2);
+        return res;
+    };
+
     // Discard candidates which do not approximate local minima
-    unsigned N = 2 * numpanels;
-    Eigen::MatrixXcd Tall(N, N * loc_min_count), Tall_right(N, N * loc_min_count);
-    Eigen::MatrixXcd Tall_der(N, N * loc_min_count), Tall_der_right(N, N * loc_min_count);
     ind.resize(loc_min_count);
     std::iota(ind.begin(), ind.end(), 0);
-    std::for_each(std::execution::par, ind.cbegin(), ind.cend(), [&](size_t i) {
-        Eigen::MatrixXcd T_left, T_right, T_der_left, T_der_right;
-        so.gen_sol_op_1st_der(bracket_left[i], c_o, c_i, T_left, T_der_left);
-        so.gen_sol_op_1st_der(bracket_right[i], c_o, c_i, T_right, T_der_right);
-        Tall.block(0, i * N, N, N) = T_left;
-        Tall_right.block(0, i * N, N, N) = T_right;
-        Tall_der.block(0, i * N, N, N) = T_der_left;
-        Tall_der_right.block(0, i * N, N, N) = T_der_right;
-    });
-    for (size_t i = loc_min_count; i--> 0;) {
-        const Eigen::MatrixXcd &T = Tall.block(0, i * N, N, N), &T_der = Tall_der.block(0, i * N, N, N);
-        const Eigen::MatrixXcd &T_right = Tall_right.block(0, i * N, N, N), &T_der_right = Tall_der_right.block(0, i * N, N, N);
-        if (arnoldi::sv_1st_der(T, T_der, 1, acc)(0, 1) * arnoldi::sv_1st_der(T_right, T_der_right, 1, acc)(0, 1) > 0.) {
-            bracket_left.erase(bracket_left.begin() + i);
-            bracket_right.erase(bracket_right.begin() + i);
-            loc_min_pos.erase(loc_min_pos.begin() + i);
-            loc_min_count--;
-            disc++;
-        }
-    }
-#ifdef CMDL
-    if (disc > 0)
-        std::cout << "Discarded " << disc << " candidates." << std::endl;
-#endif
-
-    loc_min.resize(loc_min_count);
-#ifdef BRENT_REFINE
-    // Find approximations of local minima by using Brent's algorithm.
-#ifdef CMDL
-    std::cout << "Refining with Brent's method..." << std::endl;
-#endif
-    ind.resize(loc_min_count);
-    auto rsvd_sv = [&](double k) {
-        Eigen::MatrixXcd T;
-        so.gen_sol_op(builder, k, c_o, c_i, T);
-        return randomized_svd::sv(T, W, q);
-    };
-    std::transform(ind.cbegin(), ind.cend(), loc_min.begin(), [&](size_t i) {
-        int status = 0;
-        double arg, a = bracket_left[i], b = bracket_right[i];
-        BrentMinimizer brent_minimizer(a, b, epsilon_fin);
-        arg = brent_minimizer.local_min_rc(status, 0.);
-        while (status)
-            arg = brent_minimizer.local_min_rc(status, rsvd_sv(arg));
-        return arg;
-    });
-#else
-    for (size_t i = 0; i < loc_min_count; ++i) {
-        size_t p = loc_min_pos[i];
-        loc_min[i] = k_min + p * k_step;
-#if 0
-        if (p > 1 && p < n_points_k - 1) {
-            double num = -rsv[p - 2] + 8. * rsv[p - 1] - 8. * rsv[p + 1] + rsv[p + 2];
-            double den = -rsv[p - 2] + 16. * rsv[p - 1] -30. * rsv[p] + 16. * rsv[p + 1] - rsv[p + 2];
-            double pos = loc_min[i] - k_step * num / den;
-            if (std::abs(loc_min[i] - pos) < k_step)
-                loc_min[i] = pos;
-        }
-#endif
-    }
-#endif
-
-#ifdef CMDL
-    std::cout << "Found approximate locations of " << loc_min_count << " local minima." << std::endl;
-#endif
-    // Search for true minima in the bracketed regions by using
-    // Arnoldi iterations with Newton-Raphson method.
-    // The builder created at the beginning is used for solutions operator
-    // assembly so that it is not created and destroyed in each pass.
-    int ic = 1 + (int)std::round(-log10(epsilon_fin)/2. - 1.); // number of Newton iterations
-#ifdef CMDL
-    std::cout << "Refining with Newton's method (" << ic << " iterations)..." << std::endl;
-#endif
-    Eigen::MatrixXcd Tall_der2 (N, N * loc_min_count);
-    disc = 0;
-    for (size_t j = 0; j < ic; ++j) {
-        std::for_each(std::execution::par, ind.cbegin(), ind.cend(), [&](size_t i) {
-            Eigen::MatrixXcd T, T_der, T_der2;
-            so.gen_sol_op_2nd_der(loc_min[i], c_o, c_i, T, T_der, T_der2);
-            Tall.block(0, i * N, N, N) = T;
-            Tall_der.block(0, i * N, N, N) = T_der;
-            Tall_der2.block(0, i * N, N, N) = T_der2;
-        });
+    std::vector<bool> accept(loc_min_count, false);
+    std::vector<double> der_left(loc_min_count), der_right(loc_min_count);
+    auto discard_candidates = [&]() {
         for (size_t i = loc_min_count; i--> 0;) {
-            Eigen::MatrixXcd T = Tall.block(0, i * N, N, N);
-            Eigen::MatrixXcd T_der = Tall_der.block(0, i * N, N, N);
-            Eigen::MatrixXcd T_der2 = Tall_der2.block(0, i * N, N, N);
-            double a = bracket_left[i], b = bracket_right[i], update = NAN, d1, d2;
-            if (b - a < epsilon_fin)
-                continue; // refinement done by bisection
-            size_t corr_count = 0;
-            while (true) {
-                auto der = arnoldi::sv_2nd_der(T, T_der, T_der2, 1, acc).block(0, 1, 1, 2);
-                if (update == update) {
-                    if (der(0, 0) < 0. && d1 > 0.)
-                        a = update, b = loc_min[i];
-                    else if (der(0, 0) > 0. && d1 < 0.)
-                        a = loc_min[i], b = update;
-                    else if (d1 > 0.)
-                        b = update;
-                    else a = update;
-                    bracket_left[i] = a;
-                    bracket_right[i] = b;
-                    if (b - a < epsilon_fin) {
-                        loc_min[i] = (a + b) / 2.;
-                        break;
-                    }
-                    loc_min[i] = update;
-                }
-                d1 = der(0, 0);
-                d2 = der(0, 1);
-                double k = loc_min[i] - d1 / d2;
-                if (k > b || k < a) {
-                    ++corr_count;
-                    if (corr_count > MAX_CORR)
-                        break; // discard this candidate
-                    // bisect and recompute solutions matrix and derivatives,
-                    // then do Newton step again
-                    if (d1 < 0.)
-                        update = (loc_min[i] + b) / 2.;
-                    else update = (loc_min[i] + a) / 2.;
-                    so.gen_sol_op_2nd_der(builder, update, c_o, c_i, T, T_der, T_der2);
-                } else {
-                    // Newton step accepted
-                    loc_min[i] = k;
-                    break;
-                }
-            }
-            if (corr_count > MAX_CORR) {
-                // discard candidate
-                loc_min.erase(loc_min.begin() + i);
-                ind.erase(ind.begin() + i);
-                bracket_left.erase(bracket_left.begin() + i);
-                bracket_right.erase(bracket_right.begin() + i);
+            if (!accept[i]) {
+                pos_left.erase(pos_left.begin() + i);
+                der_left.erase(der_left.begin() + i);
+                der_right.erase(der_right.begin() + i);
+                val.erase(val.begin() + i);
+                val_left.erase(val_left.begin() + i);
+                val_right.erase(val_right.begin() + i);
                 loc_min_count--;
                 disc++;
             }
         }
+    };
+    std::for_each(std::execution::par, ind.cbegin(), ind.cend(), [&](size_t i) {
+        der_left[i] = sv_der(pos_left[i]);
+        der_right[i] = sv_der(pos_left[i] + 2 * k_step);
+        accept[i] = der_left[i] < 0. && der_right[i] > 0.;
+    });
+    if (disc > 0) {
+        discard_candidates();
+#ifdef CMDL
+        std::cout << "Discarded " << disc << " candidate(s)." << std::endl;
+#endif
+    }
+    loc_min.resize(loc_min_count);
+    ind.resize(loc_min_count);
+
+#ifdef REFINE
+    // Refine approximations of local minima using the interpolated quartic
+#ifdef CMDL
+    std::cout << "Improving candidates..." << std::endl;
+#endif
+    std::transform(ind.cbegin(), ind.cend(), loc_min.begin(), [&](size_t i) {
+        int status = 0;
+        double arg, h = k_step, a = pos_left[i], b = pos_left[i] + 2 * h;
+        double f1 = val_left[i], f2 = val_right[i], f0 = val[i];
+        double d1 = der_left[i], d2 = der_right[i];
+        double scale = 0.25 * pow(h, -4), a2 = pow(a, 2);
+        double p1 = a2 * (h * (d2 - d1) - 2. * (f1 + f2 - 2. * f0));
+        double p2 = a * h * (h * (3. * d2 - 5. * d1) - (9. * f1 + 7. * f2 - 16. * f0));
+        double p3 = pow(h, 2) * (2. * h * (d2 - 4. * d1) - (11. * f1 + 5. * f2 - 16. * f0));
+        double A = scale * p1 / a2;
+        double B = -scale * (4. * p1 + p2) / a;
+        double C = scale * (6. * p1 + 3 * p2 + p3);
+        double D = d1 - scale * a * (4. * p1 + 3. * p2 + 2. * p3);
+        double E = f1 - a * d1 + scale * a2 * (p1 + p2 + p3);
+        BrentMinimizer brent_minimizer(a, b, acc);
+        arg = brent_minimizer.local_min_rc(status, 0.);
+        while (status) {
+            double p = (((A * arg + B) * arg + C) * arg + D) * arg + E;
+            arg = brent_minimizer.local_min_rc(status, p);
+        }
+        return arg;
+    });
+#endif
+
+#ifdef CMDL
+    std::cout //<< "Found approximate locations of " << loc_min_count << " local minima." << std::endl
+              << "Starting local search..." << std::endl;
+#endif
+    // Search for minima in the bracketed regions by using Newton-Raphson method
+    disc = 0;
+    unsigned ict = 0;
+    accept.resize(loc_min_count);
+    std::for_each(std::execution::par, ind.cbegin(), ind.cend(), [&](size_t i) {
+        unsigned ic;
+        bool rf;
+        auto fn = [&](double x) {
+            if (x == x)
+                return double(NAN);
+#ifdef REFINE
+            return loc_min[i];
+#else
+            return pos_left[i] + k_step;
+#endif
+        };
+        loc_min[i] = rtsafe(fn, sv_der2, pos_left[i], pos_left[i] + 2 * k_step, acc, rf, ic);
+        ict += ic;
+        accept[i] = rf;
+        if (!rf) ++disc;
+    });
+    if (disc > 0) {
+        discard_candidates();
+#ifdef CMDL
+        std::cout << "Discarded " << disc << " candidate(s)." << std::endl;
+#endif
     }
 #ifdef CMDL
-    if (disc > 0)
-        std::cout << "Discarded " << disc << " candidates." << std::endl;
+    std::cout << "Total Newton iterations taken: " << ict << std::endl;
 #endif
     // output results to file
     file_out.open(file_minimas, std::ios_base::app);
+    file_out << std::setprecision((int)std::ceil(-std::log10(acc)));
     loc_min_count = loc_min.size();
     for (size_t i = 0; i < loc_min_count; ++i)
         file_out << loc_min[i] << std::endl;

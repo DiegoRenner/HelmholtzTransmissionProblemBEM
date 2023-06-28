@@ -31,6 +31,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <execution>
 #include "parametrized_line.hpp"
 #include "singular_values_arnoldi.hpp"
 #include "find_roots.hpp"
@@ -122,58 +123,43 @@ int main(int argc, char** argv){
     ContinuousSpace<1> cont_space;
     SolutionsOperator so(mesh, order, cont_space, cont_space);
 
+    auto sv_eval = [&] (double k_in) {
+        Eigen::MatrixXcd T_in;
+        so.gen_sol_op(k_in, c_o, c_i, T_in);
+        return arnoldi::sv(T_in, 1, acc)(m);
+    };
+    auto sv_eval_both = [&] (double k_in) {
+        Eigen::MatrixXcd T_in, T_der_in, T_der2_in;
+        so.gen_sol_op_2nd_der(k_in, c_o, c_i, T_in, T_der_in, T_der2_in);
+        Eigen::MatrixXd res = arnoldi::sv_2nd_der(T_in, T_der_in, T_der2_in, 1, acc).block(m,1,1,2);
+        return res;
+    };
+    auto sv_eval_der = [&] (double k_in) {
+        Eigen::MatrixXcd T_in, T_der_in;
+        so.gen_sol_op_1st_der(k_in, c_o, c_i, T_in, T_der_in);
+        double res = arnoldi::sv_1st_der(T_in, T_der_in, 1, acc)(m,1);
+        return res;
+    };
+
     // loop over values of wavenumber
     auto tic = high_resolution_clock::now();
-    for (unsigned j = 0; j < n_points_x; j++) {
+    std::vector<int> jv(n_points_x);
+    std::iota(jv.begin(), jv.end(), 0);
+    std::for_each(std::execution::seq, jv.cbegin(), jv.cend(), [&](int j) {
         for (unsigned k = 0; k < n_points_y; k++) {
-            auto duration_ops = milliseconds ::zero();
-            auto duration = milliseconds::zero();
 
             // define wavenumber for current loop
             complex_t k_temp = (k_0+j*h_x+ii*double(k)*h_y);
 
-            // set which singular values to evaluate, smallest only
-            unsigned count = 1;
-
             // define functions that return singular value and it's derivative
-            auto sv_eval = [&] (double k_in) {
-                auto start = high_resolution_clock::now();
-                Eigen::MatrixXcd T_in;
-                so.gen_sol_op(k_in, c_o, c_i, T_in);
-                auto end = high_resolution_clock::now();
-                duration_ops += duration_cast<milliseconds>(end-start);
-                return arnoldi::sv(T_in, count, acc)(m);
-            };
-            auto sv_eval_both = [&] (double k_in) {
-                auto start = high_resolution_clock::now();
-                Eigen::MatrixXcd T_in, T_der_in, T_der2_in;
-                so.gen_sol_op_2nd_der(k_in, c_o, c_i, T_in, T_der_in, T_der2_in);
-                Eigen::MatrixXd res = arnoldi::sv_2nd_der(T_in, T_der_in, T_der2_in, count, acc).block(m,1,1,2);
-                auto end = high_resolution_clock::now();
-                duration_ops += duration_cast<milliseconds>(end-start);
-                return res;
-            };
-            auto sv_eval_der = [&] (double k_in) {
-                auto start = high_resolution_clock::now();
-                Eigen::MatrixXcd T_in, T_der_in;
-                so.gen_sol_op_1st_der(k_in, c_o, c_i, T_in, T_der_in);
-                double res = arnoldi::sv_1st_der(T_in, T_der_in, count, acc)(m,1);
-                auto end = high_resolution_clock::now();
-                duration_ops += duration_cast<milliseconds>(end-start);
-                return res;
-            };
-
             bool root_found = false;
             unsigned num_iter=0;
-            auto start = high_resolution_clock::now();
 	    
 			// search for root
 			#ifdef CMDL
             std::cout << "#######################################################" << std::endl;
 			#endif
             double root =  rtsafe(sv_eval_der,sv_eval_both,k_temp.real(), k_temp.real()+h_x,epsilon_fin,root_found,num_iter);
-            auto end = high_resolution_clock::now();
-            duration += duration_cast<milliseconds>(end-start);
 	    
 			#ifdef CMDL
 			// write interval searched to command line
@@ -209,7 +195,7 @@ int main(int argc, char** argv){
 			std::cout << std::endl;
 			#endif
         }
-    }
+    });
     auto toc = high_resolution_clock::now();
 #ifdef CMDL
     std::cout << "Total time: " << duration_cast<seconds>(toc - tic).count() << std::endl;

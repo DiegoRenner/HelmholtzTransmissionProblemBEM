@@ -122,33 +122,39 @@ double rtsafe(std::function<double(double)> fct,
     double temp,xh,xl,rts;
     fl = fct(x1);
     fh = fct(x2);
-    // sanity checks
-    if (fl * fh > 0.) {
-#ifdef CMDL
-        std::cout << "Root must be bracketed in rtsafe" << std::endl;
-#endif
-        if (fl > fh)
+    if (fl == fl && fh == fh) {
+        // sanity checks
+        if (fl * fh > 0.) {
+    #ifdef CMDL
+            std::cout << "Root must be bracketed in rtsafe" << std::endl;
+    #endif
+            if (fl > fh)
+                return x1;
+            return x2;
+        }
+        if (fl == 0.0) {
+            root_found = true;
             return x1;
-        return x2;
-    }
-    if (fl == 0.0) {
-        root_found = true;
-        return x1;
-    }
-    if (fh == 0.0) {
-        root_found = true;
-        return x2;
-    }
-    // assign boundaries s.t f(xl) < 0
-    if (fl < 0.0) {
+        }
+        if (fh == 0.0) {
+            root_found = true;
+            return x2;
+        }
+        // assign boundaries s.t f(xl) < 0
+        if (fl < 0.0) {
+            xl=x1;
+            xh=x2;
+        } else {
+            xh=x1;
+            xl=x2;
+        }
+        rts=0.5*(x1+x2); // first guess
+    } else {
+        rts=fct(NAN); // initial guess is returned by fct
         xl=x1;
         xh=x2;
-    } else {
-        xh=x1;
-        xl=x2;
     }
-    // set first guess for root, lest step, and "step before last"
-    rts=0.5*(x1+x2);
+    // set last step and "step before last"
     dxold=fabs(x2-x1);
     dx=dxold;
     // initialize functions and derivative value
@@ -164,7 +170,7 @@ double rtsafe(std::function<double(double)> fct,
             dx=0.5*(xh-xl);
             rts=xl+dx;
             // if change in root is negligible assume convergence
-            if (xl == rts) {
+            if (fabs(xl-rts) < EPS) {
                 root_found = true;
                 num_iter = j;
                 return rts;
@@ -202,7 +208,7 @@ double rtsafe(std::function<double(double)> fct,
     std::cout << "Maximum number of iterations exceeded in rtsafe" << std::endl;
 #endif
     // should never be reached
-    return 0.0;
+    return NAN;
 };
 
 

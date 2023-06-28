@@ -70,4 +70,3 @@ TEST(SingleLayerTest, compare_row) {
     // compare known solution operator from file with computed one
     ASSERT_TRUE((V-V_expected).lpNorm<2>() < 5e-4);
 }
-

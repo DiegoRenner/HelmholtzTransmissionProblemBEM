@@ -10,6 +10,7 @@
 
 #include <complex>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <chrono>
 #include <execution>
@@ -31,7 +32,7 @@ typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0, 1.);
 
 // tolerance when finding root
-double epsilon_fin = std::numeric_limits<double>::epsilon();
+double epsilon_fin = 1e-12;
 
 int main(int argc, char** argv) {
 
@@ -100,7 +101,7 @@ int main(int argc, char** argv) {
     int nr = 2 * numpanels;
     Eigen::MatrixXcd W = randomized_svd::randGaussian(nr, nc);
 
-    double k_max = 10.0, k_step = (k_max - k_min) / (n_points_k - 1);
+    double k_max = 5.0, k_step = (k_max - k_min) / (n_points_k - 1);
 
     std::vector<size_t> ind(n_points_k);
     std::vector<double> rsv(n_points_k), asv(n_points_k), rsv_min, asv_min, bracket_left, bracket_right;
@@ -124,6 +125,15 @@ int main(int argc, char** argv) {
         so.gen_sol_op_1st_der(k, c_o, c_i, T, T_der);
         return randomized_svd::sv_der(T, T_der, W, q)(1);
     };
+    auto rsvd_sv_both = [&](double k) {
+        Eigen::MatrixXcd T, T_der, T_der2;
+        so.gen_sol_op_2nd_der(k, c_o, c_i, T, T_der, T_der2);
+        Eigen::MatrixXd res(1, 2);
+        auto v = randomized_svd::sv_der2(T, T_der, T_der2, W, q);
+        res(0, 0) = v(1);
+        res(0, 1) = v(2);
+        return res;
+    };
 
 #ifdef CMDL
     std::cout << "Computing rSVD and Arnoldi curves for c_i = " << c_i << "..." << std::endl;
@@ -132,110 +142,59 @@ int main(int argc, char** argv) {
         Eigen::MatrixXcd T_in;
         so.gen_sol_op(k_min + k_step * i, c_o, c_i, T_in);
         Tall.block(0, i * nr, nr, nr) = T_in;
-        rsv[i] = randomized_svd::sv(T_in, W, q);
     });
+    auto tic = high_resolution_clock::now();
     for (size_t i = 0; i < n_points_k; ++i) {
         const Eigen::MatrixXcd &T = Tall.block(0, i * nr, nr, nr);
         asv[i] = arnoldi::sv(T, 1, acc)(0);
     }
-
-#ifdef CMDL
-    std::cout << "Finding rSVD minima..." << std::endl;
-#endif
-    for (size_t i = 0; i < n_points_k - 2; ++i) {
-        double &c = rsv[i+1], L = c - rsv[i], R = rsv[i+2] - c;
-        double k = k_min + i * k_step;
-        if (L < 0. && R > 0.) { // local minimum
-            bracket_left.push_back(k);
-            bracket_right.push_back(k + k_step * 2.0);
-        }
+    auto toc = high_resolution_clock::now();
+    auto dur_asv = duration_cast<microseconds>(toc - tic);
+    tic = high_resolution_clock::now();
+    for (size_t i = 0; i < n_points_k; ++i) {
+        const Eigen::MatrixXcd &T = Tall.block(0, i * nr, nr, nr);
+        rsv[i] = randomized_svd::sv(T, W, q);
     }
-    size_t rsv_min_count = bracket_left.size(); // number of local minima for rSVD
-
-    rsv_min.resize(rsv_min_count);
-    ind.resize(rsv_min_count);
-    std::transform(ind.cbegin(), ind.cend(), rsv_min.begin(), [&](size_t i) {
-        int status = 0;
-        double arg, a = bracket_left[i], b = bracket_right[i];
-#if 0
-        BrentMinimizer brent_minimizer(a, b, epsilon_fin);
-        arg = brent_minimizer.local_min_rc(status, 0.);
-        while (status)
-            arg = brent_minimizer.local_min_rc(status, rsvd_sv(arg));
-#else
-        bool rf;
-        unsigned int ic;
-        arg = zbrent(rsvd_sv_der, a, b, epsilon_fin, rf, ic);
-        if (!rf)
-            throw std::runtime_error("ZBRENT failed");
-        std::cout << "Found root: " << arg << std::endl;
-#endif
-        return arg;
-    });
-#ifdef CMDL
-    std::cout << "Found " << rsv_min_count << " minima." << std::endl
-              << "Finding Arnoldi SV minima..." << std::endl;
-#endif
-
-    auto sv_eval = [&](double k) {
-        Eigen::MatrixXcd T;
-        so.gen_sol_op(builder, k, c_o, c_i, T);
-        return arnoldi::sv(T, 1, acc)(0);
-    };
-    auto sv_eval_der = [&](double k) {
-        Eigen::MatrixXcd T, T_der;
-        so.gen_sol_op_1st_der(builder, k, c_o, c_i, T, T_der);
-        return arnoldi::sv_1st_der(T, T_der, 1, acc)(0, 1);
-    };
-    for (size_t i = 0; i < n_points_k - 2; ++i) {
-        double &c = asv[i+1], L = c - asv[i], R = asv[i+2] - c;
-        double k = k_min + i * k_step;
-        if (L < 0. && R > 0.) { // local minimum
-            bool rf;
-            unsigned ic;
-            double r = zbrent(sv_eval_der, k, k + k_step * 2.0, epsilon_fin, rf, ic);
-            if (rf)
-                asv_min.push_back(r);
-        }
+    toc = high_resolution_clock::now();
+    auto dur_rsv = duration_cast<microseconds>(toc - tic);
+    std::cout << "Arnoldi: " << dur_asv.count() << std::endl;
+    std::cout << "RSVD: " << dur_rsv.count() << std::endl;
+    std::vector<double> err(n_points_k);
+    for (size_t i = 0; i < n_points_k; ++i) {
+        err[i] = std::abs(asv[i] - rsv[i]) / std::abs(asv[i]);
     }
-    size_t asv_min_count = asv_min.size();
-#ifdef CMDL
-    std::cout << "Found " << asv_min_count << " minima." << std::endl
-              << "Writing results to file..." << std::endl;
-#endif
+    auto err_sorted = err;
+    std::sort(err_sorted.begin(), err_sorted.end());
+    std::cout << "Error: min " << err_sorted[0] << ", max " << err_sorted[n_points_k - 1]
+              << ", median " << err_sorted[n_points_k / 2] << std::endl;
 
     file_out.open(mfile, std::ios_base::app);
+    file_out << std::setprecision(18);
     file_out << "k = [";
     for (size_t i = 0; i < n_points_k; ++i) {
         if (i > 0)
             file_out << ",";
         file_out << k_min + i * k_step;
     }
-    file_out << "]" << std::endl << "rsv = [";
+    file_out << "];" << std::endl << "rsv = [";
     for (it = rsv.begin(); it != rsv.end(); ++it) {
         if (it != rsv.begin())
             file_out << ",";
         file_out << *it;
     }
-    file_out << "]" << std::endl << "asv = [";
+    file_out << "];" << std::endl << "asv = [";
     for (it = asv.begin(); it != asv.end(); ++it) {
         if (it != asv.begin())
             file_out << ",";
         file_out << *it;
     }
-    file_out << "]" << std::endl << "rsv_min = [";
-    for (it = rsv_min.begin(); it != rsv_min.end(); ++it) {
-        if (it != rsv_min.begin())
-            file_out << ";";
-        file_out << *it << "," << rsvd_sv(*it);
+    file_out << "];" << std::endl << "err = [";
+    for (it = err.begin(); it != err.end(); ++it) {
+        if (it != err.begin())
+            file_out << ",";
+        file_out << *it;
     }
-    file_out << "]" << std::endl << "asv_min = [";
-    for (it = asv_min.begin(); it != asv_min.end(); ++it) {
-        if (it != asv_min.begin())
-            file_out << ";";
-        file_out << *it << "," << sv_eval(*it);
-    }
-    file_out << "]" << std::endl;
+    file_out << "];" << std::endl;
     file_out.close();
 
     return 0;

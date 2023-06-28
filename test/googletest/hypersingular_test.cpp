@@ -71,4 +71,3 @@ TEST(HypersingularTest, compare_row) {
     // compare known solution operator from file with computed one
     ASSERT_TRUE((W-W_expected).lpNorm<2>() < 5e-4);
 }
-

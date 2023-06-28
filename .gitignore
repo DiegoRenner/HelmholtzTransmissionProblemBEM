@@ -1,5 +1,6 @@
 # Default ignored files
 .idea/*
+.cache/*
 bin
 build
 cmake-build-debug
