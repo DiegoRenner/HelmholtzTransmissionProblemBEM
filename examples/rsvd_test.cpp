@@ -97,11 +97,11 @@ int main(int argc, char** argv) {
     file_out.open(mfile, std::ofstream::out | std::ofstream::trunc);
     file_out.close();
 
-    int nc = 2;
+    int nc = 4;
     int nr = 2 * numpanels;
     Eigen::MatrixXcd W = randomized_svd::randGaussian(nr, nc);
 
-    double k_max = 5.0, k_step = (k_max - k_min) / (n_points_k - 1);
+    double k_max = k_min + .5, k_step = (k_max - k_min) / (n_points_k - 1);
 
     std::vector<size_t> ind(n_points_k);
     std::vector<double> rsv(n_points_k), asv(n_points_k), rsv_min, asv_min, bracket_left, bracket_right;
@@ -138,27 +138,38 @@ int main(int argc, char** argv) {
 #ifdef CMDL
     std::cout << "Computing rSVD and Arnoldi curves for c_i = " << c_i << "..." << std::endl;
 #endif
+    auto tic = high_resolution_clock::now();
     std::for_each(std::execution::par, ind.cbegin(), ind.cend(), [&](size_t i) {
         Eigen::MatrixXcd T_in;
         so.gen_sol_op(k_min + k_step * i, c_o, c_i, T_in);
         Tall.block(0, i * nr, nr, nr) = T_in;
     });
-    auto tic = high_resolution_clock::now();
+    auto toc = high_resolution_clock::now();
+    auto dur_assembly = duration_cast<milliseconds>(toc - tic);
+    auto dur_rsv = duration_cast<milliseconds>(toc - tic);
+    std::cout << "Assembly: " << dur_assembly.count() << std::endl;
+#if 0
+    std::cout << "Hankel time: " << builder.getHankelTime() << ", ratio: "
+              << (100 * builder.getHankelTime()) / dur_assembly.count() << "%" << std::endl;
+    std::cout << "Interaction matrix assembly time: " << (100 * builder.getInteractionMatrixTime()) / dur_assembly.count() << "%" << std::endl;
+    std::cout << "Mapping time: " << (100 * builder.getMappingTime()) / dur_assembly.count() << "%" << std::endl;
+#endif
+    tic = high_resolution_clock::now();
     for (size_t i = 0; i < n_points_k; ++i) {
         const Eigen::MatrixXcd &T = Tall.block(0, i * nr, nr, nr);
         asv[i] = arnoldi::sv(T, 1, acc)(0);
     }
-    auto toc = high_resolution_clock::now();
-    auto dur_asv = duration_cast<microseconds>(toc - tic);
+    toc = high_resolution_clock::now();
+    auto dur_asv = duration_cast<milliseconds>(toc - tic);
     tic = high_resolution_clock::now();
-    for (size_t i = 0; i < n_points_k; ++i) {
+    std::for_each(std::execution::par, ind.cbegin(), ind.cend(), [&](size_t i) {
         const Eigen::MatrixXcd &T = Tall.block(0, i * nr, nr, nr);
         rsv[i] = randomized_svd::sv(T, W, q);
-    }
+    });
     toc = high_resolution_clock::now();
-    auto dur_rsv = duration_cast<microseconds>(toc - tic);
     std::cout << "Arnoldi: " << dur_asv.count() << std::endl;
     std::cout << "RSVD: " << dur_rsv.count() << std::endl;
+    std::cout << "Ratio: " << double(dur_assembly.count()) / double(dur_rsv.count()) << std::endl;
     std::vector<double> err(n_points_k);
     for (size_t i = 0; i < n_points_k; ++i) {
         err[i] = std::abs(asv[i] - rsv[i]) / std::abs(asv[i]);

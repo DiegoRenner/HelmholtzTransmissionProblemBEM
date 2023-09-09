@@ -31,6 +31,7 @@ class GalerkinMatrixBuilder
     complex_t k, ksqrtc, kkc;
     double c, sqrtc, ksqrtca;
     bool k_real_positive;
+    unsigned hankel_time, mapping_time, interaction_matrix_time;
     // dimensions
     size_t numpanels, Qtest, Qtrial, dim_test, dim_trial;
     // workspace
@@ -46,7 +47,7 @@ class GalerkinMatrixBuilder
                     m_hypersingular_general_fg_arc;
     Eigen::ArrayXXd m_zero, m_vdotn;
     Eigen::ArrayXXcd m_cf, m_temp;
-    std::vector<size_t> indN2;
+    std::vector<size_t> indN2, indNs;
     // interaction matrices
     Eigen::MatrixXcd double_layer_interaction_matrix, hypersingular_interaction_matrix, single_layer_interaction_matrix;
     Eigen::MatrixXcd double_layer_der_interaction_matrix, hypersingular_der_interaction_matrix, single_layer_der_interaction_matrix;
@@ -152,6 +153,12 @@ public:
      * @param der the order of derivative (default 0, derivatives are not computed)
      */
     void assembleAll(const std::complex<double> &k_in, double c_in, int der = 0);
+    /**
+     * Get timing info.
+     */
+    unsigned getHankelTime() const { return hankel_time / 1000; }
+    unsigned getMappingTime() const { return mapping_time / 1000; }
+    unsigned getInteractionMatrixTime() const { return interaction_matrix_time / 1000; }
 };
 
 #endif // GALERKIN_ALLHPP

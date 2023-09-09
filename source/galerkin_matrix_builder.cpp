@@ -2,7 +2,7 @@
 #include "cbessel.hpp"
 #include <numeric>
 #include <iostream>
-#include <execution>
+#include <chrono>
 
 using namespace std::complex_literals;
 
@@ -17,9 +17,10 @@ GalerkinMatrixBuilder::GalerkinMatrixBuilder(const ParametrizedMesh &mesh,
                                              const QuadRule &CGaussQR_in)
 : test_space(test_space_in), trial_space(trial_space_in), panels(mesh.getPanels()), GaussQR(GaussQR_in), CGaussQR(CGaussQR_in)
 {
+    hankel_time = mapping_time = interaction_matrix_time = 0;
     numpanels = mesh.getNumPanels();
     dim_test = test_space.getSpaceDim(numpanels);
-    dim_trial = trial_space_in.getSpaceDim(numpanels);
+    dim_trial = trial_space.getSpaceDim(numpanels);
     Qtest = test_space.getQ();
     Qtrial = trial_space.getQ();
     size_t N = CGaussQR.n, Ns = GaussQR.n;
@@ -95,13 +96,13 @@ GalerkinMatrixBuilder::GalerkinMatrixBuilder(const ParametrizedMesh &mesh,
                     m_double_layer_coinciding_fg_t(i * N + I, j * N + J) =
                         test_space.evaluateShapeFunction(i, tc) * trial_space.evaluateShapeFunction(j, sc);
                     m_double_layer_adjacent_fg(i * N + I, j * N + J) =
-                        trial_space.evaluateShapeFunction_01_swapped(i, sa) * test_space.evaluateShapeFunction(j, ta);
+                        test_space.evaluateShapeFunction_01_swapped(i, sa) * trial_space.evaluateShapeFunction(j, ta);
                     m_double_layer_adjacent_fg_swap(i * N + I, j * N + J) =
-                        trial_space.evaluateShapeFunction(i, sa) * test_space.evaluateShapeFunction_01_swapped(j, ta);
+                        test_space.evaluateShapeFunction(i, sa) * trial_space.evaluateShapeFunction_01_swapped(j, ta);
                     m_double_layer_adjacent_fg_t(i * N + I, j * N + J) =
-                        trial_space.evaluateShapeFunction_01_swapped(i, ta) * test_space.evaluateShapeFunction(j, sa);
+                        test_space.evaluateShapeFunction_01_swapped(i, ta) * trial_space.evaluateShapeFunction(j, sa);
                     m_double_layer_adjacent_fg_swap_t(i * N + I, j * N + J) =
-                        trial_space.evaluateShapeFunction(i, ta) * test_space.evaluateShapeFunction_01_swapped(j, sa);
+                        test_space.evaluateShapeFunction(i, ta) * trial_space.evaluateShapeFunction_01_swapped(j, sa);
                     if (I < Ns && J < Ns) {
                         double s = m_sg(I, J), t = m_tg(I, J);
                         dbl_g_fg(I, J) =
@@ -173,6 +174,8 @@ GalerkinMatrixBuilder::GalerkinMatrixBuilder(const ParametrizedMesh &mesh,
     }
     indN2.resize(2 * N);
     std::iota(indN2.begin(), indN2.end(), 0);
+    indNs.resize(Ns);
+    std::iota(indNs.begin(), indNs.end(), 0);
     double_layer_interaction_matrix.resize(Qtest, Qtrial);
     double_layer_der_interaction_matrix.resize(Qtest, Qtrial);
     double_layer_der2_interaction_matrix.resize(Qtest, Qtrial);
@@ -194,9 +197,9 @@ GalerkinMatrixBuilder::GalerkinMatrixBuilder(const ParametrizedMesh &mesh,
 }
 
 // compute values required for the coinciding panels case
-inline void GalerkinMatrixBuilder::compute_coinciding(const AbstractParametrizedCurve &p) throw() {
+void GalerkinMatrixBuilder::compute_coinciding(const AbstractParametrizedCurve &p) throw() {
     size_t N = CGaussQR.n;
-    std::for_each(std::execution::par_unseq, indN2.cbegin(), indN2.cbegin() + N, [&](size_t J) {
+    for (size_t J = 0; J < N; ++J) {
         for (size_t I = 0; I < N; ++I) {
             double t = m_tc(I, J), s = m_sc(I, J);
             Eigen::Vector2d tangent_p = p.Derivative_01(t);
@@ -215,18 +218,22 @@ inline void GalerkinMatrixBuilder::compute_coinciding(const AbstractParametrized
                 m_h1(I, J) = 1i * complex_bessel::H1(1, arg);
             } else m_h_arg_half(I, J) = arg.real();
         }
-    });
+    }
     if (k_real_positive) {
+        auto tic = chrono::high_resolution_clock::now();
         complex_bessel::H1_01_i(m_h_arg_half, m_h0_res_half, m_h1_res_half);
+        auto toc = chrono::high_resolution_clock::now();
+        auto dur = chrono::duration_cast<std::chrono::microseconds>(toc - tic);
+        hankel_time += dur.count();
         m_h0.block(0, 0, N, N) = m_h0_res_half;
         m_h1.block(0, 0, N, N) = m_h1_res_half;
     }
 }
 
 // compute values required for the adjacent panels case
-inline void GalerkinMatrixBuilder::compute_adjacent(const AbstractParametrizedCurve &pi, const AbstractParametrizedCurve &pi_p, bool swap) throw() {
+void GalerkinMatrixBuilder::compute_adjacent(const AbstractParametrizedCurve &pi, const AbstractParametrizedCurve &pi_p, bool swap) throw() {
     size_t N = CGaussQR.n;
-    std::for_each(std::execution::par_unseq, indN2.cbegin(), indN2.cend(), [&](size_t J) {
+    for (size_t J = 0; J < 2 * N; ++J) {
         for (size_t I = 0; I < N; ++I) {
             double t = m_ta(I, J % N), s = m_sa(I, J % N);
             if (J >= N)
@@ -247,14 +254,19 @@ inline void GalerkinMatrixBuilder::compute_adjacent(const AbstractParametrizedCu
                 m_h1(I, J) = 1i * complex_bessel::H1(1, arg);
             } else m_h_arg(I, J) = arg.real();
         }
-    });
-    if (k_real_positive)
+    }
+    if (k_real_positive) {
+        auto tic = chrono::high_resolution_clock::now();
         complex_bessel::H1_01_i(m_h_arg, m_h0, m_h1);
+        auto toc = chrono::high_resolution_clock::now();
+        auto dur = chrono::duration_cast<std::chrono::microseconds>(toc - tic);
+        hankel_time += dur.count();
+    }
 }
 
 // compute values required for the disjoint panels case
-inline void GalerkinMatrixBuilder::compute_general(const AbstractParametrizedCurve &pi, const AbstractParametrizedCurve &pi_p) throw() {
-    size_t I, J, N = GaussQR.n;
+void GalerkinMatrixBuilder::compute_general(const AbstractParametrizedCurve &pi, const AbstractParametrizedCurve &pi_p) throw() {
+    size_t N = GaussQR.n;
     auto tangent_p_block = m_tangent_p.block(0, 0, N, N);
     auto tangent_block = m_tangent.block(0, 0, N, N);
     auto tangent_p_norm_block = m_tangent_p_norm.block(0, 0, N, N);
@@ -263,8 +275,8 @@ inline void GalerkinMatrixBuilder::compute_general(const AbstractParametrizedCur
     auto v_norm_block = m_v_norm.block(0, 0, N, N);
     auto h0_block = m_h0.block(0, 0, N, N);
     auto h1_block = m_h1.block(0, 0, N, N);
-    for (J = 0; J < N; ++J) {
-        for (I = 0; I < N; ++I) {
+    for (size_t J = 0; J < N; ++J) {
+        for (size_t I = 0; I < N; ++I) {
             double t = m_tg(I, J), s = m_sg(I, J);
             Eigen::Vector2d tangent_p = pi_p.Derivative_01(t);
             Eigen::Vector2d tangent = pi.Derivative_01(s);
@@ -284,7 +296,11 @@ inline void GalerkinMatrixBuilder::compute_general(const AbstractParametrizedCur
         }
     }
     if (k_real_positive) {
+        auto tic = chrono::high_resolution_clock::now();
         complex_bessel::H1_01_i(m_h_arg_small, m_h0_res_small, m_h1_res_small);
+        auto toc = chrono::high_resolution_clock::now();
+        auto dur = chrono::duration_cast<std::chrono::microseconds>(toc - tic);
+        hankel_time += dur.count();
         h0_block = m_h0_res_small;
         h1_block = m_h1_res_small;
     }
@@ -361,22 +377,21 @@ inline void GalerkinMatrixBuilder::double_layer_adjacent(bool swap, int der, boo
 // compute interaction matrices for the K submatrix, disjoint panels case
 inline void GalerkinMatrixBuilder::double_layer_general(int der, bool transp) throw() {
     size_t i, j, N = GaussQR.n;
-    auto tangent = (transp ? m_tangent : m_tangent_p).block(0, 0, N, N), v = m_v.block(0, 0, N, N);
+    auto tangent = (transp ? m_tangent : m_tangent_p).block(0, 0, N, N);
+    auto v = m_v.block(0, 0, N, N);
     auto t_norm = (transp ? m_tangent_p_norm : m_tangent_norm).block(0, 0, N, N);
     auto v_norm = m_v_norm.block(0, 0, N, N);
     auto h1 = m_h1.block(0, 0, N, N), h0 = m_h0.block(0, 0, N, N);
     auto mask = ksqrtca * v_norm > epsilon;
-    auto cf = m_cf.block(0, 0, N, N), temp = m_temp.block(0, 0, N, N);
-    auto vdotn = m_vdotn.block(0, 0, N, N);
+    auto temp = h0 - h1 * ksqrtc * v_norm;
+    auto vdotn = (transp? -1.0 : 1.0) * (v.real() * tangent.imag() - v.imag() * tangent.real());
     auto zmat = m_zero.block(0, 0, N, N);
     auto otherwise = (v_norm > epsilon).select(M_2_PI / (v_norm * v_norm), zmat);
-    vdotn = (transp? -1.0 : 1.0) * (v.real() * tangent.imag() - v.imag() * tangent.real());
-    temp = h0 - h1 * ksqrtc * v_norm;
     for (j = 0; j < Qtrial; ++j) {
         for (i = 0; i < Qtest; ++i) {
             complex_t integral = czero, integral_der = czero, integral_der2 = czero;
             auto fg = (transp ? m_double_layer_general_fg_t : m_double_layer_general_fg).block(i * N, j * N, N, N);
-            cf = m_wg * t_norm * vdotn * fg;
+            auto cf = m_wg * t_norm * vdotn * fg;
             integral += (cf * mask.select(ksqrtc * h1 / v_norm, otherwise)).sum();
             if (der > 0)
                 integral_der += ksqrtc * mask.select(h0 * cf, zmat).sum();
@@ -822,23 +837,36 @@ void GalerkinMatrixBuilder::assembleAll(const std::complex<double>& k_in, double
             if (i == j) {
                 // coinciding panels
                 compute_coinciding(pi);
+                auto tic = chrono::high_resolution_clock::now();
                 double_layer_coinciding(der);
                 hypersingular_coinciding(der);
                 single_layer_coinciding(der);
+                auto toc = chrono::high_resolution_clock::now();
+                auto dur = chrono::duration_cast<chrono::microseconds>(toc - tic);
+                interaction_matrix_time += dur.count();
             } else if ((adj = is_adjacent(pi, pj, swap))) {
                 // adjacent panels
                 compute_adjacent(pi, pj, swap);
+                auto tic = chrono::high_resolution_clock::now();
                 double_layer_adjacent(swap, der, false);
                 hypersingular_adjacent(swap, der);
                 single_layer_adjacent(swap, der);
+                auto toc = chrono::high_resolution_clock::now();
+                auto dur = chrono::duration_cast<chrono::microseconds>(toc - tic);
+                interaction_matrix_time += dur.count();
             } else {
                 // disjoint panels
                 compute_general(pi, pj);
+                auto tic = chrono::high_resolution_clock::now();
                 double_layer_general(der, false);
                 hypersingular_general(der);
                 single_layer_general(der);
+                auto toc = chrono::high_resolution_clock::now();
+                auto dur = chrono::duration_cast<chrono::microseconds>(toc - tic);
+                interaction_matrix_time += dur.count();
             }
             // Local to global mapping of the elements in interaction matrix
+            auto tic = chrono::high_resolution_clock::now();
             for (I = 0; I < Q; ++I) {
                 for (J = 0; J < Q; ++J) {
                     II = test_space.LocGlobMap(I + 1, i + 1, dim) - 1;
@@ -858,13 +886,21 @@ void GalerkinMatrixBuilder::assembleAll(const std::complex<double>& k_in, double
                     }
                 }
             }
+            auto toc = chrono::high_resolution_clock::now();
+            auto dur = chrono::duration_cast<chrono::microseconds>(toc - tic);
+            mapping_time += dur.count();
             if (i == j)
                 continue;
             // use already computed data for the (j, i) case
+            tic = chrono::high_resolution_clock::now();
             if (adj)
                 double_layer_adjacent(!swap, der, true);
             else
                 double_layer_general(der, true);
+            toc = chrono::high_resolution_clock::now();
+            dur = chrono::duration_cast<chrono::microseconds>(toc - tic);
+            interaction_matrix_time += dur.count();
+            tic = chrono::high_resolution_clock::now();
             for (I = 0; I < Q; ++I) {
                 for (J = 0; J < Q; ++J) {
                     II = test_space.LocGlobMap(I + 1, j + 1, dim) - 1;
@@ -884,6 +920,9 @@ void GalerkinMatrixBuilder::assembleAll(const std::complex<double>& k_in, double
                     }
                 }
             }
+            toc = chrono::high_resolution_clock::now();
+            dur = chrono::duration_cast<chrono::microseconds>(toc - tic);
+            mapping_time += dur.count();
         }
     }
     double_layer_matrix *= 0.25;

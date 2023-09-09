@@ -26,5 +26,8 @@ parserArgumentsOpenCL=-ferror-limit=100 -fspell-checking -Wdocumentation -Wunuse
 [CustomDefinesAndIncludes][ProjectPath0][Compiler]
 Name=GCC
 
+[CustomDefinesAndIncludes][ProjectPath0][Defines]
+CMDL=1
+
 [Project]
 VersionControlSupport=kdevgit

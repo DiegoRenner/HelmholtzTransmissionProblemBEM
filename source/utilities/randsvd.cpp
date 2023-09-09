@@ -35,8 +35,8 @@ namespace randomized_svd {
         Eigen::PartialPivLU<Eigen::MatrixXcd> lu_decomp(T);
         Q = lu_decomp.solve(R).colPivHouseholderQr().matrixQ() * thinQ;
         for (int i = 0; i < q; ++i) {
-            Q = lu_decomp.adjoint().solve(Q).colPivHouseholderQr().matrixQ() * thinQ;
-            Q = lu_decomp.solve(Q).colPivHouseholderQr().matrixQ() * thinQ;
+            Q = lu_decomp.adjoint().solve(Q).householderQr().householderQ() * thinQ;
+            Q = lu_decomp.solve(Q).householderQr().householderQ() * thinQ;
         }
         auto svd = lu_decomp.adjoint().solve(Q).bdcSvd();
         return 1.0 / svd.singularValues()(0);

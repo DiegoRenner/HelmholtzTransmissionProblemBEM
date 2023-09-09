@@ -1,15 +1,15 @@
 #include "gen_sol_op.hpp"
 #include "mass_matrix.hpp"
-// #include "double_layer.hpp"
-// #include "double_layer_der.hpp"
-// #include "double_layer_der2.hpp"
-// #include "hypersingular.hpp"
-// #include "hypersingular_der.hpp"
-// #include "hypersingular_der2.hpp"
-// #include "single_layer.hpp"
-// #include "single_layer_der.hpp"
-// #include "single_layer_der2.hpp"
-// #include <iostream>
+#include "double_layer.hpp"
+#include "double_layer_der.hpp"
+#include "double_layer_der2.hpp"
+#include "hypersingular.hpp"
+#include "hypersingular_der.hpp"
+#include "hypersingular_der2.hpp"
+#include "single_layer.hpp"
+#include "single_layer_der.hpp"
+#include "single_layer_der2.hpp"
+#include <iostream>
 
 typedef std::complex<double> complex_t;
 
@@ -80,6 +80,7 @@ void SolutionsOperator::gen_sol_op_in(GalerkinMatrixBuilder &builder, const comp
         builder.assembleSingleLayer(k, c_o);
         V_o = builder.getSingleLayer();
     }
+
     // assemble solutions operator matrix
     T.block(0, 0, dim_test, dim_trial) = M - K_o + K_i;
     T.block(dim_test, 0, dim_trial, dim_trial) = W_o - W_i;
