@@ -1,15 +1,5 @@
 #include "gen_sol_op.hpp"
 #include "mass_matrix.hpp"
-#include "double_layer.hpp"
-#include "double_layer_der.hpp"
-#include "double_layer_der2.hpp"
-#include "hypersingular.hpp"
-#include "hypersingular_der.hpp"
-#include "hypersingular_der2.hpp"
-#include "single_layer.hpp"
-#include "single_layer_der.hpp"
-#include "single_layer_der2.hpp"
-#include <iostream>
 
 typedef std::complex<double> complex_t;
 
@@ -41,10 +31,9 @@ Eigen::MatrixXcd SolutionsOperator::project(const Eigen::MatrixXcd &T) const {
     return lu.solve(lu.solve(T).transpose().eval()).transpose().eval();
 }
 
-
 void SolutionsOperator::gen_sol_op(const complex_t &k, double c_o, double c_i,
                                    Eigen::MatrixXcd &T) const {
-    GalerkinMatrixBuilder builder(mesh, test_space, trial_space, GaussQR, CGaussQR);
+    GalerkinMatrixBuilder builder(mesh, test_space, trial_space, GaussQR.n);
     gen_sol_op_in(builder, k, c_o, c_i, T);
 }
 
@@ -92,7 +81,7 @@ void SolutionsOperator::gen_sol_op_in(GalerkinMatrixBuilder &builder, const comp
 
 void SolutionsOperator::gen_sol_op_1st_der(const complex_t &k, double c_o, double c_i,
                                            Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der) const {
-    GalerkinMatrixBuilder builder(mesh, test_space, trial_space, GaussQR, CGaussQR);
+    GalerkinMatrixBuilder builder(mesh, test_space, trial_space, GaussQR.n);
     gen_sol_op_1st_der_in(builder, k, c_o, c_i, T, T_der);
 }
 
@@ -158,7 +147,7 @@ void SolutionsOperator::gen_sol_op_1st_der_in(GalerkinMatrixBuilder &builder, co
 
 void SolutionsOperator::gen_sol_op_2nd_der(const complex_t &k, double c_o, double c_i,
                                            Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der, Eigen::MatrixXcd &T_der2) const {
-    GalerkinMatrixBuilder builder(mesh, test_space, trial_space, GaussQR, CGaussQR);
+    GalerkinMatrixBuilder builder(mesh, test_space, trial_space, GaussQR.n);
     gen_sol_op_2nd_der_in(builder, k, c_o, c_i, T, T_der, T_der2);
 }
 

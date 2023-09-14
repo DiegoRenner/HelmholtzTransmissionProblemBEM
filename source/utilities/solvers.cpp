@@ -12,14 +12,15 @@ namespace bvp {
                                          const std::function<complex_t(double, double)> u_dir,
                                          const unsigned order,
                                          const double k) {
+            QuadRule GaussQR = getGaussQR(order, 0., 1.);
             // compute FEM-spaces of lowest order
             ContinuousSpace<1> cont_space;
             DiscontinuousSpace<0> discont_space;
             // compute interpolation coefficients for dirichlet data
             Eigen::VectorXcd u_dir_N = discont_space.Interpolate_helmholtz(u_dir, mesh);
             // compute operators for first kind direct Dirichlet problem BIE
-            Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh, cont_space, discont_space, getGaussQR(order, 0., 1.));
-            GalerkinMatrixBuilder builder(mesh, discont_space, cont_space, getGaussQR(order, 0., 1.), getCGaussQR(order));
+            Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh, discont_space, cont_space, GaussQR);
+            GalerkinMatrixBuilder builder(mesh, cont_space, discont_space, order);
             builder.assembleDoubleLayer(k, 1.);
             Eigen::MatrixXcd K = builder.getDoubleLayer();
             builder.assembleSingleLayer(k, 1.);
@@ -36,14 +37,15 @@ namespace bvp {
                                        const std::function<complex_t(double, double)> u_neu,
                                        const unsigned int order,
                                        const double k) {
+            QuadRule GaussQR = getGaussQR(order, 0., 1.);
             // compute FEM-spaces of lowest order
             ContinuousSpace<1> cont_space;
             DiscontinuousSpace<0> discont_space;
             // compute interpolation coefficients of Neumann data
             Eigen::VectorXcd u_neu_N = discont_space.Interpolate_helmholtz(u_neu, mesh);
             // compute operators for first kind direct Neumann problem BIE
-            Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh, cont_space, discont_space, getGaussQR(order, 0., 1.));
-            GalerkinMatrixBuilder builder(mesh, cont_space, discont_space, getGaussQR(order, 0., 1.), getCGaussQR(order));
+            Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh, cont_space, discont_space, GaussQR);
+            GalerkinMatrixBuilder builder(mesh, discont_space, cont_space, order);
             builder.assembleDoubleLayer(k, 1.);
             Eigen::MatrixXcd K = builder.getDoubleLayer();
             builder.assembleHypersingular(k, 1.);
@@ -66,13 +68,14 @@ namespace tp {
                                const double k,
                                const double c_o,
                                const double c_i) {
+            QuadRule GaussQR = getGaussQR(order, 0., 1.);
             // define number of panels for convenience
             int numpanels = mesh.getNumPanels();
             // space used for interpolation of Dirichlet data
             ContinuousSpace<1> cont_space;
             // compute operators of second kind direct BIEs for the Helmholtz Transmission problem
-            Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, getGaussQR(order, 0., 1.));
-            GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, getGaussQR(order, 0., 1.), getCGaussQR(order));
+            Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, GaussQR);
+            GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, order);
             builder.assembleAll(k, c_o);
             Eigen::MatrixXcd K_o = builder.getDoubleLayer();
             Eigen::MatrixXcd W_o = builder.getHypersingular();

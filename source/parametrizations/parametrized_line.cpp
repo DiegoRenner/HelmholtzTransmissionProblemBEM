@@ -8,42 +8,56 @@
  */
 
 #include "parametrized_line.hpp"
-
 #include <assert.h>
 #include <iostream>
 #include <math.h>
 #include <utility>
-
 #include <Eigen/Dense>
 
 using Point = typename ParametrizedLine::Point;
+using namespace std::complex_literals;
 
 ParametrizedLine::ParametrizedLine(Point first, Point second)
-    : start_(first), end_(second) {}
+: start_(first), end_(second) { }
 
 Point ParametrizedLine::operator()(double t) const {
   assert(IsWithinParameterRange(t));
   double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
   // Linear interpolation of x & y coordinates based on parameter t
-  Eigen::Vector2d point(t * (x2 - x1) / 2 + (x2 + x1) / 2,
-                        t * (y2 - y1) / 2 + (y2 + y1) / 2);
+  Eigen::Vector2d point(t * (x2 - x1) / 2 + (x2 + x1) / 2, t * (y2 - y1) / 2 + (y2 + y1) / 2);
   return point;
 }
+Eigen::ArrayXXcd ParametrizedLine::operator()(const Eigen::ArrayXXd &t) const {
+  assert(IsWithinParameterRange(t));
+  double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
+  // Linear interpolation of x & y coordinates based on parameter t
+  return t * (x2 - x1) / 2. + (x2 + x1) / 2. + 1i * (t * (y2 - y1) / 2. + (y2 + y1) / 2.);
+}
 Point ParametrizedLine::operator[](double t) const {
-    assert(IsWithinParameterRange(t));
-    double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
-    // Linear interpolation of x & y coordinates based on parameter t
-    Eigen::Vector2d point(t * (x2 - x1) + x1,
-                          t * (y2 - y1) + y1);
-    return point;
+  assert(IsWithinParameterRange(t));
+  double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
+  // Linear interpolation of x & y coordinates based on parameter t
+  Eigen::Vector2d point(t * (x2 - x1) + x1, t * (y2 - y1) + y1);
+  return point;
+}
+Eigen::ArrayXXcd ParametrizedLine::operator[](const Eigen::ArrayXXd &t) const {
+  assert(IsWithinParameterRange(t));
+  double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
+  // Linear interpolation of x & y coordinates based on parameter t
+  return t * (x2 - x1) + x1 + 1i * (t * (y2 - y1) + y1);
 }
 Point ParametrizedLine::swapped_op(double t) const {
-    assert(IsWithinParameterRange(t));
-    double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
-    // Linear interpolation of x & y coordinates based on parameter t
-    Eigen::Vector2d point(-t * (x2 - x1) + x2,
-                          -t * (y2 - y1) + y2);
-    return point;
+  assert(IsWithinParameterRange(t));
+  double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
+  // Linear interpolation of x & y coordinates based on parameter t
+  Eigen::Vector2d point(-t * (x2 - x1) + x2, -t * (y2 - y1) + y2);
+  return point;
+}
+Eigen::ArrayXXcd ParametrizedLine::swapped_op(const Eigen::ArrayXXd &t) const {
+  assert(IsWithinParameterRange(t));
+  double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
+  // Linear interpolation of x & y coordinates based on parameter t
+  return -t * (x2 - x1) + x2 + 1i * (-t * (y2 - y1) + y2);
 }
 
 Eigen::Vector2d ParametrizedLine::Derivative(double t) const {
@@ -53,19 +67,43 @@ Eigen::Vector2d ParametrizedLine::Derivative(double t) const {
   Eigen::Vector2d derivative((x2 - x1) / 2, (y2 - y1) / 2);
   return derivative;
 }
+Eigen::ArrayXXcd ParametrizedLine::Derivative(const Eigen::ArrayXXd &t) const {
+  assert(IsWithinParameterRange(t));
+  double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
+  // Derivative of the linear interpolation used in the function operator()
+  auto ret = Eigen::ArrayXXcd(t.rows(), t.cols());
+  ret.setConstant((x2 - x1) / 2. + 1i * ((y2 - y1) / 2.));
+  return ret;
+}
 Eigen::Vector2d ParametrizedLine::Derivative_01(double t) const {
-    assert(IsWithinParameterRange(t));
-    double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
-    // Derivative of the linear interpolation used in the function operator()
-    Eigen::Vector2d derivative((x2-x1), (y2 - y1));
-    return derivative;
+  assert(IsWithinParameterRange(t));
+  double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
+  // Derivative of the linear interpolation used in the function operator()
+  Eigen::Vector2d derivative((x2-x1), (y2 - y1));
+  return derivative;
+}
+Eigen::ArrayXXcd ParametrizedLine::Derivative_01(const Eigen::ArrayXXd &t) const {
+  assert(IsWithinParameterRange(t));
+  double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
+  // Derivative of the linear interpolation used in the function operator()
+  auto ret = Eigen::ArrayXXcd(t.rows(), t.cols());
+  ret.setConstant((x2 - x1) + 1i * (y2 - y1));
+  return ret;
 }
 Eigen::Vector2d ParametrizedLine::Derivative_01_swapped(double t) const {
-    assert(IsWithinParameterRange(t));
-    double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
-    // Derivative of the linear interpolation used in the function operator()
-    Eigen::Vector2d derivative(-(x2-x1), -(y2 - y1));
-    return derivative;
+  assert(IsWithinParameterRange(t));
+  double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
+  // Derivative of the linear interpolation used in the function operator()
+  Eigen::Vector2d derivative(-(x2-x1), -(y2 - y1));
+  return derivative;
+}
+Eigen::ArrayXXcd ParametrizedLine::Derivative_01_swapped(const Eigen::ArrayXXd &t) const {
+  assert(IsWithinParameterRange(t));
+  double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
+  // Derivative of the linear interpolation used in the function operator()
+  auto ret = Eigen::ArrayXXcd(t.rows(), t.cols());
+  ret.setConstant(-(x2 - x1) - 1i * (y2 - y1));
+  return ret;
 }
 
 Eigen::Vector2d ParametrizedLine::DoubleDerivative(double t) const {
@@ -93,8 +131,7 @@ PanelVector ParametrizedLine::split(unsigned int N) const {
     Point first = this->operator()(t1);
     Point second = this->operator()(t2);
     // Adding the part parametrization to the vector with a shared pointer
-    parametrization_parts.push_back(
-        std::make_shared<ParametrizedLine>(first, second));
+    parametrization_parts.push_back(std::make_shared<ParametrizedLine>(first, second));
   }
   return parametrization_parts;
 }

@@ -39,15 +39,21 @@ public:
    * See documentation in AbstractParametrizedCurve
    */
   Eigen::Vector2d operator()(double) const;
-    Eigen::Vector2d operator[](double) const;
-    Eigen::Vector2d swapped_op(double) const;
+  Eigen::Vector2d operator[](double) const;
+  Eigen::Vector2d swapped_op(double) const;
+  Eigen::ArrayXXcd operator()(const Eigen::ArrayXXd &) const;
+  Eigen::ArrayXXcd operator[](const Eigen::ArrayXXd &) const;
+  Eigen::ArrayXXcd swapped_op(const Eigen::ArrayXXd &) const;
 
   /**
    * See documentation in AbstractParametrizedCurve
    */
   Eigen::Vector2d Derivative(double) const;
-    Eigen::Vector2d Derivative_01(double) const;
-    Eigen::Vector2d Derivative_01_swapped(double) const;
+  Eigen::Vector2d Derivative_01(double) const;
+  Eigen::Vector2d Derivative_01_swapped(double) const;
+  Eigen::ArrayXXcd Derivative(const Eigen::ArrayXXd &) const;
+  Eigen::ArrayXXcd Derivative_01(const Eigen::ArrayXXd &) const;
+  Eigen::ArrayXXcd Derivative_01_swapped(const Eigen::ArrayXXd &) const;
 
   /**
    * See documentation in AbstractParametrizedCurve

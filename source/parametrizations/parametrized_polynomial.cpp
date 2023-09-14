@@ -81,8 +81,7 @@ PanelVector ParametrizedPolynomial::split(unsigned int N) const {
     if (i==N-1)
       tmax = tmax_;
     // Adding the part parametrization to the vector with a shared pointer
-    parametrization_parts.push_back(
-        std::make_shared<ParametrizedPolynomial>(coeffs_, tmin, tmax));
+    parametrization_parts.push_back(std::make_shared<ParametrizedPolynomial>(coeffs_, tmin, tmax));
   }
   return parametrization_parts;
 }

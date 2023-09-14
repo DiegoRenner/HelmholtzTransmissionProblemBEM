@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
     // create objects for assembling solutions operator and its derivatives
     ContinuousSpace<1> cont_space;
     SolutionsOperator so(mesh, order, cont_space, cont_space);
-    GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, so.get_GaussQR(), so.get_CGaussQR());
+    GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, order);
 
     std::iota(ind.begin(), ind.end(), 0);
 

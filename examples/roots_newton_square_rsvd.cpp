@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
     // create objects for assembling solutions operator and its derivatives
     ContinuousSpace<1> cont_space;
     SolutionsOperator so(mesh, order, cont_space, cont_space);
-    GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, so.get_GaussQR(), so.get_CGaussQR());
+    GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, order);
 
     auto tic = high_resolution_clock::now();
 #ifdef CMDL
@@ -244,11 +244,11 @@ int main(int argc, char** argv) {
         double C = scale * (6. * p1 + 3 * p2 + p3);
         double D = d1 - scale * a * (4. * p1 + 3. * p2 + 2. * p3);
         double E = f1 - a * d1 + scale * a2 * (p1 + p2 + p3);
-        BrentMinimizer brent_minimizer(a, b, acc);
-        arg = brent_minimizer.local_min_rc(status, 0.);
+        BrentMinimizer br_min(a, b, acc);
+        arg = br_min.local_min_rc(status, 0.);
         while (status) {
             double p = (((A * arg + B) * arg + C) * arg + D) * arg + E;
-            arg = brent_minimizer.local_min_rc(status, p);
+            arg = br_min.local_min_rc(status, p);
         }
         return arg;
     });
@@ -264,7 +264,7 @@ int main(int argc, char** argv) {
     accept.resize(loc_min_count);
     std::for_each(std::execution::par, ind.cbegin(), ind.cend(), [&](size_t i) {
         unsigned ic;
-        bool rf;
+        bool rf = false;
         auto fn = [&](double x) {
             if (x == x)
                 return double(NAN);

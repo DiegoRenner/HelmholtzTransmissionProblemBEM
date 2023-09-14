@@ -55,6 +55,8 @@ public:
     return std::make_pair(-1., 1.);
   }
 
+  virtual ~AbstractParametrizedCurve() { }
+
   /**
    * This function is used for accessing a point on the parametrized
    * curve with parameter "t" for the parametrization \f$\gamma\f$(t).
@@ -69,6 +71,9 @@ public:
   virtual Eigen::Vector2d operator()(double t) const = 0;
   virtual Eigen::Vector2d operator[](double t) const = 0;
   virtual Eigen::Vector2d swapped_op(double t) const = 0;
+  virtual Eigen::ArrayXXcd operator()(const Eigen::ArrayXXd &t) const = 0;
+  virtual Eigen::ArrayXXcd operator[](const Eigen::ArrayXXd &t) const = 0;
+  virtual Eigen::ArrayXXcd swapped_op(const Eigen::ArrayXXd &t) const = 0;
 
   /**
    * This function is used for retrieving the derivative \f$\dot{\gamma}\f$(t)
@@ -86,6 +91,9 @@ public:
   virtual Eigen::Vector2d Derivative(double t) const = 0;
   virtual Eigen::Vector2d Derivative_01(double t) const = 0;
   virtual Eigen::Vector2d Derivative_01_swapped(double t) const = 0;
+  virtual Eigen::ArrayXXcd Derivative(const Eigen::ArrayXXd &t) const = 0;
+  virtual Eigen::ArrayXXcd Derivative_01(const Eigen::ArrayXXd &t) const = 0;
+  virtual Eigen::ArrayXXcd Derivative_01_swapped(const Eigen::ArrayXXd &t) const = 0;
 
   /**
    * This function is used for retrieving the double derivative
@@ -119,6 +127,13 @@ public:
     std::tie(a, b) = ParameterRange();
     // Checking if the value is within parameter range
     return (t >= a && t <= b);
+  }
+  static bool IsWithinParameterRange(const Eigen::ArrayXXd &t) {
+    double a, b;
+    // Getting the parameter range
+    std::tie(a, b) = ParameterRange();
+    // Checking if the value is within parameter range
+    return ((t >= a).all() && (t <= b).all());
   }
 
   /**

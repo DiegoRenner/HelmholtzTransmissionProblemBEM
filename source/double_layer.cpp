@@ -1,5 +1,6 @@
 #include "double_layer.hpp"
 #include "cbessel.hpp"
+#include <iostream>
 
     namespace double_layer_helmholtz {
 

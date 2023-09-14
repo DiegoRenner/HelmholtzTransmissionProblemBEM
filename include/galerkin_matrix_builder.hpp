@@ -23,15 +23,14 @@ class GalerkinMatrixBuilder
     const AbstractBEMSpace &test_space;
     const AbstractBEMSpace &trial_space;
     // panel vector
-    const PanelVector &panels;
+    PanelVector panels;
     // quadrature rules
-    const QuadRule &GaussQR;
-    const QuadRule &CGaussQR;
+    QuadRule GaussQR;
+    QuadRule CGaussQR;
     // wavenumber and refraction index
     complex_t k, ksqrtc, kkc;
     double c, sqrtc, ksqrtca;
     bool k_real_positive;
-    unsigned hankel_time, mapping_time, interaction_matrix_time;
     // dimensions
     size_t numpanels, Qtest, Qtrial, dim_test, dim_trial;
     // workspace
@@ -47,7 +46,6 @@ class GalerkinMatrixBuilder
                     m_hypersingular_general_fg_arc;
     Eigen::ArrayXXd m_zero, m_vdotn;
     Eigen::ArrayXXcd m_cf, m_temp;
-    std::vector<size_t> indN2, indNs;
     // interaction matrices
     Eigen::MatrixXcd double_layer_interaction_matrix, hypersingular_interaction_matrix, single_layer_interaction_matrix;
     Eigen::MatrixXcd double_layer_der_interaction_matrix, hypersingular_der_interaction_matrix, single_layer_der_interaction_matrix;
@@ -70,6 +68,8 @@ class GalerkinMatrixBuilder
     void single_layer_coinciding(int der) throw();
     void single_layer_adjacent(bool swap, int der) throw();
     void single_layer_general(int der) throw();
+    void all_coinciding(int der) throw();
+    void all_general(int der) throw();
     void initialize_parameters(const std::complex<double> &k_in, double c_in);
     bool is_adjacent(const AbstractParametrizedCurve &p1, const AbstractParametrizedCurve &p2, bool &swap) const;
 
@@ -85,8 +85,7 @@ public:
     GalerkinMatrixBuilder(const ParametrizedMesh &mesh,
                           const AbstractBEMSpace &test_space_in,
                           const AbstractBEMSpace &trial_space_in,
-                          const QuadRule &GaussQR_in,
-                          const QuadRule &CGaussQR_in);
+                          unsigned order);
     /**
      * Return the dimension of the test space.
      * @return unsigned int, the dimension
@@ -153,12 +152,6 @@ public:
      * @param der the order of derivative (default 0, derivatives are not computed)
      */
     void assembleAll(const std::complex<double> &k_in, double c_in, int der = 0);
-    /**
-     * Get timing info.
-     */
-    unsigned getHankelTime() const { return hankel_time / 1000; }
-    unsigned getMappingTime() const { return mapping_time / 1000; }
-    unsigned getInteractionMatrixTime() const { return interaction_matrix_time / 1000; }
 };
 
 #endif // GALERKIN_ALLHPP
