@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
     complex_t k_temp = k_0;
 
     ContinuousSpace<1> cont_space;
-    SolutionsOperator so(mesh, order, cont_space, cont_space);
+    SolutionsOperator so(mesh, order, cont_space, cont_space, true);
 
     // define functions for evaluating singular values and their derivatives
     auto sv_eval = [&] (double k_in) {

@@ -1328,26 +1328,21 @@ namespace complex_bessel {
         size_t nr=x.rows(),nc=x.cols();
         Eigen::ArrayXXd J0(nr,nc),Y0(nr,nc),J1(nr,nc),Y1(nr,nc);
         Bessel_JY_01(x,J0,Y0,J1,Y1);
-        h0.real()=J0;
-        h0.imag()=Y0;
+        h0=J0+1i*Y0;
     }
     void H1_01(const Eigen::ArrayXXd &x,Eigen::ArrayXXcd &h0,Eigen::ArrayXXcd &h1) {
         size_t nr=x.rows(),nc=x.cols();
         Eigen::ArrayXXd J0(nr,nc),Y0(nr,nc),J1(nr,nc),Y1(nr,nc);
         Bessel_JY_01(x,J0,Y0,J1,Y1);
-        h0.real()=J0;
-        h0.imag()=Y0;
-        h1.real()=J1;
-        h1.imag()=Y1;
+        h0=J0+1i*Y0;
+        h1=J1+1i*Y1;
     }
     void H1_01_i(const Eigen::ArrayXXd &x,Eigen::ArrayXXcd &h0,Eigen::ArrayXXcd &h1) {
         size_t nr=x.rows(),nc=x.cols();
         Eigen::ArrayXXd J0(nr,nc),Y0(nr,nc),J1(nr,nc),Y1(nr,nc);
         Bessel_JY_01(x,J0,Y0,J1,Y1);
-        h0.real()=-Y0;
-        h0.imag()=J0;
-        h1.real()=-Y1;
-        h1.imag()=J1;
+        h0=-Y0+1i*J0;
+        h1=-Y1+1i*J1;
     }
 
     /* n-th derivative of Bessel function f_v(z) */

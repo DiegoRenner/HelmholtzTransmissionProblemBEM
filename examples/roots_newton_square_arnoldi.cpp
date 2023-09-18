@@ -31,7 +31,6 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
-#include <execution>
 #include "parametrized_line.hpp"
 #include "singular_values_arnoldi.hpp"
 #include "find_roots.hpp"
@@ -121,23 +120,36 @@ int main(int argc, char** argv){
 	#endif
 
     ContinuousSpace<1> cont_space;
-    SolutionsOperator so(mesh, order, cont_space, cont_space);
+    SolutionsOperator so(mesh, order, cont_space, cont_space, true);
+    GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, order);
+
+    unsigned total_arnoldi_time = 0;
 
     auto sv_eval = [&] (double k_in) {
         Eigen::MatrixXcd T_in;
-        so.gen_sol_op(k_in, c_o, c_i, T_in);
-        return arnoldi::sv(T_in, 1, acc)(m);
+        so.gen_sol_op(builder, k_in, c_o, c_i, T_in);
+        auto tic = high_resolution_clock::now();
+        double res = arnoldi::sv(T_in, 1, acc)(m);
+        auto toc = high_resolution_clock::now();
+        total_arnoldi_time += duration_cast<microseconds>(toc - tic).count();
+        return res;
     };
     auto sv_eval_both = [&] (double k_in) {
         Eigen::MatrixXcd T_in, T_der_in, T_der2_in;
-        so.gen_sol_op_2nd_der(k_in, c_o, c_i, T_in, T_der_in, T_der2_in);
+        so.gen_sol_op_2nd_der(builder, k_in, c_o, c_i, T_in, T_der_in, T_der2_in);
+        auto tic = high_resolution_clock::now();
         Eigen::MatrixXd res = arnoldi::sv_2nd_der(T_in, T_der_in, T_der2_in, 1, acc).block(m,1,1,2);
+        auto toc = high_resolution_clock::now();
+        total_arnoldi_time += duration_cast<microseconds>(toc - tic).count();
         return res;
     };
     auto sv_eval_der = [&] (double k_in) {
         Eigen::MatrixXcd T_in, T_der_in;
-        so.gen_sol_op_1st_der(k_in, c_o, c_i, T_in, T_der_in);
+        so.gen_sol_op_1st_der(builder, k_in, c_o, c_i, T_in, T_der_in);
+        auto tic = high_resolution_clock::now();
         double res = arnoldi::sv_1st_der(T_in, T_der_in, 1, acc)(m,1);
+        auto toc = high_resolution_clock::now();
+        total_arnoldi_time += duration_cast<microseconds>(toc - tic).count();
         return res;
     };
 
@@ -145,7 +157,7 @@ int main(int argc, char** argv){
     auto tic = high_resolution_clock::now();
     std::vector<int> jv(n_points_x);
     std::iota(jv.begin(), jv.end(), 0);
-    std::for_each(std::execution::seq, jv.cbegin(), jv.cend(), [&](int j) {
+    std::for_each(jv.cbegin(), jv.cend(), [&](int j) {
         for (unsigned k = 0; k < n_points_y; k++) {
 
             // define wavenumber for current loop
@@ -198,7 +210,8 @@ int main(int argc, char** argv){
     });
     auto toc = high_resolution_clock::now();
 #ifdef CMDL
-    std::cout << "Total time: " << duration_cast<seconds>(toc - tic).count() << std::endl;
+    std::cout << "Total time: " << duration_cast<seconds>(toc - tic).count() << " seconds" << std::endl;
+    std::cout << "Total Arnoldi time: " << 1e-6 * total_arnoldi_time << " seconds" << std::endl;
 #endif
     return 0;
 }

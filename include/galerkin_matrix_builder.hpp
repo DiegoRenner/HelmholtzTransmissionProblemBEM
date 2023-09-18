@@ -31,11 +31,13 @@ class GalerkinMatrixBuilder
     complex_t k, ksqrtc, kkc;
     double c, sqrtc, ksqrtca;
     bool k_real_positive;
+    // timing info
+    unsigned initialization_time;
+    unsigned interaction_matrix_assembly_time;
+    unsigned hankel_computation_time;
     // dimensions
     size_t numpanels, Qtest, Qtrial, dim_test, dim_trial;
     // workspace
-    Eigen::ArrayXXcd m_h0, m_h1, m_v, m_tangent, m_tangent_p, m_h0_res_half, m_h1_res_half, m_h0_res_small, m_h1_res_small;
-    Eigen::ArrayXXd m_v_norm, m_tangent_norm, m_tangent_p_norm, m_h_arg, m_h_arg_half, m_h_arg_small;
     Eigen::ArrayXXd m_tc, m_ta, m_tg, m_sc, m_sa, m_sg, m_wc, m_wa, m_wg;
     Eigen::ArrayXXd m_double_layer_coinciding_fg, m_double_layer_adjacent_fg, m_double_layer_adjacent_fg_swap, m_double_layer_general_fg,
                     m_double_layer_coinciding_fg_t, m_double_layer_adjacent_fg_t, m_double_layer_adjacent_fg_swap_t,
@@ -44,8 +46,9 @@ class GalerkinMatrixBuilder
     Eigen::ArrayXXd m_hypersingular_coinciding_fg, m_hypersingular_adjacent_fg, m_hypersingular_adjacent_fg_swap, m_hypersingular_general_fg,
                     m_hypersingular_coinciding_fg_arc, m_hypersingular_adjacent_fg_arc, m_hypersingular_adjacent_fg_arc_swap,
                     m_hypersingular_general_fg_arc;
-    Eigen::ArrayXXd m_zero, m_vdotn;
-    Eigen::ArrayXXcd m_cf, m_temp;
+    Eigen::ArrayXXd m_zero;
+    Eigen::ArrayXXcd m_h0[2], m_h1[2], m_v[2], m_tangent[2], m_tangent_p[2], masked1[2], masked2[2], masked3[2];
+    Eigen::ArrayXXd m_v_norm[2], m_tangent_norm[2], m_tangent_p_norm[2];
     // interaction matrices
     Eigen::MatrixXcd double_layer_interaction_matrix, hypersingular_interaction_matrix, single_layer_interaction_matrix;
     Eigen::MatrixXcd double_layer_der_interaction_matrix, hypersingular_der_interaction_matrix, single_layer_der_interaction_matrix;
@@ -69,6 +72,7 @@ class GalerkinMatrixBuilder
     void single_layer_adjacent(bool swap, int der) throw();
     void single_layer_general(int der) throw();
     void all_coinciding(int der) throw();
+    void all_adjacent(bool swap, int der) throw();
     void all_general(int der) throw();
     void initialize_parameters(const std::complex<double> &k_in, double c_in);
     bool is_adjacent(const AbstractParametrizedCurve &p1, const AbstractParametrizedCurve &p2, bool &swap) const;
@@ -152,6 +156,10 @@ public:
      * @param der the order of derivative (default 0, derivatives are not computed)
      */
     void assembleAll(const std::complex<double> &k_in, double c_in, int der = 0);
+    // get timing info for profiling
+    unsigned getInitializationTime();
+    unsigned getInteractionMatrixAssemblyTime();
+    unsigned getHankelComputationTime();
 };
 
 #endif // GALERKIN_ALLHPP

@@ -24,12 +24,21 @@ class SolutionsOperator
     QuadRule GaussQR;
     QuadRule CGaussQR;
     Eigen::MatrixXcd project(const Eigen::MatrixXcd &T) const;
+    // timing info
+    bool profiling;
+    unsigned count[3] = {0, 0, 0};
+    unsigned total_initialization_time[3] = {0, 0, 0};
+    unsigned total_assembly_time[3] = {0, 0, 0};
+    unsigned total_hankel_computation_time[3] = {0, 0, 0};
+    unsigned total_interaction_matrix_assembly_time[3] = {0, 0, 0};
+    unsigned total_projection_time[3] = {0, 0, 0};
+    // solutions operator matrix assembly routines
     void gen_sol_op_in(GalerkinMatrixBuilder &builder, const complex_t &k, double c_o, double c_i,
-                       Eigen::MatrixXcd &T) const;
+                       Eigen::MatrixXcd &T);
     void gen_sol_op_1st_der_in(GalerkinMatrixBuilder &builder, const complex_t &k, double c_o, double c_i,
-                               Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der) const;
+                               Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der);
     void gen_sol_op_2nd_der_in(GalerkinMatrixBuilder &builder, const complex_t &k, double c_o, double c_i,
-                               Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der, Eigen::MatrixXcd &T_der2) const;
+                               Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der, Eigen::MatrixXcd &T_der2);
 
 public:
     /**
@@ -42,7 +51,10 @@ public:
     SolutionsOperator(const ParametrizedMesh &mesh_in,
                       unsigned int order,
                       const AbstractBEMSpace &test_space_in,
-                      const AbstractBEMSpace &trial_space_in);
+                      const AbstractBEMSpace &trial_space_in,
+                      bool profiling_in);
+    // destructor
+    ~SolutionsOperator();
     /**
      * Compute approximation of solutions operator for second-kind direct BIEs of
      * Helmholtz transmission problem using Galerkin BEM.
@@ -53,7 +65,7 @@ public:
      * @param T complex matrix to which the solutions operator matrix will be stored
      */
     void gen_sol_op(const std::complex<double> &k, double c_o, double c_i,
-                    Eigen::MatrixXcd &T) const;
+                    Eigen::MatrixXcd &T);
     /**
      * Compute approximation of solutions operator for second-kind direct BIEs of
      * Helmholtz transmission problem using Galerkin BEM.
@@ -65,7 +77,7 @@ public:
      * @param T complex matrix to which the solutions operator matrix will be stored
      */
     void gen_sol_op(GalerkinMatrixBuilder &builder, const std::complex<double> &k, double c_o, double c_i,
-                    Eigen::MatrixXcd &T) const;
+                    Eigen::MatrixXcd &T);
     /**
      * Compute approximation of solutions operator and its 1st derivative
      * for second-kind direct BIEs of Helmholtz transmission problem using Galerkin BEM.
@@ -77,7 +89,7 @@ public:
      * @param T_der complex matrix to which the 1st derivative of the solutions operator matrix will be stored
      */
     void gen_sol_op_1st_der(const std::complex<double> &k, double c_o, double c_i,
-                            Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der) const;
+                            Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der);
     /**
      * Compute approximation of solutions operator and its 1st derivative
      * for second-kind direct BIEs of Helmholtz transmission problem using Galerkin BEM.
@@ -90,7 +102,7 @@ public:
      * @param T_der complex matrix to which the 1st derivative of the solutions operator matrix will be stored
      */
     void gen_sol_op_1st_der(GalerkinMatrixBuilder &builder, const std::complex<double> &k, double c_o, double c_i,
-                            Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der) const;
+                            Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der);
     /**
      * Compute approximation of solutions operator and its 1st and 2nd derivatives
      * for second-kind direct BIEs of Helmholtz transmission problem using Galerkin BEM.
@@ -103,7 +115,7 @@ public:
      * @param T_der2 complex matrix to which the 2nd derivative of the solutions operator matrix will be stored
      */
     void gen_sol_op_2nd_der(const std::complex<double> &k, double c_o, double c_i,
-                            Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der, Eigen::MatrixXcd &T_der2) const;
+                            Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der, Eigen::MatrixXcd &T_der2);
     /**
      * Compute approximation of solutions operator and its 1st and 2nd derivatives
      * for second-kind direct BIEs of Helmholtz transmission problem using Galerkin BEM.
@@ -117,7 +129,7 @@ public:
      * @param T_der2 complex matrix to which the 2nd derivative of the solutions operator matrix will be stored
      */
     void gen_sol_op_2nd_der(GalerkinMatrixBuilder &builder, const std::complex<double> &k, double c_o, double c_i,
-                            Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der, Eigen::MatrixXcd &T_der2) const;
+                            Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der, Eigen::MatrixXcd &T_der2);
     /**
      * Return reference to the mass matrix.
      */

@@ -1,13 +1,9 @@
 #include "galerkin_matrix_builder.hpp"
 #include "cbessel.hpp"
 #include <numeric>
-#include <execution>
 #include <iostream>
+#include <chrono>
 
-using namespace std::complex_literals;
-
-typedef std::complex<double> complex_t;
-static const complex_t czero(0., 0.);
 static const double epsilon = std::numeric_limits<double>::epsilon();
 
 GalerkinMatrixBuilder::GalerkinMatrixBuilder(const ParametrizedMesh &mesh,
@@ -16,6 +12,7 @@ GalerkinMatrixBuilder::GalerkinMatrixBuilder(const ParametrizedMesh &mesh,
                                              unsigned order)
 : test_space(test_space_in), trial_space(trial_space_in)
 {
+    auto tic = chrono::high_resolution_clock::now();
     GaussQR = getGaussQR(order, 0., 1.);
     CGaussQR = getCGaussQR(order);
     panels = mesh.getPanels();
@@ -25,25 +22,7 @@ GalerkinMatrixBuilder::GalerkinMatrixBuilder(const ParametrizedMesh &mesh,
     Qtest = test_space.getQ();
     Qtrial = trial_space.getQ();
     size_t N = CGaussQR.n, Ns = GaussQR.n;
-    m_h0.resize(N, 2 * N);
-    m_h1.resize(N, 2 * N);
-    m_h_arg.resize(N, 2 * N);
-    m_h_arg_half.resize(N, N);
-    m_h_arg_small.resize(Ns, Ns);
-    m_h0_res_half.resize(N, N);
-    m_h1_res_half.resize(N, N);
-    m_h0_res_small.resize(Ns, Ns);
-    m_h1_res_small.resize(Ns, Ns);
-    m_v.resize(N, 2 * N);
-    m_v_norm.resize(N, 2 * N);
-    m_tangent.resize(N, 2 * N);
-    m_tangent_p.resize(N, 2 * N);
-    m_tangent_norm.resize(N, 2 * N);
-    m_tangent_p_norm.resize(N, 2 * N);
     m_zero.setZero(N, N);
-    m_cf.resize(N, N);
-    m_vdotn.resize(N, N);
-    m_temp.resize(N, N);
     m_tc.resize(N, N);
     m_ta.resize(N, N);
     m_tg.resize(Ns, Ns);
@@ -191,111 +170,125 @@ GalerkinMatrixBuilder::GalerkinMatrixBuilder(const ParametrizedMesh &mesh,
     single_layer_matrix.resize(dim_test, dim_test);
     single_layer_der_matrix.resize(dim_test, dim_test);
     single_layer_der2_matrix.resize(dim_test, dim_test);
+    auto toc = chrono::high_resolution_clock::now();
+    initialization_time = chrono::duration_cast<chrono::microseconds>(toc - tic).count();
 }
 
 // compute values required for the coinciding panels case
 inline void GalerkinMatrixBuilder::compute_coinciding(const AbstractParametrizedCurve &p) throw() {
     size_t I, J, N = CGaussQR.n;
-    m_tangent_p.block(0, 0, N, N) = p.Derivative_01(m_tc);
-    m_tangent.block(0, 0, N, N) = p.Derivative_01(m_sc);
-    m_v.block(0, 0, N, N) = p[m_sc] - p[m_tc];
-    m_v_norm.block(0, 0, N, N) = m_v.block(0, 0, N, N).cwiseAbs();
-    m_tangent_norm.block(0, 0, N, N) = m_tangent.block(0, 0, N, N).cwiseAbs();
-    m_tangent_p_norm.block(0, 0, N, N) = m_tangent_p.block(0, 0, N, N).cwiseAbs();
+    m_tangent_p[0] = p.Derivative_01(m_tc);
+    m_tangent[0] = p.Derivative_01(m_sc);
+    m_v[0] = p[m_sc] - p[m_tc];
+    m_v_norm[0] = m_v[0].cwiseAbs();
+    m_tangent_norm[0] = m_tangent[0].cwiseAbs();
+    m_tangent_p_norm[0] = m_tangent_p[0].cwiseAbs();
+    auto tic = chrono::high_resolution_clock::now();
     if (k_real_positive) {
-        m_h_arg_half = ksqrtc.real() * m_v_norm.block(0, 0, N, N);
-        complex_bessel::H1_01_i(m_h_arg_half, m_h0_res_half, m_h1_res_half);
-        m_h0.block(0, 0, N, N) = m_h0_res_half;
-        m_h1.block(0, 0, N, N) = m_h1_res_half;
+        complex_bessel::H1_01_i(ksqrtc.real() * m_v_norm[0], m_h0[0], m_h1[0]);
     } else {
+        m_h0[0].resize(N, N);
+        m_h1[0].resize(N, N);
         for (J = 0; J < N; ++J) {
             for (I = 0; I < N; ++I) {
-                m_h0(I, J) = 1i * complex_bessel::H1(0, ksqrtc * m_v_norm(I, J));
-                m_h1(I, J) = 1i * complex_bessel::H1(1, ksqrtc * m_v_norm(I, J));
+                m_h0[0](I, J) = 1i * complex_bessel::H1(0, ksqrtc * m_v_norm[0](I, J));
+                m_h1[0](I, J) = 1i * complex_bessel::H1(1, ksqrtc * m_v_norm[0](I, J));
             }
         }
     }
+    auto toc = chrono::high_resolution_clock::now();
+    hankel_computation_time += chrono::duration_cast<chrono::microseconds>(toc - tic).count();
 }
 
 // compute values required for the adjacent panels case
 inline void GalerkinMatrixBuilder::compute_adjacent(const AbstractParametrizedCurve &pi, const AbstractParametrizedCurve &pi_p, bool swap) throw() {
-    size_t I, J, N = CGaussQR.n;
-    m_tangent_p.block(0, 0, N, N) = swap ? -pi_p.Derivative_01_swapped(m_ta) : pi_p.Derivative_01(m_ta);
-    m_tangent_p.block(0, N, N, N) = swap ? -pi_p.Derivative_01_swapped(m_sa) : pi_p.Derivative_01(m_sa);
-    m_tangent.block(0, 0, N, N) = swap ? pi.Derivative_01(m_sa) : -pi.Derivative_01_swapped(m_sa);
-    m_tangent.block(0, N, N, N) = swap ? pi.Derivative_01(m_ta) : -pi.Derivative_01_swapped(m_ta);
-    m_v.block(0, 0, N, N) = swap ? pi[m_sa] - pi_p.swapped_op(m_ta) : pi.swapped_op(m_sa) - pi_p[m_ta];
-    m_v.block(0, N, N, N) = swap ? pi[m_ta] - pi_p.swapped_op(m_sa) : pi.swapped_op(m_ta) - pi_p[m_sa];
-    m_v_norm = m_v.cwiseAbs();
-    m_tangent_norm = m_tangent.cwiseAbs();
-    m_tangent_p_norm = m_tangent_p.cwiseAbs();
+    size_t I, J, K, N = CGaussQR.n;
+    m_tangent_p[0] = swap ? -pi_p.Derivative_01_swapped(m_ta) : pi_p.Derivative_01(m_ta);
+    m_tangent_p[1] = swap ? -pi_p.Derivative_01_swapped(m_sa) : pi_p.Derivative_01(m_sa);
+    m_tangent[0] = swap ? pi.Derivative_01(m_sa) : -pi.Derivative_01_swapped(m_sa);
+    m_tangent[1] = swap ? pi.Derivative_01(m_ta) : -pi.Derivative_01_swapped(m_ta);
+    m_v[0] = swap ? pi[m_sa] - pi_p.swapped_op(m_ta) : pi.swapped_op(m_sa) - pi_p[m_ta];
+    m_v[1] = swap ? pi[m_ta] - pi_p.swapped_op(m_sa) : pi.swapped_op(m_ta) - pi_p[m_sa];
+    m_v_norm[0] = m_v[0].cwiseAbs();
+    m_v_norm[1] = m_v[1].cwiseAbs();
+    m_tangent_norm[0] = m_tangent[0].cwiseAbs();
+    m_tangent_norm[1] = m_tangent[1].cwiseAbs();
+    m_tangent_p_norm[0] = m_tangent_p[0].cwiseAbs();
+    m_tangent_p_norm[1] = m_tangent_p[1].cwiseAbs();
+    auto tic = chrono::high_resolution_clock::now();
     if (k_real_positive) {
-        m_h_arg = ksqrtc.real() * m_v_norm;
-        complex_bessel::H1_01_i(m_h_arg, m_h0, m_h1);
-    } else {
+        complex_bessel::H1_01_i(ksqrtc.real() * m_v_norm[0], m_h0[0], m_h1[0]);
+        complex_bessel::H1_01_i(ksqrtc.real() * m_v_norm[1], m_h0[1], m_h1[1]);
+    } else for (K = 0; K < 2; ++K) {
+        m_h0[K].resize(N, N);
+        m_h1[K].resize(N, N);
         for (J = 0; J < 2 * N; ++J) {
             for (I = 0; I < N; ++I) {
-                m_h0(I, J) = 1i * complex_bessel::H1(0, ksqrtc * m_v_norm(I, J));
-                m_h1(I, J) = 1i * complex_bessel::H1(1, ksqrtc * m_v_norm(I, J));
+                m_h0[K](I, J) = 1i * complex_bessel::H1(0, ksqrtc * m_v_norm[K](I, J));
+                m_h1[K](I, J) = 1i * complex_bessel::H1(1, ksqrtc * m_v_norm[K](I, J));
             }
         }
     }
+    auto toc = chrono::high_resolution_clock::now();
+    hankel_computation_time += chrono::duration_cast<chrono::microseconds>(toc - tic).count();
 }
 
 // compute values required for the disjoint panels case
 inline void GalerkinMatrixBuilder::compute_general(const AbstractParametrizedCurve &pi, const AbstractParametrizedCurve &pi_p) throw() {
     size_t I, J, N = GaussQR.n;
-    m_tangent_p.block(0, 0, N, N) = pi_p.Derivative_01(m_tg);
-    m_tangent.block(0, 0, N, N) = pi.Derivative_01(m_sg);
-    m_v.block(0, 0, N, N) = pi[m_sg] - pi_p[m_tg];
-    m_v_norm.block(0, 0, N, N) = m_v.block(0, 0, N, N).cwiseAbs();
-    m_tangent_norm.block(0, 0, N, N) = m_tangent.block(0, 0, N, N).cwiseAbs();
-    m_tangent_p_norm.block(0, 0, N, N) = m_tangent_p.block(0, 0, N, N).cwiseAbs();
+    m_tangent_p[0] = pi_p.Derivative_01(m_tg);
+    m_tangent[0] = pi.Derivative_01(m_sg);
+    m_v[0] = pi[m_sg] - pi_p[m_tg];
+    m_v_norm[0] = m_v[0].cwiseAbs();
+    m_tangent_norm[0] = m_tangent[0].cwiseAbs();
+    m_tangent_p_norm[0] = m_tangent_p[0].cwiseAbs();
+    auto tic = chrono::high_resolution_clock::now();
     if (k_real_positive) {
-        m_h_arg_small = ksqrtc.real() * m_v_norm.block(0, 0, N, N);
-        complex_bessel::H1_01_i(m_h_arg_small, m_h0_res_small, m_h1_res_small);
-        m_h0.block(0, 0, N, N) = m_h0_res_small;
-        m_h1.block(0, 0, N, N) = m_h1_res_small;
+        complex_bessel::H1_01_i(ksqrtc.real() * m_v_norm[0], m_h0[0], m_h1[0]);
     } else {
+        m_h0[0].resize(N, N);
+        m_h1[0].resize(N, N);
         for (J = 0; J < N; ++J) {
             for (I = 0; I < N; ++I) {
-                m_h0(I, J) = 1i * complex_bessel::H1(0, ksqrtc * m_v_norm(I, J));
-                m_h1(I, J) = 1i * complex_bessel::H1(1, ksqrtc * m_v_norm(I, J));
+                m_h0[0](I, J) = 1i * complex_bessel::H1(0, ksqrtc * m_v_norm[0](I, J));
+                m_h1[0](I, J) = 1i * complex_bessel::H1(1, ksqrtc * m_v_norm[0](I, J));
             }
         }
     }
+    auto toc = chrono::high_resolution_clock::now();
+    hankel_computation_time += chrono::duration_cast<chrono::microseconds>(toc - tic).count();
 }
 
 // compute interaction matrices for the K submatrix, coinciding panels case
 void GalerkinMatrixBuilder::double_layer_coinciding(int der) throw() {
     size_t i, j, K, N = CGaussQR.n;
-    const auto &v = m_v.block(0, 0, N, N);
-    const auto &v_norm = m_v_norm.block(0, 0, N, N);
-    const auto &h1 = m_h1.block(0, 0, N, N), &h0 = m_h0.block(0, 0, N, N);
+    const auto &v = m_v[0];
+    const auto &v_norm = m_v_norm[0];
+    const auto &h1 = m_h1[0], &h0 = m_h0[0];
     auto mask = (ksqrtca * v_norm) > epsilon;
-    auto masked1 = mask.select(ksqrtc * h1 / v_norm, (v_norm > epsilon).select(M_2_PI / (v_norm * v_norm), m_zero));
-    Eigen::ArrayXXcd masked2, masked3;
+    Eigen::ArrayXXd vdotn, cf;
     double_layer_interaction_matrix.setZero();
+    masked1[0] = mask.select(ksqrtc * h1 / v_norm, (v_norm > epsilon).select(M_2_PI / (v_norm * v_norm), m_zero));
     if (der > 0) {
         double_layer_der_interaction_matrix.setZero();
-        masked2 = mask.select(h0, m_zero);
+        masked2[0] = mask.select(h0, m_zero);
     }
     if (der > 1) {
         double_layer_der2_interaction_matrix.setZero();
-        masked3 = masked2 - mask.select(h1 * ksqrtc * v_norm, m_zero);
+        masked3[0] = masked2[0] - mask.select(h1 * ksqrtc * v_norm, m_zero);
     }
     for (K = 0; K < 2; ++K) {
-        const auto tangent = (K == 0 ? m_tangent_p : m_tangent).block(0, 0, N, N);
-        m_temp = (K * 2 - 1.) * m_wc * (K == 0 ? m_tangent_norm : m_tangent_p_norm).block(0, 0, N, N) *
+        const auto &tangent = (K == 0 ? m_tangent_p : m_tangent)[0];
+        vdotn = (K * 2 - 1.) * m_wc * (K == 0 ? m_tangent_norm : m_tangent_p_norm)[0] *
             (v.imag() * tangent.real() - v.real() * tangent.imag());
         for (j = 0; j < Qtrial; ++j) {
             for (i = 0; i < Qtest; ++i) {
-                m_cf = m_temp * (K == 0 ? m_double_layer_coinciding_fg : m_double_layer_coinciding_fg_t).block(i * N, j * N, N, N);
-                double_layer_interaction_matrix(i, j) += (m_cf * masked1).sum();
+                cf = vdotn * (K == 0 ? m_double_layer_coinciding_fg : m_double_layer_coinciding_fg_t).block(i * N, j * N, N, N);
+                double_layer_interaction_matrix(i, j) += (cf * masked1[0]).sum();
                 if (der > 0)
-                    double_layer_der_interaction_matrix(i, j) += (m_cf * masked2).sum();
+                    double_layer_der_interaction_matrix(i, j) += (cf * masked2[0]).sum();
                 if (der > 1)
-                    double_layer_der2_interaction_matrix(i, j) += (m_cf * masked3).sum();
+                    double_layer_der2_interaction_matrix(i, j) += (cf * masked3[0]).sum();
             }
         }
     }
@@ -313,31 +306,33 @@ void GalerkinMatrixBuilder::double_layer_adjacent(bool swap, int der, bool trans
         double_layer_der_interaction_matrix.setZero();
     if (der > 1)
         double_layer_der2_interaction_matrix.setZero();
-    Eigen::ArrayXXcd masked2, masked3;
+    Eigen::ArrayXXd vdotn, cf;
     for (K = 0; K < 2; ++K) {
-        const auto &tangent = (transp ? m_tangent : m_tangent_p).block(0, K * N, N, N);
-        const auto &v = m_v.block(0, K * N, N, N);
-        const auto &v_norm = m_v_norm.block(0, K * N, N, N);
-        const auto &h1 = m_h1.block(0, K * N, N, N), &h0 = m_h0.block(0, K * N, N, N);
+        const auto &tangent = (transp ? m_tangent : m_tangent_p)[K];
+        const auto &v = m_v[K];
+        const auto &v_norm = m_v_norm[K];
+        const auto &h1 = m_h1[K], &h0 = m_h0[K];
         auto mask = (ksqrtca * v_norm) > epsilon;
-        auto masked1 = mask.select(ksqrtc * h1 / v_norm, (v_norm > epsilon).select(M_2_PI / (v_norm * v_norm), m_zero));
-        if (der > 0)
-            masked2 = mask.select(h0, m_zero);
-        if (der > 1)
-            masked3 = masked2 - mask.select(h1 * ksqrtc * v_norm, m_zero);
-        m_temp = (transp? 1.0 : -1.0) * m_wa * (v.imag() * tangent.real() - v.real() * tangent.imag()) *
-            (transp ? m_tangent_p_norm : m_tangent_norm).block(0, K * N, N, N);
+        if (!transp) {
+            masked1[K] = mask.select(ksqrtc * h1 / v_norm, (v_norm > epsilon).select(M_2_PI / (v_norm * v_norm), m_zero));
+            if (der > 0)
+                masked2[K] = mask.select(h0, m_zero);
+            if (der > 1)
+                masked3[K] = masked2[K] - mask.select(h1 * ksqrtc * v_norm, m_zero);
+        }
+        vdotn = (transp? 1.0 : -1.0) * m_wa * (v.imag() * tangent.real() - v.real() * tangent.imag()) *
+            (transp ? m_tangent_p_norm : m_tangent_norm)[K];
         for (j = 0; j < Qtrial; ++j) {
             for (i = 0; i < Qtest; ++i) {
-                m_cf = m_temp * (swap ? ((transp ? K == 0 : K == 1) ? m_double_layer_adjacent_fg_swap_t
-                                                                    : m_double_layer_adjacent_fg_swap)
-                                      : ((transp ? K == 0 : K == 1) ? m_double_layer_adjacent_fg_t
-                                                                    : m_double_layer_adjacent_fg)).block(i * N, j * N, N, N);
-                double_layer_interaction_matrix(i, j) += (m_cf * masked1).sum();
+                cf = vdotn * (swap ? ((transp ? K == 0 : K == 1) ? m_double_layer_adjacent_fg_swap_t
+                                                                 : m_double_layer_adjacent_fg_swap)
+                                   : ((transp ? K == 0 : K == 1) ? m_double_layer_adjacent_fg_t
+                                                                 : m_double_layer_adjacent_fg)).block(i * N, j * N, N, N);
+                double_layer_interaction_matrix(i, j) += (cf * masked1[K]).sum();
                 if (der > 0)
-                    double_layer_der_interaction_matrix(i, j) += (m_cf * masked2).sum();
+                    double_layer_der_interaction_matrix(i, j) += (cf * masked2[K]).sum();
                 if (der > 1)
-                    double_layer_der2_interaction_matrix(i, j) += (m_cf * masked3).sum();
+                    double_layer_der2_interaction_matrix(i, j) += (cf * masked3[K]).sum();
             }
         }
     }
@@ -350,33 +345,28 @@ void GalerkinMatrixBuilder::double_layer_adjacent(bool swap, int der, bool trans
 // compute interaction matrices for the K submatrix, disjoint panels case
 void GalerkinMatrixBuilder::double_layer_general(int der, bool transp) throw() {
     size_t i, j, N = GaussQR.n;
-    const auto &tangent = (transp ? m_tangent : m_tangent_p).block(0, 0, N, N), &v = m_v.block(0, 0, N, N);
-    const auto &v_norm = m_v_norm.block(0, 0, N, N);
-    const auto &h1 = m_h1.block(0, 0, N, N), &h0 = m_h0.block(0, 0, N, N);
+    const auto &tangent = (transp ? m_tangent : m_tangent_p)[0], &v = m_v[0];
+    const auto &v_norm = m_v_norm[0];
+    const auto &h1 = m_h1[0], &h0 = m_h0[0];
     const auto &zmat = m_zero.block(0, 0, N, N);
     auto mask = ksqrtca * v_norm > epsilon;
-    auto masked1 = mask.select(ksqrtc * h1 / v_norm, (v_norm > epsilon).select(M_2_PI / (v_norm * v_norm), zmat));
-    m_vdotn.block(0, 0, N, N) = m_wg * (transp? -1.0 : 1.0) * (v.real() * tangent.imag() - v.imag() * tangent.real()) *
-        (transp ? m_tangent_p_norm : m_tangent_norm).block(0, 0, N, N);
-    double_layer_interaction_matrix.setZero();
-    Eigen::ArrayXXcd masked2, masked3;
-    if (der > 0) {
-        double_layer_der_interaction_matrix.setZero();
-        masked2 = mask.select(h0, zmat);
-    }
-    if (der > 1) {
-        double_layer_der2_interaction_matrix.setZero();
-        masked3 = masked2 - mask.select(h1 * ksqrtc * v_norm, zmat);
+    Eigen::ArrayXXd cf, vdotn = m_wg * (transp? -1.0 : 1.0) * (v.real() * tangent.imag() - v.imag() * tangent.real()) *
+        (transp ? m_tangent_p_norm : m_tangent_norm)[0];
+    if (!transp) {
+        masked1[0] = mask.select(ksqrtc * h1 / v_norm, (v_norm > epsilon).select(M_2_PI / (v_norm * v_norm), zmat));
+        if (der > 0)
+            masked2[0] = mask.select(h0, zmat);
+        if (der > 1)
+            masked3[0] = masked2[0] - mask.select(h1 * ksqrtc * v_norm, zmat);
     }
     for (j = 0; j < Qtrial; ++j) {
         for (i = 0; i < Qtest; ++i) {
-            m_cf.block(0, 0, N, N) = m_vdotn.block(0, 0, N, N) *
-                (transp ? m_double_layer_general_fg_t : m_double_layer_general_fg).block(i * N, j * N, N, N);
-            double_layer_interaction_matrix(i, j) += (m_cf.block(0, 0, N, N) * masked1).sum();
+            cf = vdotn * (transp ? m_double_layer_general_fg_t : m_double_layer_general_fg).block(i * N, j * N, N, N);
+            double_layer_interaction_matrix(i, j) = (cf * masked1[0]).sum();
             if (der > 0)
-                double_layer_der_interaction_matrix(i, j) += (m_cf.block(0, 0, N, N) * masked2).sum();
+                double_layer_der_interaction_matrix(i, j) = (cf * masked2[0]).sum();
             if (der > 1)
-                double_layer_der2_interaction_matrix(i, j) += (m_cf.block(0, 0, N, N) * masked3).sum();
+                double_layer_der2_interaction_matrix(i, j) = (cf * masked3[0]).sum();
         }
     }
     if (der > 0)
@@ -388,15 +378,19 @@ void GalerkinMatrixBuilder::double_layer_general(int der, bool transp) throw() {
 // compute interaction matrices for the W submatrix, coinciding panels case
 void GalerkinMatrixBuilder::hypersingular_coinciding(int der) throw() {
     size_t i, j, K, N = CGaussQR.n;
-    const auto &tangent_p = m_tangent_p.block(0, 0, N, N), &tangent = m_tangent.block(0, 0, N, N);
-    const auto &h0 = m_h0.block(0, 0, N, N), &h1 = m_h1.block(0, 0, N, N);
-    const auto &v_norm = m_v_norm.block(0, 0, N, N);
-    auto tdottp = tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real();
+    const auto &tangent_p = m_tangent_p[0], &tangent = m_tangent[0];
+    const auto &h0 = m_h0[0];
+    const auto &v_norm = m_v_norm[0];
+    Eigen::ArrayXXd tdottp = (tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real()) * m_wc;
     auto mask = ksqrtca * v_norm > epsilon;
-    auto masked1 = mask.select(h0, (v_norm > epsilon).select(-M_2_PI * v_norm.log(), m_zero));
+    Eigen::ArrayXXcd h1_vnorm, cf;
+    Eigen::ArrayXXd temp;
     hypersingular_interaction_matrix.setZero();
-    if (der > 0)
+    masked1[0] = mask.select(h0, (v_norm > epsilon).select(-M_2_PI * v_norm.log(), m_zero));
+    if (der > 0) {
         hypersingular_der_interaction_matrix.setZero();
+        h1_vnorm = m_h1[0] * v_norm;
+    }
     if (der > 1)
         hypersingular_der2_interaction_matrix.setZero();
     for (K = 0; K < 2; ++K) {
@@ -410,15 +404,14 @@ void GalerkinMatrixBuilder::hypersingular_coinciding(int der) throw() {
                         hypersingular_der2_interaction_matrix(i, j) = hypersingular_der2_interaction_matrix(j, i);
                     continue;
                 }
-                m_cf = m_hypersingular_coinciding_fg_arc.block((K > 0 ? j : i) * N, (K > 0 ? i : j) * N, N, N) -
-                    kkc * (m_temp = m_hypersingular_coinciding_fg.block((K > 0 ? j : i) * N, (K > 0 ? i : j) * N, N, N) * tdottp);
-                hypersingular_interaction_matrix(i, j) += (m_wc * m_cf * masked1).sum();
+                cf = m_wc * m_hypersingular_coinciding_fg_arc.block((K > 0 ? j : i) * N, (K > 0 ? i : j) * N, N, N) -
+                    kkc * (temp = m_hypersingular_coinciding_fg.block((K > 0 ? j : i) * N, (K > 0 ? i : j) * N, N, N) * tdottp);
+                hypersingular_interaction_matrix(i, j) += (cf * masked1[0]).sum();
                 if (der > 0)
-                    hypersingular_der_interaction_matrix(i, j) += mask.select(
-                        m_wc * (h1 * v_norm * m_cf + 2.0 * h0 * ksqrtc * m_temp), m_zero).sum();
+                    hypersingular_der_interaction_matrix(i, j) += mask.select(h1_vnorm * cf + 2.0 * h0 * ksqrtc * temp, m_zero).sum();
                 if (der > 1)
                     hypersingular_der2_interaction_matrix(i, j) += mask.select(
-                        m_wc * ((h0 * v_norm - h1 / ksqrtc) * m_cf * v_norm - 2.0 * m_temp * (2.0 * h1 * ksqrtc * v_norm - h0)), m_zero).sum();
+                        (h0 * v_norm * v_norm - h1_vnorm / ksqrtc) * cf - 2.0 * temp * (2.0 * ksqrtc * h1_vnorm - h0), m_zero).sum();
             }
         }
     }
@@ -436,30 +429,33 @@ void GalerkinMatrixBuilder::hypersingular_adjacent(bool swap, int der) throw() {
         hypersingular_der_interaction_matrix.setZero();
     if (der > 1)
         hypersingular_der2_interaction_matrix.setZero();
+    Eigen::ArrayXXcd h1_vnorm, cf;
+    Eigen::ArrayXXd temp, tdottp;
     for (K = 0; K < 2; ++K) {
-        const auto &tangent_p = m_tangent_p.block(0, K * N, N, N), &tangent = m_tangent.block(0, K * N, N, N);
-        const auto &h0 = m_h0.block(0, K * N, N, N), &h1 = m_h1.block(0, K * N, N, N);
-        const auto &v_norm = m_v_norm.block(0, K * N, N, N);
-        auto tdottp = tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real();
+        const auto &tangent_p = m_tangent_p[K], &tangent = m_tangent[K];
+        const auto &h0 = m_h0[K];
+        const auto &v_norm = m_v_norm[K];
+        tdottp = (tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real()) * m_wa;
         auto mask = ksqrtca * v_norm > epsilon;
-        auto masked1 = mask.select(h0, (v_norm > epsilon).select(-M_2_PI * v_norm.log(), m_zero));
+        masked1[0] = mask.select(h0, (v_norm > epsilon).select(-M_2_PI * v_norm.log(), m_zero));
+        if (der > 0)
+            h1_vnorm = m_h1[K] * v_norm;
         for (j = 0; j < Qtrial; ++j) {
             for (i = 0; i < Qtrial; ++i) {
-                m_cf = (swap ? (K > 0 ? m_hypersingular_adjacent_fg_arc.block(j * N, i * N, N, N)
-                                      : m_hypersingular_adjacent_fg_arc_swap.block(i * N, j * N, N, N))
-                             : (K > 0 ? m_hypersingular_adjacent_fg_arc_swap.block(j * N, i * N, N, N)
-                                      : m_hypersingular_adjacent_fg_arc.block(i * N, j * N, N, N))) -
-                    kkc * (m_temp = (swap ? (K > 0 ? m_hypersingular_adjacent_fg.block(j * N, i * N, N, N)
-                                                   : m_hypersingular_adjacent_fg_swap.block(i * N, j * N, N, N))
-                                          : (K > 0 ? m_hypersingular_adjacent_fg_swap.block(j * N, i * N, N, N)
-                                                   : m_hypersingular_adjacent_fg.block(i * N, j * N, N, N))) * tdottp);
-                hypersingular_interaction_matrix(i, j) += (m_wa * m_cf * masked1).sum();
+                cf = m_wa * (swap ? (K > 0 ? m_hypersingular_adjacent_fg_arc.block(j * N, i * N, N, N)
+                                           : m_hypersingular_adjacent_fg_arc_swap.block(i * N, j * N, N, N))
+                                  : (K > 0 ? m_hypersingular_adjacent_fg_arc_swap.block(j * N, i * N, N, N)
+                                           : m_hypersingular_adjacent_fg_arc.block(i * N, j * N, N, N))) -
+                    kkc * (temp = (swap ? (K > 0 ? m_hypersingular_adjacent_fg.block(j * N, i * N, N, N)
+                                                 : m_hypersingular_adjacent_fg_swap.block(i * N, j * N, N, N))
+                                        : (K > 0 ? m_hypersingular_adjacent_fg_swap.block(j * N, i * N, N, N)
+                                                 : m_hypersingular_adjacent_fg.block(i * N, j * N, N, N))) * tdottp);
+                hypersingular_interaction_matrix(i, j) += (cf * masked1[0]).sum();
                 if (der > 0)
-                    hypersingular_der_interaction_matrix(i, j) += mask.select(
-                        m_wa * (h1 * v_norm * m_cf + 2.0 * h0 * ksqrtc * m_temp), m_zero).sum();
+                    hypersingular_der_interaction_matrix(i, j) += mask.select(h1_vnorm * cf + 2.0 * h0 * ksqrtc * temp, m_zero).sum();
                 if (der > 1)
                     hypersingular_der2_interaction_matrix(i, j) += mask.select(
-                        m_wa * ((h0 * v_norm - h1 / ksqrtc) * m_cf * v_norm - 2.0 * m_temp * (2.0 * h1 * ksqrtc * v_norm - h0)), m_zero).sum();
+                        (h0 * v_norm * v_norm - h1_vnorm / ksqrtc) * cf - 2.0 * temp * (2.0 * ksqrtc * h1_vnorm - h0), m_zero).sum();
             }
         }
     }
@@ -472,29 +468,33 @@ void GalerkinMatrixBuilder::hypersingular_adjacent(bool swap, int der) throw() {
 // compute interaction matrices for the W submatrix, disjoint panels case
 void GalerkinMatrixBuilder::hypersingular_general(int der) throw() {
     size_t i, j, N = GaussQR.n;
-    const auto &tangent_p = m_tangent_p.block(0, 0, N, N), &tangent = m_tangent.block(0, 0, N, N);
-    const auto &h0 = m_h0.block(0, 0, N, N), &h1 = m_h1.block(0, 0, N, N);
-    const auto &v_norm = m_v_norm.block(0, 0, N, N);
+    const auto &tangent_p = m_tangent_p[0], &tangent = m_tangent[0];
+    const auto &h0 = m_h0[0];
+    const auto &v_norm = m_v_norm[0];
     const auto &zmat = m_zero.block(0, 0, N, N);
-    auto tdottp = tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real();
+    Eigen::ArrayXXd tdottp = (tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real()) * m_wg;
     auto mask = ksqrtca * v_norm > epsilon;
-    auto masked1 = mask.select(h0, (v_norm > epsilon).select(-M_2_PI * v_norm.log(), zmat));
+    Eigen::ArrayXXcd h1_vnorm, cf;
+    Eigen::ArrayXXd temp;
     hypersingular_interaction_matrix.setZero();
-    if (der > 0)
+    masked1[0] = mask.select(h0, (v_norm > epsilon).select(-M_2_PI * v_norm.log(), zmat));
+    if (der > 0) {
         hypersingular_der_interaction_matrix.setZero();
+        h1_vnorm = m_h1[0] * v_norm;
+    }
     if (der > 1)
         hypersingular_der2_interaction_matrix.setZero();
     for (j = 0; j < Qtrial; ++j) {
         for (i = 0; i < Qtrial; ++i) {
-            m_cf.block(0, 0, N, N) = m_hypersingular_general_fg_arc.block(i * N, j * N, N, N) -
-                kkc * (m_temp = m_hypersingular_general_fg.block(i * N, j * N, N, N) * tdottp);
-            hypersingular_interaction_matrix(i, j) += (m_wg * m_cf.block(0, 0, N, N) * masked1).sum();
+            cf = m_wg * m_hypersingular_general_fg_arc.block(i * N, j * N, N, N) -
+                kkc * (temp = m_hypersingular_general_fg.block(i * N, j * N, N, N) * tdottp);
+            hypersingular_interaction_matrix(i, j) += (cf * masked1[0]).sum();
             if (der > 0)
                 hypersingular_der_interaction_matrix(i, j) +=
-                    (m_wg * mask.select(h1 * v_norm * m_cf.block(0, 0, N, N) + 2.0 * h0 * ksqrtc * m_temp, zmat)).sum();
+                    mask.select(h1_vnorm * cf + 2.0 * h0 * ksqrtc * temp, zmat).sum();
             if (der > 1)
-                hypersingular_der2_interaction_matrix(i, j) += (m_wg * mask.select(
-                    (h0 * v_norm - h1 / ksqrtc) * m_cf.block(0, 0, N, N) * v_norm - 2.0 * m_temp * (2.0 * h1 * ksqrtc * v_norm - h0), zmat)).sum();
+                hypersingular_der2_interaction_matrix(i, j) += mask.select(
+                    (h0 * v_norm * v_norm - h1_vnorm / ksqrtc) * cf - 2.0 * temp * (2.0 * ksqrtc * h1_vnorm - h0), zmat).sum();
         }
     }
     if (der > 0)
@@ -506,20 +506,19 @@ void GalerkinMatrixBuilder::hypersingular_general(int der) throw() {
 // compute interaction matrices for the V submatrix, coinciding panels case
 void GalerkinMatrixBuilder::single_layer_coinciding(int der) throw() {
     size_t i, j, K, N = CGaussQR.n;
-    const auto &v_norm = m_v_norm.block(0, 0, N, N);
-    const auto &h0 = m_h0.block(0, 0, N, N), &h1 = m_h1.block(0, 0, N, N);
-    auto ttp_norm = m_tangent_norm.block(0, 0, N, N) * m_tangent_p_norm.block(0, 0, N, N);
+    const auto &v_norm = m_v_norm[0];
+    const auto &h0 = m_h0[0], &h1 = m_h1[0];
+    Eigen::ArrayXXd cf, ttp_norm = m_tangent_norm[0] * m_tangent_p_norm[0] * m_wc;
     auto mask = ksqrtca * v_norm > epsilon;
-    auto masked1 = mask.select(h0, (v_norm > epsilon).select(-M_2_PI * v_norm.log(), m_zero));
-    Eigen::ArrayXXcd masked2, masked3;
     single_layer_interaction_matrix.setZero();
+    masked1[0] = mask.select(h0, (v_norm > epsilon).select(-M_2_PI * v_norm.log(), m_zero));
     if (der > 0) {
         single_layer_der_interaction_matrix.setZero();
-        masked2 = mask.select(h1 * v_norm, m_zero);
+        masked2[0] = mask.select(h1 * v_norm, m_zero);
     }
     if (der > 1) {
         single_layer_der2_interaction_matrix.setZero();
-        masked3 = mask.select((h1 / ksqrtc - h0 * v_norm) * v_norm, m_zero);
+        masked3[0] = mask.select((h1 / ksqrtc - h0 * v_norm) * v_norm, m_zero);
     }
     for (K = 0; K < 2; ++K) {
         for (j = 0; j < Qtest; ++j) {
@@ -532,12 +531,12 @@ void GalerkinMatrixBuilder::single_layer_coinciding(int der) throw() {
                         single_layer_der2_interaction_matrix(i, j) = single_layer_der2_interaction_matrix(j, i);
                     continue;
                 }
-                m_cf = ttp_norm * m_single_layer_coinciding_fg.block((K > 0 ? j : i) * N, (K > 0 ? i : j) * N, N, N) * m_wc;
-                single_layer_interaction_matrix(i, j) += (m_cf * masked1).sum();
+                cf = ttp_norm * m_single_layer_coinciding_fg.block((K > 0 ? j : i) * N, (K > 0 ? i : j) * N, N, N);
+                single_layer_interaction_matrix(i, j) += (cf * masked1[0]).sum();
                 if (der > 0)
-                    single_layer_der_interaction_matrix(i, j) += (m_cf * masked2).sum();
+                    single_layer_der_interaction_matrix(i, j) += (cf * masked2[0]).sum();
                 if (der > 1)
-                    single_layer_der2_interaction_matrix(i, j) += (m_cf * masked3).sum();
+                    single_layer_der2_interaction_matrix(i, j) += (cf * masked3[0]).sum();
             }
         }
     }
@@ -550,35 +549,33 @@ void GalerkinMatrixBuilder::single_layer_coinciding(int der) throw() {
 // compute interaction matrices for the V submatrix, adjacent panels case
 void GalerkinMatrixBuilder::single_layer_adjacent(bool swap, int der) throw() {
     size_t i, j, K, N = CGaussQR.n;
-    auto ttp_norm_0 = m_tangent_norm.block(0, 0, N, N) * m_tangent_p_norm.block(0, 0, N, N);
-    auto ttp_norm_1 = m_tangent_norm.block(0, N, N, N) * m_tangent_p_norm.block(0, N, N, N);
     single_layer_interaction_matrix.setZero();
     if (der > 0)
         single_layer_der_interaction_matrix.setZero();
     if (der > 1)
         single_layer_der2_interaction_matrix.setZero();
-    Eigen::ArrayXXcd masked2, masked3;
+    Eigen::ArrayXXd ttp_norm, cf;
     for (K = 0; K < 2; ++K) {
-        const auto &v_norm = m_v_norm.block(0, K * N, N, N);
-        const auto &h0 = m_h0.block(0, K * N, N, N), &h1 = m_h1.block(0, K * N, N, N);
+        const auto &v_norm = m_v_norm[K];
+        const auto &h0 = m_h0[K], &h1 = m_h1[K];
         auto mask = ksqrtca * v_norm > epsilon;
-        auto masked1 = mask.select(h0, (v_norm > epsilon).select(-M_2_PI * v_norm.log(), m_zero));
+        masked1[K] = mask.select(h0, (v_norm > epsilon).select(-M_2_PI * v_norm.log(), m_zero));
         if (der > 0)
-            masked2 = mask.select(h1 * v_norm, m_zero);
+            masked2[K] = mask.select(h1 * v_norm, m_zero);
         if (der > 1)
-            masked3 = mask.select((h1 / ksqrtc - h0 * v_norm) * v_norm, m_zero);
-        m_temp = (K == 0 ? ttp_norm_0 : ttp_norm_1) * m_wa;
+            masked3[K] = mask.select((h1 / ksqrtc - h0 * v_norm) * v_norm, m_zero);
+        ttp_norm = m_tangent_norm[K] * m_tangent_p_norm[K] * m_wa;
         for (j = 0; j < Qtest; ++j) {
             for (i = 0; i < Qtest; ++i) {
-                m_cf = m_temp * (swap ? (K > 0 ? m_single_layer_adjacent_fg.block(j * N, i * N, N, N)
+                cf = ttp_norm * (swap ? (K > 0 ? m_single_layer_adjacent_fg.block(j * N, i * N, N, N)
                                                : m_single_layer_adjacent_fg_swap.block(i * N, j * N, N, N))
                                       : (K > 0 ? m_single_layer_adjacent_fg_swap.block(j * N, i * N, N, N)
                                                : m_single_layer_adjacent_fg.block(i * N, j * N, N, N)));
-                single_layer_interaction_matrix(i, j) += (m_cf * masked1).sum();
+                single_layer_interaction_matrix(i, j) += (cf * masked1[K]).sum();
                 if (der > 0)
-                    single_layer_der_interaction_matrix(i, j) += (m_cf * masked2).sum();
+                    single_layer_der_interaction_matrix(i, j) += (cf * masked2[K]).sum();
                 if (der > 1)
-                    single_layer_der2_interaction_matrix(i, j) += (m_cf * masked3).sum();
+                    single_layer_der2_interaction_matrix(i, j) += (cf * masked3[K]).sum();
             }
         }
     }
@@ -591,30 +588,24 @@ void GalerkinMatrixBuilder::single_layer_adjacent(bool swap, int der) throw() {
 // compute interaction matrices for the V submatrix, disjoint panels case
 void GalerkinMatrixBuilder::single_layer_general(int der) throw() {
     size_t i, j, N = GaussQR.n;
-    const auto &v_norm = m_v_norm.block(0, 0, N, N);
-    const auto &h0 = m_h0.block(0, 0, N, N), &h1 = m_h1.block(0, 0, N, N);
+    const auto &v_norm = m_v_norm[0];
+    const auto &h0 = m_h0[0], &h1 = m_h1[0];
     const auto &zmat = m_zero.block(0, 0, N, N);
-    auto ttp_norm = m_tangent_norm.block(0, 0, N, N) * m_tangent_p_norm.block(0, 0, N, N);
+    Eigen::ArrayXXd cf, ttp_norm = m_tangent_norm[0] * m_tangent_p_norm[0] * m_wg;
     auto mask = ksqrtca * v_norm > epsilon;
-    auto masked1 = mask.select(h0, (v_norm > epsilon).select(-M_2_PI * v_norm.log(), zmat));
-    Eigen::ArrayXXcd masked2, masked3;
-    single_layer_interaction_matrix.setZero();
-    if (der > 0) {
-        single_layer_der_interaction_matrix.setZero();
-        masked2 = mask.select(h1 * v_norm, zmat);
-    }
-    if (der > 1) {
-        single_layer_der2_interaction_matrix.setZero();
-        masked3 = mask.select((h1 / ksqrtc - h0 * v_norm) * v_norm, zmat);
-    }
+    masked1[0] = mask.select(h0, (v_norm > epsilon).select(-M_2_PI * v_norm.log(), zmat));
+    if (der > 0)
+        masked2[0] = mask.select(h1 * v_norm, zmat);
+    if (der > 1)
+        masked3[0] = mask.select((h1 / ksqrtc - h0 * v_norm) * v_norm, zmat);
     for (j = 0; j < Qtest; ++j) {
         for (i = 0; i < Qtest; ++i) {
-            m_cf.block(0, 0, N, N) = ttp_norm * m_wg * m_single_layer_general_fg.block(i * N, j * N, N, N);
-            single_layer_interaction_matrix(i, j) += (m_cf.block(0, 0, N, N) * masked1).sum();
+            cf = ttp_norm * m_single_layer_general_fg.block(i * N, j * N, N, N);
+            single_layer_interaction_matrix(i, j) = (cf * masked1[0]).sum();
             if (der > 0)
-                single_layer_der_interaction_matrix(i, j) += (m_cf.block(0, 0, N, N) * masked2).sum();
+                single_layer_der_interaction_matrix(i, j) = (cf * masked2[0]).sum();
             if (der > 1)
-                single_layer_der2_interaction_matrix(i, j) += (m_cf.block(0, 0, N, N) * masked3).sum();
+                single_layer_der2_interaction_matrix(i, j) = (cf * masked3[0]).sum();
         }
     }
     if (der > 0)
@@ -625,18 +616,19 @@ void GalerkinMatrixBuilder::single_layer_general(int der) throw() {
 
 void GalerkinMatrixBuilder::all_coinciding(int der) throw() {
     size_t i, j, K, N = CGaussQR.n, Q = Qtest;
-    const auto &v = m_v.block(0, 0, N, N);
-    const auto &v_norm = m_v_norm.block(0, 0, N, N);
-    const auto &h1 = m_h1.block(0, 0, N, N), &h0 = m_h0.block(0, 0, N, N);
-    const auto &tangent_p = m_tangent_p.block(0, 0, N, N), &tangent = m_tangent.block(0, 0, N, N);
-    auto tdottp = tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real();
-    auto ttp_norm = m_tangent_norm.block(0, 0, N, N) * m_tangent_p_norm.block(0, 0, N, N);
-    auto v_norm2 = v_norm * v_norm;
+    const auto &v = m_v[0];
+    const auto &v_norm = m_v_norm[0];
+    const auto &h1 = m_h1[0], &h0 = m_h0[0];
+    const auto &tangent_p = m_tangent_p[0], &tangent = m_tangent[0];
+    Eigen::ArrayXXd tdottp = (tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real()) * m_wc;
+    Eigen::ArrayXXd ttp_norm = m_tangent_norm[0] * m_tangent_p_norm[0] * m_wc;
+    Eigen::ArrayXXd v_norm2 = v_norm * v_norm;
     auto mask = (ksqrtca * v_norm) > epsilon;
     auto mask2 = v_norm > epsilon;
-    auto masked1 = mask.select(ksqrtc * h1 / v_norm, mask2.select(M_2_PI / v_norm2, m_zero));
-    auto masked1_hg = mask.select(h0, mask2.select(-M_2_PI * v_norm.log(), m_zero));
-    Eigen::ArrayXXcd masked2, masked2_g, masked3, masked3_g;
+    masked1[0] = mask.select(ksqrtc * h1 / v_norm, mask2.select(M_2_PI / v_norm2, m_zero));
+    Eigen::ArrayXXcd masked1_hg = mask.select(h0, mask2.select(-M_2_PI * v_norm.log(), m_zero));
+    Eigen::ArrayXXcd masked2_g, masked3_g, cf;
+    Eigen::ArrayXXd temp, vdotn, cfr;
     double_layer_interaction_matrix.setZero();
     hypersingular_interaction_matrix.setZero();
     single_layer_interaction_matrix.setZero();
@@ -644,27 +636,27 @@ void GalerkinMatrixBuilder::all_coinciding(int der) throw() {
         double_layer_der_interaction_matrix.setZero();
         hypersingular_der_interaction_matrix.setZero();
         single_layer_der_interaction_matrix.setZero();
-        masked2 = mask.select(h0, m_zero);
+        masked2[0] = mask.select(h0, m_zero);
         masked2_g = mask.select(h1 * v_norm, m_zero);
     }
     if (der > 1) {
         double_layer_der2_interaction_matrix.setZero();
         hypersingular_der2_interaction_matrix.setZero();
         single_layer_der2_interaction_matrix.setZero();
-        masked3 = masked2 - ksqrtc * masked2_g;
-        masked3_g = masked2_g / ksqrtc - masked2 * v_norm2;
+        masked3[0] = masked2[0] - ksqrtc * masked2_g;
+        masked3_g = masked2_g / ksqrtc - masked2[0] * v_norm2;
     }
     for (K = 0; K < 2; ++K) {
-        auto temp = (K * 2 - 1.) * m_wc * (K == 0 ? m_tangent_norm : m_tangent_p_norm).block(0, 0, N, N) *
+        vdotn = (K * 2 - 1.) * m_wc * (K == 0 ? m_tangent_norm : m_tangent_p_norm)[0] *
             (v.imag() * (K == 0 ? tangent_p : tangent).real() - v.real() * (K == 0 ? tangent_p : tangent).imag());
         for (j = 0; j < Q; ++j) {
             for (i = 0; i < Q; ++i) {
-                m_cf = temp * (K == 0 ? m_double_layer_coinciding_fg : m_double_layer_coinciding_fg_t).block(i * N, j * N, N, N);
-                double_layer_interaction_matrix(i, j) += (m_cf * masked1).sum();
+                cfr = vdotn * (K == 0 ? m_double_layer_coinciding_fg : m_double_layer_coinciding_fg_t).block(i * N, j * N, N, N);
+                double_layer_interaction_matrix(i, j) += (cfr * masked1[0]).sum();
                 if (der > 0)
-                    double_layer_der_interaction_matrix(i, j) += (m_cf * masked2).sum();
+                    double_layer_der_interaction_matrix(i, j) += (cfr * masked2[0]).sum();
                 if (der > 1)
-                    double_layer_der2_interaction_matrix(i, j) += (m_cf * masked3).sum();
+                    double_layer_der2_interaction_matrix(i, j) += (cfr * masked3[0]).sum();
                 if (i < j) { // symmetry
                     hypersingular_interaction_matrix(i, j) = hypersingular_interaction_matrix(j, i);
                     single_layer_interaction_matrix(i, j) = single_layer_interaction_matrix(j, i);
@@ -677,21 +669,104 @@ void GalerkinMatrixBuilder::all_coinciding(int der) throw() {
                         single_layer_der2_interaction_matrix(i, j) = single_layer_der2_interaction_matrix(j, i);
                     }
                 } else {
-                    m_cf = m_hypersingular_coinciding_fg_arc.block((K > 0 ? j : i) * N, (K > 0 ? i : j) * N, N, N) -
-                        kkc * (m_temp = m_hypersingular_coinciding_fg.block((K > 0 ? j : i) * N, (K > 0 ? i : j) * N, N, N) * tdottp);
-                    hypersingular_interaction_matrix(i, j) += (m_wc * m_cf * masked1_hg).sum();
+                    cf = m_wc * m_hypersingular_coinciding_fg_arc.block((K > 0 ? j : i) * N, (K > 0 ? i : j) * N, N, N) -
+                        kkc * (temp = m_hypersingular_coinciding_fg.block((K > 0 ? j : i) * N, (K > 0 ? i : j) * N, N, N) * tdottp);
+                    hypersingular_interaction_matrix(i, j) += (cf * masked1_hg).sum();
                     if (der > 0)
-                        hypersingular_der_interaction_matrix(i, j) += (m_wc * (masked2_g * m_cf + 2.0 * masked2 * ksqrtc * m_temp)).sum();
+                        hypersingular_der_interaction_matrix(i, j) += (masked2_g * cf + (2.0 * ksqrtc) * masked2[0] * temp).sum();
                     if (der > 1)
-                        hypersingular_der2_interaction_matrix(i, j) +=
-                            (m_wc * ((masked2 * v_norm2 - masked2_g / ksqrtc) * m_cf - 2.0 * m_temp * (masked2 - 2.0 * masked3))).sum();
-                    m_cf = ttp_norm * m_single_layer_coinciding_fg.block((K > 0 ? j : i) * N, (K > 0 ? i : j) * N, N, N) * m_wc;
-                    single_layer_interaction_matrix(i, j) += (m_cf * masked1_hg).sum();
+                        hypersingular_der2_interaction_matrix(i, j) -= (masked3_g * cf + 2.0 * temp * (masked2[0] - 2.0 * masked3[0])).sum();
+                    cfr = ttp_norm * m_single_layer_coinciding_fg.block((K > 0 ? j : i) * N, (K > 0 ? i : j) * N, N, N);
+                    single_layer_interaction_matrix(i, j) += (cfr * masked1_hg).sum();
                     if (der > 0)
-                        single_layer_der_interaction_matrix(i, j) += (m_cf * masked2_g).sum();
+                        single_layer_der_interaction_matrix(i, j) += (cfr * masked2_g).sum();
                     if (der > 1)
-                        single_layer_der2_interaction_matrix(i, j) += (m_cf * masked3_g).sum();
+                        single_layer_der2_interaction_matrix(i, j) += (cfr * masked3_g).sum();
                 }
+            }
+        }
+    }
+    if (der > 0) {
+        double_layer_der_interaction_matrix *= k * c;
+        hypersingular_der_interaction_matrix *= -sqrtc;
+        single_layer_der_interaction_matrix *= -sqrtc;
+    }
+    if (der > 1) {
+        double_layer_der2_interaction_matrix *= c;
+        hypersingular_der2_interaction_matrix *= -c;
+        single_layer_der2_interaction_matrix *= c;
+    }
+}
+
+void GalerkinMatrixBuilder::all_adjacent(bool swap, int der) throw() {
+    size_t i, j, K, N = CGaussQR.n, Q = Qtest;
+    double_layer_interaction_matrix.setZero();
+    hypersingular_interaction_matrix.setZero();
+    single_layer_interaction_matrix.setZero();
+    if (der > 0) {
+        double_layer_der_interaction_matrix.setZero();
+        hypersingular_der_interaction_matrix.setZero();
+        single_layer_der_interaction_matrix.setZero();
+    }
+    if (der > 1) {
+        double_layer_der2_interaction_matrix.setZero();
+        hypersingular_der2_interaction_matrix.setZero();
+        single_layer_der2_interaction_matrix.setZero();
+    }
+    Eigen::ArrayXXcd masked2_g, masked3_g, cf;
+    Eigen::ArrayXXd temp, cfr;
+    for (K = 0; K < 2; ++K) {
+        const auto &tangent_p = m_tangent_p[K], &tangent = m_tangent[K];
+        const auto &v = m_v[K];
+        const auto &v_norm = m_v_norm[K];
+        const auto &h1 = m_h1[K], &h0 = m_h0[K];
+        Eigen::ArrayXXd tdottp = (tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real()) * m_wa;
+        Eigen::ArrayXXd vdotn = m_wa * (v.real() * tangent_p.imag() - v.imag() * tangent_p.real()) * m_tangent_norm[K];
+        Eigen::ArrayXXd ttp_norm = m_tangent_norm[K] * m_tangent_p_norm[K] * m_wa;
+        Eigen::ArrayXXd v_norm2 = v_norm * v_norm;
+        auto mask = (ksqrtca * v_norm) > epsilon;
+        auto mask2 = v_norm > epsilon;
+        Eigen::ArrayXXcd masked1_hg = mask.select(h0, mask2.select(-M_2_PI * v_norm.log(), m_zero));
+        masked1[K] = mask.select(ksqrtc * h1 / v_norm, mask2.select(M_2_PI / v_norm2, m_zero));
+        if (der > 0) {
+            masked2[K] = mask.select(h0, m_zero);
+            masked2_g = mask.select(h1 * v_norm, m_zero);
+        }
+        if (der > 1) {
+            masked3[K] = masked2[K] - ksqrtc * masked2_g;
+            masked3_g = masked2_g / ksqrtc - masked2[K] * v_norm2;
+        }
+        for (j = 0; j < Q; ++j) {
+            for (i = 0; i < Q; ++i) {
+                cfr = vdotn * (swap ? (K == 1 ? m_double_layer_adjacent_fg_swap_t : m_double_layer_adjacent_fg_swap)
+                                    : (K == 1 ? m_double_layer_adjacent_fg_t : m_double_layer_adjacent_fg)).block(i * N, j * N, N, N);
+                double_layer_interaction_matrix(i, j) += (cfr * masked1[K]).sum();
+                if (der > 0)
+                    double_layer_der_interaction_matrix(i, j) += (cfr * masked2[K]).sum();
+                if (der > 1)
+                    double_layer_der2_interaction_matrix(i, j) += (cfr * masked3[K]).sum();
+                cf = m_wa * (swap ? (K > 0 ? m_hypersingular_adjacent_fg_arc.block(j * N, i * N, N, N)
+                                           : m_hypersingular_adjacent_fg_arc_swap.block(i * N, j * N, N, N))
+                                  : (K > 0 ? m_hypersingular_adjacent_fg_arc_swap.block(j * N, i * N, N, N)
+                                           : m_hypersingular_adjacent_fg_arc.block(i * N, j * N, N, N))) -
+                    kkc * (temp = (swap ? (K > 0 ? m_hypersingular_adjacent_fg.block(j * N, i * N, N, N)
+                                                 : m_hypersingular_adjacent_fg_swap.block(i * N, j * N, N, N))
+                                        : (K > 0 ? m_hypersingular_adjacent_fg_swap.block(j * N, i * N, N, N)
+                                                 : m_hypersingular_adjacent_fg.block(i * N, j * N, N, N))) * tdottp);
+                hypersingular_interaction_matrix(i, j) += (cf * masked1_hg).sum();
+                if (der > 0)
+                    hypersingular_der_interaction_matrix(i, j) += (masked2_g * cf + (2.0 * ksqrtc) * masked2[K] * temp).sum();
+                if (der > 1)
+                    hypersingular_der2_interaction_matrix(i, j) -= (masked3_g * cf + 2.0 * temp * (masked2[K] - 2.0 * masked3[K])).sum();
+                cfr = ttp_norm * (swap ? (K > 0 ? m_single_layer_adjacent_fg.block(j * N, i * N, N, N)
+                                                : m_single_layer_adjacent_fg_swap.block(i * N, j * N, N, N))
+                                       : (K > 0 ? m_single_layer_adjacent_fg_swap.block(j * N, i * N, N, N)
+                                                : m_single_layer_adjacent_fg.block(i * N, j * N, N, N)));
+                single_layer_interaction_matrix(i, j) += (cfr * masked1_hg).sum();
+                if (der > 0)
+                    single_layer_der_interaction_matrix(i, j) += (cfr * masked2_g).sum();
+                if (der > 1)
+                    single_layer_der2_interaction_matrix(i, j) += (cfr * masked3_g).sum();
             }
         }
     }
@@ -709,60 +784,48 @@ void GalerkinMatrixBuilder::all_coinciding(int der) throw() {
 
 void GalerkinMatrixBuilder::all_general(int der) throw() {
     size_t i, j, N = GaussQR.n, Q = Qtest;
-    const auto &tangent_p = m_tangent_p.block(0, 0, N, N), &tangent = m_tangent.block(0, 0, N, N);
-    const auto &v = m_v.block(0, 0, N, N);
-    const auto &v_norm = m_v_norm.block(0, 0, N, N);
-    const auto &h1 = m_h1.block(0, 0, N, N), h0 = m_h0.block(0, 0, N, N);
+    const auto &tangent_p = m_tangent_p[0], &tangent = m_tangent[0];
+    const auto &v = m_v[0];
+    const auto &v_norm = m_v_norm[0];
+    const auto &h1 = m_h1[0], h0 = m_h0[0];
     const auto &zmat = m_zero.block(0, 0, N, N);
-    auto ttp_norm = m_tangent_norm.block(0, 0, N, N) * m_tangent_p_norm.block(0, 0, N, N);
-    auto tdottp = tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real();
-    auto v_norm2 = v_norm * v_norm;
+    Eigen::ArrayXXd ttp_norm = m_tangent_norm[0] * m_tangent_p_norm[0] * m_wg;
+    Eigen::ArrayXXd tdottp = (tangent.imag() * tangent_p.imag() + tangent.real() * tangent_p.real()) * m_wg;
+    Eigen::ArrayXXd v_norm2 = v_norm * v_norm;
     auto mask = ksqrtca * v_norm > epsilon;
     auto mask2 = v_norm > epsilon;
-    auto masked1 = mask.select(ksqrtc * h1 / v_norm, mask2.select(M_2_PI / v_norm2, zmat));
-    auto masked1_hg = mask.select(h0, mask2.select(-M_2_PI * v_norm.log(), zmat));
-    m_vdotn.block(0, 0, N, N) = m_wg * (v.real() * tangent_p.imag() - v.imag() * tangent_p.real()) * m_tangent_norm.block(0, 0, N, N);
-    Eigen::ArrayXXcd masked2, masked2_g, masked3, masked3_g;
-    double_layer_interaction_matrix.setZero();
-    hypersingular_interaction_matrix.setZero();
-    single_layer_interaction_matrix.setZero();
+    masked1[0] = mask.select(ksqrtc * h1 / v_norm, mask2.select(M_2_PI / v_norm2, zmat));
+    Eigen::ArrayXXcd masked1_hg = mask.select(h0, mask2.select(-M_2_PI * v_norm.log(), zmat));
+    Eigen::ArrayXXd vdotn = m_wg * (v.real() * tangent_p.imag() - v.imag() * tangent_p.real()) * m_tangent_norm[0];
+    Eigen::ArrayXXcd masked2_g, masked3_g, cf;
+    Eigen::ArrayXXd temp, cfr1, cfr2;
     if (der > 0) {
-        double_layer_der_interaction_matrix.setZero();
-        hypersingular_der_interaction_matrix.setZero();
-        single_layer_der_interaction_matrix.setZero();
-        masked2 = mask.select(h0, zmat);
+        masked2[0] = mask.select(h0, zmat);
         masked2_g = mask.select(h1 * v_norm, zmat);
     }
     if (der > 1) {
-        double_layer_der2_interaction_matrix.setZero();
-        hypersingular_der2_interaction_matrix.setZero();
-        single_layer_der2_interaction_matrix.setZero();
-        masked3 = masked2 - ksqrtc * masked2_g;
-        masked3_g = masked2_g / ksqrtc - masked2 * v_norm2;
+        masked3[0] = masked2[0] - ksqrtc * masked2_g;
+        masked3_g = masked2_g / ksqrtc - masked2[0] * v_norm2;
     }
     for (j = 0; j < Q; ++j) {
         for (i = 0; i < Q; ++i) {
-            m_cf.block(0, 0, N, N) = m_vdotn.block(0, 0, N, N) * m_double_layer_general_fg.block(i * N, j * N, N, N);
-            double_layer_interaction_matrix(i, j) += (m_cf.block(0, 0, N, N) * masked1).sum();
-            if (der > 0)
-                double_layer_der_interaction_matrix(i, j) += (m_cf.block(0, 0, N, N) * masked2).sum();
-            if (der > 1)
-                double_layer_der2_interaction_matrix(i, j) += (m_cf.block(0, 0, N, N) * masked3).sum();
-            m_cf.block(0, 0, N, N) = m_hypersingular_general_fg_arc.block(i * N, j * N, N, N) -
-                kkc * (m_temp = m_hypersingular_general_fg.block(i * N, j * N, N, N) * tdottp);
-            hypersingular_interaction_matrix(i, j) += (m_wg * m_cf.block(0, 0, N, N) * masked1_hg).sum();
-            if (der > 0)
-                hypersingular_der_interaction_matrix(i, j) +=
-                    (m_wg * mask.select(h1 * v_norm * m_cf.block(0, 0, N, N) + 2.0 * h0 * ksqrtc * m_temp, zmat)).sum();
-            if (der > 1)
-                hypersingular_der2_interaction_matrix(i, j) += (m_wg * mask.select(
-                    (h0 * v_norm - h1 / ksqrtc) * m_cf.block(0, 0, N, N) * v_norm - 2.0 * m_temp * (2.0 * h1 * ksqrtc * v_norm - h0), zmat)).sum();
-            m_cf.block(0, 0, N, N) = ttp_norm * m_wg * m_single_layer_general_fg.block(i * N, j * N, N, N);
-            single_layer_interaction_matrix(i, j) += (m_cf.block(0, 0, N, N) * masked1_hg).sum();
-            if (der > 0)
-                single_layer_der_interaction_matrix(i, j) += (m_cf.block(0, 0, N, N) * masked2_g).sum();
-            if (der > 1)
-                single_layer_der2_interaction_matrix(i, j) += (m_cf.block(0, 0, N, N) * masked3_g).sum();
+            cfr1 = vdotn * m_double_layer_general_fg.block(i * N, j * N, N, N);
+            cfr2 = ttp_norm * m_single_layer_general_fg.block(i * N, j * N, N, N);
+            cf = m_wg * m_hypersingular_general_fg_arc.block(i * N, j * N, N, N) -
+                kkc * (temp = m_hypersingular_general_fg.block(i * N, j * N, N, N) * tdottp);
+            double_layer_interaction_matrix(i, j) = (cfr1 * masked1[0]).sum();
+            single_layer_interaction_matrix(i, j) = (cfr2 * masked1_hg).sum();
+            hypersingular_interaction_matrix(i, j) = (cf * masked1_hg).sum();
+            if (der > 0) {
+                double_layer_der_interaction_matrix(i, j) = (cfr1 * masked2[0]).sum();
+                single_layer_der_interaction_matrix(i, j) = (cfr2 * masked2_g).sum();
+                hypersingular_der_interaction_matrix(i, j) = (masked2_g * cf + (2.0 * ksqrtc) * masked2[0] * temp).sum();
+            }
+            if (der > 1) {
+                double_layer_der2_interaction_matrix(i, j) = (cfr1 * masked3[0]).sum();
+                single_layer_der2_interaction_matrix(i, j) = (cfr2 * masked3_g).sum();
+                hypersingular_der2_interaction_matrix(i, j) = -(masked3_g * cf + 2.0 * temp * (masked2[0] - 2.0 * masked3[0])).sum();
+            }
         }
     }
     if (der > 0) {
@@ -814,6 +877,7 @@ void GalerkinMatrixBuilder::assembleDoubleLayer(const std::complex<double>& k_in
         const auto &pi = *panels[i];
         for (j = 0; j < dim_trial; ++j) {
             const auto &pj = *panels[j];
+            auto tic = chrono::high_resolution_clock::now();
             if (i == j) {
                 // coinciding panels
                 compute_coinciding(pi);
@@ -827,6 +891,8 @@ void GalerkinMatrixBuilder::assembleDoubleLayer(const std::complex<double>& k_in
                 compute_general(pi, pj);
                 double_layer_general(der, false);
             }
+            auto toc = chrono::high_resolution_clock::now();
+            interaction_matrix_assembly_time += chrono::duration_cast<chrono::microseconds>(toc - tic).count();
             // Local to global mapping of the elements in interaction matrix
             for (I = 0; I < Qtest; ++I) {
                 for (J = 0; J < Qtrial; ++J) {
@@ -862,6 +928,7 @@ void GalerkinMatrixBuilder::assembleHypersingular(const std::complex<double>& k_
         const auto &pi = *panels[i];
         for (j = 0; j <= i; ++j) {
             const auto &pj = *panels[j];
+            auto tic = chrono::high_resolution_clock::now();
             if (i == j) {
                 // coinciding panels
                 compute_coinciding(pi);
@@ -875,6 +942,8 @@ void GalerkinMatrixBuilder::assembleHypersingular(const std::complex<double>& k_
                 compute_general(pi, pj);
                 hypersingular_general(der);
             }
+            auto toc = chrono::high_resolution_clock::now();
+            interaction_matrix_assembly_time += chrono::duration_cast<chrono::microseconds>(toc - tic).count();
             // Local to global mapping of the elements in interaction matrix
             for (I = 0; I < Qtrial; ++I) {
                 for (J = 0; J < Qtrial; ++J) {
@@ -923,6 +992,7 @@ void GalerkinMatrixBuilder::assembleSingleLayer(const std::complex<double>& k_in
         const auto &pi = *panels[i];
         for (j = 0; j <= i; ++j) {
             const auto &pj = *panels[j];
+            auto tic = chrono::high_resolution_clock::now();
             if (i == j) {
                 // coinciding panels
                 compute_coinciding(pi);
@@ -936,6 +1006,8 @@ void GalerkinMatrixBuilder::assembleSingleLayer(const std::complex<double>& k_in
                 compute_general(pi, pj);
                 single_layer_general(der);
             }
+            auto toc = chrono::high_resolution_clock::now();
+            interaction_matrix_assembly_time += chrono::duration_cast<chrono::microseconds>(toc - tic).count();
             // Local to global mapping of the elements in interaction matrix
             for (I = 0; I < Qtest; ++I) {
                 for (J = 0; J < Qtest; ++J) {
@@ -994,21 +1066,40 @@ void GalerkinMatrixBuilder::assembleAll(const std::complex<double>& k_in, double
         const auto &pi = *panels[i];
         for (j = 0; j <= i; ++j) {
             const auto &pj = *panels[j];
+            auto tic = chrono::high_resolution_clock::now();
             if (&pi == &pj) {
                 // coinciding panels
                 compute_coinciding(pi);
+#if 0
+                double_layer_coinciding(der);
+                hypersingular_coinciding(der);
+                single_layer_coinciding(der);
+#else
                 all_coinciding(der);
+#endif
             } else if ((adj = is_adjacent(pi, pj, swap))) {
                 // adjacent panels
                 compute_adjacent(pi, pj, swap);
+#if 0
                 double_layer_adjacent(swap, der, false);
                 hypersingular_adjacent(swap, der);
                 single_layer_adjacent(swap, der);
+#else
+                all_adjacent(swap, der);
+#endif
             } else {
                 // disjoint panels
                 compute_general(pi, pj);
+#if 0
+                double_layer_general(der, false);
+                hypersingular_general(der);
+                single_layer_general(der);
+#else
                 all_general(der);
+#endif
             }
+            auto toc = chrono::high_resolution_clock::now();
+            interaction_matrix_assembly_time += chrono::duration_cast<chrono::microseconds>(toc - tic).count();
             // Local to global mapping of the elements in interaction matrix
             for (I = 0; I < Q; ++I) {
                 for (J = 0; J < Q; ++J) {
@@ -1032,10 +1123,13 @@ void GalerkinMatrixBuilder::assembleAll(const std::complex<double>& k_in, double
             if (i == j)
                 continue;
             // use already computed data for the (j, i) case
+            tic = chrono::high_resolution_clock::now();
             if (adj)
                 double_layer_adjacent(!swap, der, true);
             else
                 double_layer_general(der, true);
+            toc = chrono::high_resolution_clock::now();
+            interaction_matrix_assembly_time += chrono::duration_cast<chrono::microseconds>(toc - tic).count();
             for (I = 0; I < Q; ++I) {
                 for (J = 0; J < Q; ++J) {
                     II = test_space.LocGlobMap(I + 1, j + 1, dim) - 1;
@@ -1100,4 +1194,22 @@ const Eigen::MatrixXcd & GalerkinMatrixBuilder::getSingleLayer(int der) const {
     if (der == 2)
         return single_layer_der2_matrix;
     throw std::runtime_error("Invalid order of derivative!");
+}
+
+unsigned int GalerkinMatrixBuilder::getInitializationTime() {
+    auto ret = initialization_time;
+    initialization_time = 0;
+    return ret;
+}
+
+unsigned int GalerkinMatrixBuilder::getInteractionMatrixAssemblyTime() {
+    auto ret = interaction_matrix_assembly_time;
+    interaction_matrix_assembly_time = 0;
+    return ret;
+}
+
+unsigned int GalerkinMatrixBuilder::getHankelComputationTime() {
+    auto ret = hankel_computation_time;
+    hankel_computation_time = 0;
+    return ret;
 }

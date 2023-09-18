@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
     file_iter = file_iter.append(argv[2])+suffix;
 
     ContinuousSpace<1> cont_space;
-    SolutionsOperator so(mesh, order, cont_space, cont_space);
+    SolutionsOperator so(mesh, order, cont_space, cont_space, true);
 
     // iterate over mesh on wavenumber
     for (unsigned j = 0; j < n_points_x; j++) {

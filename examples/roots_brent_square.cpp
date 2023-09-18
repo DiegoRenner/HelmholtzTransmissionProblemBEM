@@ -120,7 +120,7 @@ int main(int argc, char** argv) {
 	#endif
 
     ContinuousSpace<1> cont_space;
-    SolutionsOperator so(mesh, order, cont_space, cont_space);
+    SolutionsOperator so(mesh, order, cont_space, cont_space, true);
 
     // loop over values of wavenumber
     for (unsigned j = 0; j < n_points_x; j++) {

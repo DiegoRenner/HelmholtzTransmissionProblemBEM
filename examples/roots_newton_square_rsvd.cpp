@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
 
     // create objects for assembling solutions operator and its derivatives
     ContinuousSpace<1> cont_space;
-    SolutionsOperator so(mesh, order, cont_space, cont_space);
+    SolutionsOperator so(mesh, order, cont_space, cont_space, false);
     GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, order);
 
     auto tic = high_resolution_clock::now();
@@ -226,7 +226,7 @@ int main(int argc, char** argv) {
     ind.resize(loc_min_count);
 
 #ifdef REFINE
-    // Refine approximations of local minima using the interpolated quartic
+    // Refine approximations of local minima by using the interpolated quartic
 #ifdef CMDL
     std::cout << "Improving candidates..." << std::endl;
 #endif
@@ -297,7 +297,7 @@ int main(int argc, char** argv) {
     file_out.close();
     auto toc = high_resolution_clock::now();
 #ifdef CMDL
-    std::cout << "Total time: " << duration_cast<seconds>(toc - tic).count() << " sec" << std::endl;
+    std::cout << "Total time: " << 1e-3 * duration_cast<milliseconds>(toc - tic).count() << " sec" << std::endl;
     std::cout << std::endl;
 #endif
     return 0;

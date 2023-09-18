@@ -1,12 +1,28 @@
 #include "gen_sol_op.hpp"
 #include "mass_matrix.hpp"
+#include <chrono>
+#include <iostream>
+#if 0 // used for debugging
+#include <double_layer.hpp>
+#include <single_layer.hpp>
+#include <hypersingular.hpp>
+#include <double_layer_der.hpp>
+#include <single_layer_der.hpp>
+#include <hypersingular_der.hpp>
+#include <double_layer_der2.hpp>
+#include <single_layer_der2.hpp>
+#include <hypersingular_der2.hpp>
+#endif
+
+using namespace std::chrono;
 
 typedef std::complex<double> complex_t;
 
 SolutionsOperator::SolutionsOperator(const ParametrizedMesh &mesh_in,
                                      unsigned int order,
                                      const AbstractBEMSpace &test_space_in,
-                                     const AbstractBEMSpace &trial_space_in)
+                                     const AbstractBEMSpace &trial_space_in,
+                                     bool profiling_in)
 : mesh(mesh_in), test_space(test_space_in), trial_space(trial_space_in)
 {
     GaussQR = getGaussQR(order, 0., 1.);
@@ -15,6 +31,7 @@ SolutionsOperator::SolutionsOperator(const ParametrizedMesh &mesh_in,
     dim_test = test_space.getSpaceDim(numpanels);
     dim_trial = trial_space.getSpaceDim(numpanels);
     size_t dim = dim_test + dim_trial;
+    profiling = profiling_in;
     // assemble mass matrix
     M = mass_matrix::GalerkinMatrix(mesh, trial_space, test_space, GaussQR);
     // compute matrix for projection onto ortogonal FEM-spaces
@@ -27,23 +44,58 @@ SolutionsOperator::SolutionsOperator(const ParametrizedMesh &mesh_in,
         (llt.transpositionsP().transpose() * llt.matrixL().toDenseMatrix() * llt.vectorD().cwiseSqrt().asDiagonal());
 }
 
+SolutionsOperator::~SolutionsOperator() {
+    if (!profiling)
+        return;
+#ifdef CMDL
+    // print timing info
+    std::cout << "--------------------------------------------" << std::endl
+              << "Solutions operator matrix assembly profiling" << std::endl
+              << std::endl;
+    for (int i = 0; i < 3; ++i) {
+        std::cout << "Order of derivative: " << i << std::endl
+                  << " * average assembly time: "
+                  << 1e-6 * double(total_assembly_time[i]) / double(count[i]) << " seconds" << std::endl
+                  << " * initialization: "
+                  << 100. * double(total_initialization_time[i]) / double(total_assembly_time[i]) << " %" << std::endl
+                  << " * Hankel computation: "
+                  << 100. * double(total_hankel_computation_time[i]) / double(total_assembly_time[i]) << " %" << std::endl
+                  << " * interaction matrix assembly: "
+                  << 100. * double(total_interaction_matrix_assembly_time[i] - total_hankel_computation_time[i]) /
+                    double(total_assembly_time[i]) << " %" << std::endl
+                  << " * projection: "
+                  << 100. * double(total_projection_time[i]) / double(total_assembly_time[i]) << " %" << std::endl;
+    }
+    std::cout << "--------------------------------------------" << std::endl;
+#endif
+}
+
 Eigen::MatrixXcd SolutionsOperator::project(const Eigen::MatrixXcd &T) const {
     return lu.solve(lu.solve(T).transpose().eval()).transpose().eval();
 }
 
 void SolutionsOperator::gen_sol_op(const complex_t &k, double c_o, double c_i,
-                                   Eigen::MatrixXcd &T) const {
+                                   Eigen::MatrixXcd &T) {
     GalerkinMatrixBuilder builder(mesh, test_space, trial_space, GaussQR.n);
     gen_sol_op_in(builder, k, c_o, c_i, T);
+    total_initialization_time[0] += builder.getInitializationTime();
+    total_hankel_computation_time[0] += builder.getHankelComputationTime();
+    total_interaction_matrix_assembly_time[0] += builder.getInteractionMatrixAssemblyTime();
+    count[0]++;
 }
 
 void SolutionsOperator::gen_sol_op(GalerkinMatrixBuilder &builder, const complex_t &k, double c_o, double c_i,
-                                   Eigen::MatrixXcd &T) const {
+                                   Eigen::MatrixXcd &T) {
     gen_sol_op_in(builder, k, c_o, c_i, T);
+    total_initialization_time[0] += builder.getInitializationTime();
+    total_hankel_computation_time[0] += builder.getHankelComputationTime();
+    total_interaction_matrix_assembly_time[0] += builder.getInteractionMatrixAssemblyTime();
+    count[0]++;
 }
 
 void SolutionsOperator::gen_sol_op_in(GalerkinMatrixBuilder &builder, const complex_t &k, double c_o, double c_i,
-                                      Eigen::MatrixXcd &T) const {
+                                      Eigen::MatrixXcd &T) {
+    auto tic = high_resolution_clock::now();
     T.resize(dim_test + dim_trial, dim_trial + dim_test);
     Eigen::MatrixXcd K_i, K_o, V_i, V_o, W_i, W_o;
     if (builder.testTrialSpacesAreEqual()) {
@@ -75,23 +127,37 @@ void SolutionsOperator::gen_sol_op_in(GalerkinMatrixBuilder &builder, const comp
     T.block(dim_test, 0, dim_trial, dim_trial) = W_o - W_i;
     T.block(0, dim_trial, dim_test, dim_test) = V_o - V_i;
     T.block(dim_test, dim_trial, dim_trial, dim_test) = (M + K_o - K_i).transpose();
+    auto toc = high_resolution_clock::now();
+    total_assembly_time[0] += duration_cast<microseconds>(toc - tic).count();
     // project onto orthogonal FEM spaces
+    tic = high_resolution_clock::now();
     T = project(T);
+    toc = high_resolution_clock::now();
+    total_projection_time[0] += duration_cast<microseconds>(toc - tic).count();
 }
 
 void SolutionsOperator::gen_sol_op_1st_der(const complex_t &k, double c_o, double c_i,
-                                           Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der) const {
+                                           Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der) {
     GalerkinMatrixBuilder builder(mesh, test_space, trial_space, GaussQR.n);
     gen_sol_op_1st_der_in(builder, k, c_o, c_i, T, T_der);
+    total_initialization_time[1] += builder.getInitializationTime();
+    total_hankel_computation_time[1] += builder.getHankelComputationTime();
+    total_interaction_matrix_assembly_time[1] += builder.getInteractionMatrixAssemblyTime();
+    count[1]++;
 }
 
 void SolutionsOperator::gen_sol_op_1st_der(GalerkinMatrixBuilder &builder, const complex_t &k, double c_o, double c_i,
-                                           Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der) const {
+                                           Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der) {
     gen_sol_op_1st_der_in(builder, k, c_o, c_i, T, T_der);
+    total_initialization_time[1] += builder.getInitializationTime();
+    total_hankel_computation_time[1] += builder.getHankelComputationTime();
+    total_interaction_matrix_assembly_time[1] += builder.getInteractionMatrixAssemblyTime();
+    count[1]++;
 }
 
 void SolutionsOperator::gen_sol_op_1st_der_in(GalerkinMatrixBuilder &builder, const complex_t &k, double c_o, double c_i,
-                                              Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der) const {
+                                              Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der) {
+    auto tic = high_resolution_clock::now();
     T.resize(dim_test + dim_trial, dim_trial + dim_test);
     T_der.resize(dim_test + dim_trial, dim_trial + dim_test);
     Eigen::MatrixXcd K_i, K_o, V_i, V_o, W_i, W_o;
@@ -140,24 +206,38 @@ void SolutionsOperator::gen_sol_op_1st_der_in(GalerkinMatrixBuilder &builder, co
     T_der.block(dim_test, 0, dim_trial, dim_trial) = W_der_o - W_der_i;
     T_der.block(0, dim_trial, dim_test, dim_test) = V_der_o - V_der_i;
     T_der.block(dim_test, dim_trial, dim_trial, dim_test) = (K_der_o - K_der_i).transpose();
+    auto toc = high_resolution_clock::now();
+    total_assembly_time[1] += duration_cast<microseconds>(toc - tic).count();
     // project onto orthogonal FEM spaces
+    tic = high_resolution_clock::now();
     T = project(T);
     T_der = project(T_der);
+    toc = high_resolution_clock::now();
+    total_projection_time[1] += duration_cast<microseconds>(toc - tic).count();
 }
 
 void SolutionsOperator::gen_sol_op_2nd_der(const complex_t &k, double c_o, double c_i,
-                                           Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der, Eigen::MatrixXcd &T_der2) const {
+                                           Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der, Eigen::MatrixXcd &T_der2) {
     GalerkinMatrixBuilder builder(mesh, test_space, trial_space, GaussQR.n);
     gen_sol_op_2nd_der_in(builder, k, c_o, c_i, T, T_der, T_der2);
+    total_initialization_time[2] += builder.getInitializationTime();
+    total_hankel_computation_time[2] += builder.getHankelComputationTime();
+    total_interaction_matrix_assembly_time[2] += builder.getInteractionMatrixAssemblyTime();
+    count[2]++;
 }
 
 void SolutionsOperator::gen_sol_op_2nd_der(GalerkinMatrixBuilder &builder, const complex_t &k, double c_o, double c_i,
-                                           Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der, Eigen::MatrixXcd &T_der2) const {
+                                           Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der, Eigen::MatrixXcd &T_der2) {
     gen_sol_op_2nd_der_in(builder, k, c_o, c_i, T, T_der, T_der2);
+    total_initialization_time[2] += builder.getInitializationTime();
+    total_hankel_computation_time[2] += builder.getHankelComputationTime();
+    total_interaction_matrix_assembly_time[2] += builder.getInteractionMatrixAssemblyTime();
+    count[2]++;
 }
 
 void SolutionsOperator::gen_sol_op_2nd_der_in(GalerkinMatrixBuilder &builder, const complex_t &k, double c_o, double c_i,
-                                              Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der, Eigen::MatrixXcd &T_der2) const {
+                                              Eigen::MatrixXcd &T, Eigen::MatrixXcd &T_der, Eigen::MatrixXcd &T_der2) {
+    auto tic = high_resolution_clock::now();
     T.resize(dim_test + dim_trial, dim_trial + dim_test);
     T_der.resize(dim_test + dim_trial, dim_trial + dim_test);
     T_der2.resize(dim_test + dim_trial, dim_trial + dim_test);
@@ -224,8 +304,13 @@ void SolutionsOperator::gen_sol_op_2nd_der_in(GalerkinMatrixBuilder &builder, co
     T_der2.block(dim_test, 0, dim_trial, dim_trial) = W_der2_o - W_der2_i;
     T_der2.block(0, dim_trial, dim_test, dim_test) = V_der2_o - V_der2_i;
     T_der2.block(dim_test, dim_trial, dim_trial, dim_test) = (K_der2_o - K_der2_i).transpose();
+    auto toc = high_resolution_clock::now();
+    total_assembly_time[2] += duration_cast<microseconds>(toc - tic).count();
     // project onto orthogonal FEM spaces
+    tic = high_resolution_clock::now();
     T = project(T);
     T_der = project(T_der);
     T_der2 = project(T_der2);
+    toc = high_resolution_clock::now();
+    total_projection_time[2] += duration_cast<microseconds>(toc - tic).count();
 }
