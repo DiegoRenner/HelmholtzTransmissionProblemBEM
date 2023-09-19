@@ -40,7 +40,7 @@ unset(CMDL CACHE)
 # COMPILATION FLAGS
 ###########################################################################
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "-O3 -march=native -mtune=native -mavx -mfma")
+set(CMAKE_CXX_FLAGS "-O3 -march=native -mtune=native -mavx -mfma -fno-math-errno -g")
 
 # IGNORE WARNINGS
 ###########################################################################

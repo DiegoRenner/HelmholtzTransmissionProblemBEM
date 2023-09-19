@@ -41,6 +41,7 @@
 #include "continuous_space.hpp"
 
 #define REFINE
+#define PARALLELIZE
 
 // define shorthand for time benchmarking tools, complex data type and immaginary unit
 using namespace std::chrono;
@@ -48,6 +49,8 @@ typedef std::complex<double> complex_t;
 complex_t ii = complex_t(0,1.);
 
 int main(int argc, char** argv) {
+
+    //Eigen::setNbThreads(1);
 
     // check whether we have the correct number of input arguments
     if (argc < 10)
@@ -134,9 +137,18 @@ int main(int argc, char** argv) {
     std::cout << std::endl;
 #endif
 
+#ifdef PARALLELIZE
+    auto policy = std::execution::par;
+    bool profiling = false;
+#else
+    auto policy = std::execution::seq;
+    unsigned total_rsvd_time = 0;
+    bool profiling = true;
+#endif
+
     // create objects for assembling solutions operator and its derivatives
     ContinuousSpace<1> cont_space;
-    SolutionsOperator so(mesh, order, cont_space, cont_space, false);
+    SolutionsOperator so(mesh, order, cont_space, cont_space, profiling);
     GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, order);
 
     auto tic = high_resolution_clock::now();
@@ -150,10 +162,20 @@ int main(int argc, char** argv) {
 
     // Sweep the k interval with subdivision of size n_points_k, do this in parallel.
     // For each value k, approximate the smallest singular value by using rSVD.
-    std::transform(std::execution::par, ind.cbegin(), ind.cend(), rsv.begin(), [&](size_t i) {
+    std::transform(policy, ind.cbegin(), ind.cend(), rsv.begin(), [&](size_t i) {
         Eigen::MatrixXcd T;
+#ifndef PARALLELIZE
+        so.gen_sol_op(builder, k_min + k_step * i, c_o, c_i, T);
+        auto tic = high_resolution_clock::now();
+#else
         so.gen_sol_op(k_min + k_step * i, c_o, c_i, T);
-        return randomized_svd::sv(T, W, q);
+#endif
+        auto res = randomized_svd::sv(T, W, q);
+#ifndef PARALLELIZE
+        auto toc = high_resolution_clock::now();
+        total_rsvd_time += duration_cast<milliseconds>(toc - tic).count();
+#endif
+        return res;
     });
 
     // Bracket the local minima of the rSVD curve.
@@ -179,14 +201,33 @@ int main(int argc, char** argv) {
 
     auto sv_der = [&](double k) {
         Eigen::MatrixXcd T, T_der;
+#ifndef PARALLELIZE
+        so.gen_sol_op_1st_der(builder, k, c_o, c_i, T, T_der);
+        auto tic = high_resolution_clock::now();
+#else
         so.gen_sol_op_1st_der(k, c_o, c_i, T, T_der);
-        return randomized_svd::sv_der(T, T_der, W, q)(1);
+#endif
+        auto res = randomized_svd::sv_der(T, T_der, W, q)(1);
+#ifndef PARALLELIZE
+        auto toc = high_resolution_clock::now();
+        total_rsvd_time += duration_cast<milliseconds>(toc - tic).count();
+#endif
+        return res;
     };
     auto sv_der2 = [&](double k) {
         Eigen::MatrixXcd T, T_der, T_der2;
         Eigen::MatrixXd res(1, 2);
+#ifndef PARALLELIZE
+        so.gen_sol_op_2nd_der(builder, k, c_o, c_i, T, T_der, T_der2);
+        auto tic = high_resolution_clock::now();
+#else
         so.gen_sol_op_2nd_der(k, c_o, c_i, T, T_der, T_der2);
+#endif
         auto v = randomized_svd::sv_der2(T, T_der, T_der2, W, q);
+#ifndef PARALLELIZE
+        auto toc = high_resolution_clock::now();
+        total_rsvd_time += duration_cast<milliseconds>(toc - tic).count();
+#endif
         res(0, 0) = v(1);
         res(0, 1) = v(2);
         return res;
@@ -211,7 +252,7 @@ int main(int argc, char** argv) {
             }
         }
     };
-    std::for_each(std::execution::par, ind.cbegin(), ind.cend(), [&](size_t i) {
+    std::for_each(policy, ind.cbegin(), ind.cend(), [&](size_t i) {
         der_left[i] = sv_der(pos_left[i]);
         der_right[i] = sv_der(pos_left[i] + 2 * k_step);
         accept[i] = der_left[i] < 0. && der_right[i] > 0.;
@@ -262,7 +303,7 @@ int main(int argc, char** argv) {
     disc = 0;
     unsigned ict = 0;
     accept.resize(loc_min_count);
-    std::for_each(std::execution::par, ind.cbegin(), ind.cend(), [&](size_t i) {
+    std::for_each(policy, ind.cbegin(), ind.cend(), [&](size_t i) {
         unsigned ic;
         bool rf = false;
         auto fn = [&](double x) {
@@ -298,6 +339,9 @@ int main(int argc, char** argv) {
     auto toc = high_resolution_clock::now();
 #ifdef CMDL
     std::cout << "Total time: " << 1e-3 * duration_cast<milliseconds>(toc - tic).count() << " sec" << std::endl;
+#ifndef PARALLELIZE
+    std::cout << "Total RSVD time: " << 1e-3 * total_rsvd_time << " sec" << std::endl;
+#endif
     std::cout << std::endl;
 #endif
     return 0;

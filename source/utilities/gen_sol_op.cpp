@@ -55,14 +55,14 @@ SolutionsOperator::~SolutionsOperator() {
     for (int i = 0; i < 3; ++i) {
         std::cout << "Order of derivative: " << i << std::endl
                   << " * average assembly time: "
-                  << 1e-6 * double(total_assembly_time[i]) / double(count[i]) << " seconds" << std::endl
+                  << (1e-6 * double(total_assembly_time[i])) / count[i] << " seconds" << std::endl
                   << " * initialization: "
-                  << 100. * double(total_initialization_time[i]) / double(total_assembly_time[i]) << " %" << std::endl
+                  << 100. * (double(total_initialization_time[i]) / total_assembly_time[i]) << " %" << std::endl
                   << " * Hankel computation: "
-                  << 100. * double(total_hankel_computation_time[i]) / double(total_assembly_time[i]) << " %" << std::endl
+                  << 100. * (double(total_hankel_computation_time[i]) / total_assembly_time[i]) << " %" << std::endl
                   << " * interaction matrix assembly: "
-                  << 100. * double(total_interaction_matrix_assembly_time[i] - total_hankel_computation_time[i]) /
-                    double(total_assembly_time[i]) << " %" << std::endl
+                  << 100. * (double(total_interaction_matrix_assembly_time[i]) - double(total_hankel_computation_time[i])) /
+                    total_assembly_time[i] << " %" << std::endl
                   << " * projection: "
                   << 100. * double(total_projection_time[i]) / double(total_assembly_time[i]) << " %" << std::endl;
     }

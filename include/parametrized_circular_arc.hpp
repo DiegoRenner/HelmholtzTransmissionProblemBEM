@@ -51,9 +51,9 @@ public:
   Eigen::Vector2d Derivative(double) const;
   Eigen::Vector2d Derivative_01(double) const;
   Eigen::Vector2d Derivative_01_swapped(double) const;
-  Eigen::ArrayXXcd Derivative(const Eigen::ArrayXXd &) const;
-  Eigen::ArrayXXcd Derivative_01(const Eigen::ArrayXXd &) const;
-  Eigen::ArrayXXcd Derivative_01_swapped(const Eigen::ArrayXXd &) const;
+  void Derivative(const Eigen::ArrayXXd &, Eigen::ArrayXXcd &, Eigen::ArrayXXd &) const;
+  void Derivative_01(const Eigen::ArrayXXd &, Eigen::ArrayXXcd &, Eigen::ArrayXXd &) const;
+  void Derivative_01_swapped(const Eigen::ArrayXXd &, Eigen::ArrayXXcd &, Eigen::ArrayXXd &, bool) const;
 
   /**
    * See documentation in AbstractParametrizedCurve

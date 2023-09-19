@@ -42,10 +42,11 @@ Eigen::Vector2d ParametrizedSemiCircle::Derivative(double t) const {
   Eigen::Vector2d derivative(-radius_ * M_PI_2 * sin(M_PI_2 * t), M_PI_2 * radius_ * cos(M_PI_2 * t));
   return derivative;
 }
-Eigen::ArrayXXcd ParametrizedSemiCircle::Derivative(const Eigen::ArrayXXd &t) const {
+void ParametrizedSemiCircle::Derivative(const Eigen::ArrayXXd &t, Eigen::ArrayXXcd &res, Eigen::ArrayXXd &norm) const {
   assert(IsWithinParameterRange(t));
   // Derivative of the polar coordinaties used in the function operator()
-  return 1i * radius_ * M_PI_2 * (1i * M_PI_2 * t).exp();
+  res = 1i * radius_ * M_PI_2 * (1i * M_PI_2 * t).exp();
+  norm = res.cwiseAbs();
 }
 
 Eigen::Vector2d ParametrizedSemiCircle::DoubleDerivative(double t) const {

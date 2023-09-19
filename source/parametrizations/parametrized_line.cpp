@@ -31,7 +31,7 @@ Eigen::ArrayXXcd ParametrizedLine::operator()(const Eigen::ArrayXXd &t) const {
   assert(IsWithinParameterRange(t));
   double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
   // Linear interpolation of x & y coordinates based on parameter t
-  return t * (x2 - x1) / 2. + (x2 + x1) / 2. + 1i * (t * (y2 - y1) / 2. + (y2 + y1) / 2.);
+  return (t * (x2 - x1) + (x2 + x1) + 1i * (t * (y2 - y1) + (y2 + y1))) * .5;
 }
 Point ParametrizedLine::operator[](double t) const {
   assert(IsWithinParameterRange(t));
@@ -44,20 +44,20 @@ Eigen::ArrayXXcd ParametrizedLine::operator[](const Eigen::ArrayXXd &t) const {
   assert(IsWithinParameterRange(t));
   double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
   // Linear interpolation of x & y coordinates based on parameter t
-  return t * (x2 - x1) + x1 + 1i * (t * (y2 - y1) + y1);
+  return (x2 - x1) * t + x1 + 1i * ((y2 - y1) * t + y1);
 }
 Point ParametrizedLine::swapped_op(double t) const {
   assert(IsWithinParameterRange(t));
   double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
   // Linear interpolation of x & y coordinates based on parameter t
-  Eigen::Vector2d point(-t * (x2 - x1) + x2, -t * (y2 - y1) + y2);
+  Eigen::Vector2d point(-(x2 - x1) * t + x2, -(y2 - y1) * t + y2);
   return point;
 }
 Eigen::ArrayXXcd ParametrizedLine::swapped_op(const Eigen::ArrayXXd &t) const {
   assert(IsWithinParameterRange(t));
   double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
   // Linear interpolation of x & y coordinates based on parameter t
-  return -t * (x2 - x1) + x2 + 1i * (-t * (y2 - y1) + y2);
+  return (x1 - x2) * t + x2 + 1i * ((y1 - y2) * t + y2);
 }
 
 Eigen::Vector2d ParametrizedLine::Derivative(double t) const {
@@ -67,13 +67,12 @@ Eigen::Vector2d ParametrizedLine::Derivative(double t) const {
   Eigen::Vector2d derivative((x2 - x1) / 2, (y2 - y1) / 2);
   return derivative;
 }
-Eigen::ArrayXXcd ParametrizedLine::Derivative(const Eigen::ArrayXXd &t) const {
+void ParametrizedLine::Derivative(const Eigen::ArrayXXd &t, Eigen::ArrayXXcd &res, Eigen::ArrayXXd &norm) const {
   assert(IsWithinParameterRange(t));
   double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
   // Derivative of the linear interpolation used in the function operator()
-  auto ret = Eigen::ArrayXXcd(t.rows(), t.cols());
-  ret.setConstant((x2 - x1) / 2. + 1i * ((y2 - y1) / 2.));
-  return ret;
+  res.setConstant(((x2 - x1) + 1i * ((y2 - y1))) * .5);
+  norm.setConstant(std::abs(((x2 - x1) + 1i * ((y2 - y1))) * .5));
 }
 Eigen::Vector2d ParametrizedLine::Derivative_01(double t) const {
   assert(IsWithinParameterRange(t));
@@ -82,28 +81,26 @@ Eigen::Vector2d ParametrizedLine::Derivative_01(double t) const {
   Eigen::Vector2d derivative((x2-x1), (y2 - y1));
   return derivative;
 }
-Eigen::ArrayXXcd ParametrizedLine::Derivative_01(const Eigen::ArrayXXd &t) const {
+void ParametrizedLine::Derivative_01(const Eigen::ArrayXXd &t, Eigen::ArrayXXcd &res, Eigen::ArrayXXd &norm) const {
   assert(IsWithinParameterRange(t));
   double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
   // Derivative of the linear interpolation used in the function operator()
-  auto ret = Eigen::ArrayXXcd(t.rows(), t.cols());
-  ret.setConstant((x2 - x1) + 1i * (y2 - y1));
-  return ret;
+  res.setConstant((x2 - x1) + 1i * (y2 - y1));
+  norm.setConstant(std::abs((x2 - x1) + 1i * (y2 - y1)));
 }
 Eigen::Vector2d ParametrizedLine::Derivative_01_swapped(double t) const {
   assert(IsWithinParameterRange(t));
   double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
   // Derivative of the linear interpolation used in the function operator()
-  Eigen::Vector2d derivative(-(x2-x1), -(y2 - y1));
+  Eigen::Vector2d derivative(-(x2 - x1), -(y2 - y1));
   return derivative;
 }
-Eigen::ArrayXXcd ParametrizedLine::Derivative_01_swapped(const Eigen::ArrayXXd &t) const {
+void ParametrizedLine::Derivative_01_swapped(const Eigen::ArrayXXd &t, Eigen::ArrayXXcd &res, Eigen::ArrayXXd &norm, bool neg) const {
   assert(IsWithinParameterRange(t));
   double x1(start_(0)), y1(start_(1)), x2(end_(0)), y2(end_(1));
   // Derivative of the linear interpolation used in the function operator()
-  auto ret = Eigen::ArrayXXcd(t.rows(), t.cols());
-  ret.setConstant(-(x2 - x1) - 1i * (y2 - y1));
-  return ret;
+  res.setConstant((neg ? -1. : 1.) * ((x1 - x2) + 1i * (y1 - y2)));
+  norm.setConstant(std::abs((x1 - x2) + 1i * (y1 - y2)));
 }
 
 Eigen::Vector2d ParametrizedLine::DoubleDerivative(double t) const {

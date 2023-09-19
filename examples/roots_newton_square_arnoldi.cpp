@@ -49,6 +49,8 @@ double epsilon_fin = 1e-6;
 
 int main(int argc, char** argv){
 
+    //Eigen::setNbThreads(4);
+
     // define radius of circle refraction index and initial wavenumber
     double eps = atof(argv[1]);
     double c_i = atof(argv[2]);

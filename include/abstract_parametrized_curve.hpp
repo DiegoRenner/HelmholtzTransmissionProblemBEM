@@ -91,9 +91,9 @@ public:
   virtual Eigen::Vector2d Derivative(double t) const = 0;
   virtual Eigen::Vector2d Derivative_01(double t) const = 0;
   virtual Eigen::Vector2d Derivative_01_swapped(double t) const = 0;
-  virtual Eigen::ArrayXXcd Derivative(const Eigen::ArrayXXd &t) const = 0;
-  virtual Eigen::ArrayXXcd Derivative_01(const Eigen::ArrayXXd &t) const = 0;
-  virtual Eigen::ArrayXXcd Derivative_01_swapped(const Eigen::ArrayXXd &t) const = 0;
+  virtual void Derivative(const Eigen::ArrayXXd &t, Eigen::ArrayXXcd &res, Eigen::ArrayXXd &norm) const = 0;
+  virtual void Derivative_01(const Eigen::ArrayXXd &t, Eigen::ArrayXXcd &res, Eigen::ArrayXXd &norm) const = 0;
+  virtual void Derivative_01_swapped(const Eigen::ArrayXXd &t, Eigen::ArrayXXcd &res, Eigen::ArrayXXd &norm, bool neg) const = 0;
 
   /**
    * This function is used for retrieving the double derivative
