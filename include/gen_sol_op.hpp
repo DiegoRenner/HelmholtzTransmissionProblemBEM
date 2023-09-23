@@ -15,19 +15,14 @@
 
 class SolutionsOperator
 {
-    const ParametrizedMesh &mesh;
-    const AbstractBEMSpace &test_space;
-    const AbstractBEMSpace &trial_space;
-    size_t dim_test, dim_trial;
+    const BuilderData &builder_data;
     Eigen::PartialPivLU<Eigen::MatrixXcd> lu;
     Eigen::MatrixXd M; // mass matrix
-    QuadRule GaussQR;
-    QuadRule CGaussQR;
     Eigen::MatrixXcd project(const Eigen::MatrixXcd &T) const;
+    size_t dim_test, dim_trial;
     // timing info
     bool profiling;
     unsigned count[3] = {0, 0, 0};
-    unsigned total_initialization_time[3] = {0, 0, 0};
     unsigned total_assembly_time[3] = {0, 0, 0};
     unsigned total_hankel_computation_time[3] = {0, 0, 0};
     unsigned total_interaction_matrix_assembly_time[3] = {0, 0, 0};
@@ -43,16 +38,10 @@ class SolutionsOperator
 public:
     /**
      * Initialize solutions operator class.
-     * @param mesh_in panel mesh
-     * @param order unsigned integer, quadrature order
-     * @param test_space_in the test test_space
-     * @param trial_space_in the trial space
+     * @param builder_data_in bulder data object
+     * @param profiling_in whether to do time profiling
      */
-    SolutionsOperator(const ParametrizedMesh &mesh_in,
-                      unsigned int order,
-                      const AbstractBEMSpace &test_space_in,
-                      const AbstractBEMSpace &trial_space_in,
-                      bool profiling_in);
+    SolutionsOperator(const BuilderData &builder_data_in, bool profiling_in);
     // destructor
     ~SolutionsOperator();
     /**
@@ -134,14 +123,6 @@ public:
      * Return reference to the mass matrix.
      */
     const Eigen::MatrixXd &mass_matrix() const { return M; };
-    /**
-     * Return reference to the common quadrature rule.
-     */
-    const QuadRule &get_GaussQR() const { return GaussQR; }
-    /**
-     * Return reference to the composite quadrature rule.
-     */
-    const QuadRule &get_CGaussQR() const { return CGaussQR; }
 };
 
 #endif //GEN_SOL_OPHPP

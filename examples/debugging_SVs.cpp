@@ -69,7 +69,8 @@ int main(int argc, char** argv) {
         file_out << "#panels = " << numpanels[i] << std::endl;
         ParametrizedMesh mesh(curve.split(numpanels[i]));
 
-        GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, order);
+        BuilderData builder_data(mesh, cont_space, cont_space, order);
+        GalerkinMatrixBuilder builder(builder_data);
 
         // compute EVs for each BIO at this resolution
         file_out << "Single Layer BIO" << std::endl;

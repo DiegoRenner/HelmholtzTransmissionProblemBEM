@@ -41,7 +41,7 @@
 #include "continuous_space.hpp"
 
 #define REFINE
-#define PARALLELIZE
+//#define PARALLELIZE
 
 // define shorthand for time benchmarking tools, complex data type and immaginary unit
 using namespace std::chrono;
@@ -148,8 +148,11 @@ int main(int argc, char** argv) {
 
     // create objects for assembling solutions operator and its derivatives
     ContinuousSpace<1> cont_space;
-    SolutionsOperator so(mesh, order, cont_space, cont_space, profiling);
-    GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, order);
+    BuilderData builder_data(mesh, cont_space, cont_space, order);
+    SolutionsOperator so(builder_data, profiling);
+#ifndef PARALLELIZE
+    GalerkinMatrixBuilder builder(builder_data);
+#endif
 
     auto tic = high_resolution_clock::now();
 #ifdef CMDL

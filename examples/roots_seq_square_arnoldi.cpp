@@ -121,7 +121,8 @@ int main(int argc, char** argv){
 #endif
 
     ContinuousSpace<1> cont_space;
-    SolutionsOperator so(mesh, order, cont_space, cont_space, true);
+    BuilderData builder_data(mesh, cont_space, cont_space, order);
+    SolutionsOperator so(builder_data, true);
 
     auto duration_ops = milliseconds ::zero();
     auto duration = milliseconds::zero();

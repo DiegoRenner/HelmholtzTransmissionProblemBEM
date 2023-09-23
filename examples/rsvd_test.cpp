@@ -109,8 +109,9 @@ int main(int argc, char** argv) {
 
     // create objects for assembling solutions operator and its derivatives
     ContinuousSpace<1> cont_space;
-    SolutionsOperator so(mesh, order, cont_space, cont_space, false);
-    GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, order);
+    BuilderData builder_data(mesh, cont_space, cont_space, order);
+    SolutionsOperator so(builder_data, false);
+    GalerkinMatrixBuilder builder(builder_data);
 
     std::iota(ind.begin(), ind.end(), 0);
 

@@ -20,7 +20,8 @@ namespace bvp {
             Eigen::VectorXcd u_dir_N = discont_space.Interpolate_helmholtz(u_dir, mesh);
             // compute operators for first kind direct Dirichlet problem BIE
             Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh, discont_space, cont_space, GaussQR);
-            GalerkinMatrixBuilder builder(mesh, cont_space, discont_space, order);
+            BuilderData builder_data(mesh, cont_space, discont_space, order);
+            GalerkinMatrixBuilder builder(builder_data);
             builder.assembleDoubleLayer(k, 1.);
             Eigen::MatrixXcd K = builder.getDoubleLayer();
             builder.assembleSingleLayer(k, 1.);
@@ -45,7 +46,8 @@ namespace bvp {
             Eigen::VectorXcd u_neu_N = discont_space.Interpolate_helmholtz(u_neu, mesh);
             // compute operators for first kind direct Neumann problem BIE
             Eigen::MatrixXcd M = mass_matrix::GalerkinMatrix(mesh, cont_space, discont_space, GaussQR);
-            GalerkinMatrixBuilder builder(mesh, discont_space, cont_space, order);
+            BuilderData builder_data(mesh, discont_space, cont_space, order);
+            GalerkinMatrixBuilder builder(builder_data);
             builder.assembleDoubleLayer(k, 1.);
             Eigen::MatrixXcd K = builder.getDoubleLayer();
             builder.assembleHypersingular(k, 1.);
@@ -75,7 +77,8 @@ namespace tp {
             ContinuousSpace<1> cont_space;
             // compute operators of second kind direct BIEs for the Helmholtz Transmission problem
             Eigen::MatrixXcd M_cont = mass_matrix::GalerkinMatrix(mesh, cont_space, cont_space, GaussQR);
-            GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, order);
+            BuilderData builder_data(mesh, cont_space, cont_space, order);
+            GalerkinMatrixBuilder builder(builder_data);
             builder.assembleAll(k, c_o);
             Eigen::MatrixXcd K_o = builder.getDoubleLayer();
             Eigen::MatrixXcd W_o = builder.getHypersingular();

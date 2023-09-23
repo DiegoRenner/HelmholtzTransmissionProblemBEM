@@ -37,7 +37,8 @@ ParametrizedMesh mesh(curve.split(numpanels));
 // define order of quadrature rule with which to compute matrix entries of operator
 unsigned order = 11;
 
-GalerkinMatrixBuilder builder(mesh, discont_space, cont_space, order);
+BuilderData builder_data(mesh, discont_space, cont_space, order);
+GalerkinMatrixBuilder builder(builder_data);
 Eigen::VectorXcd V;
 
 // set variables for reading operator from file

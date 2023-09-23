@@ -122,8 +122,9 @@ int main(int argc, char** argv){
 	#endif
 
     ContinuousSpace<1> cont_space;
-    SolutionsOperator so(mesh, order, cont_space, cont_space, true);
-    GalerkinMatrixBuilder builder(mesh, cont_space, cont_space, order);
+    BuilderData builder_data(mesh, cont_space, cont_space, order);
+    SolutionsOperator so(builder_data, true);
+    GalerkinMatrixBuilder builder(builder_data);
 
     unsigned total_arnoldi_time = 0;
 

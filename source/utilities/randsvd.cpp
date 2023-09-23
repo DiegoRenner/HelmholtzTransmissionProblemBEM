@@ -45,50 +45,44 @@ namespace randomized_svd {
     Eigen::Vector2d sv_der(const Eigen::MatrixXcd &T, const Eigen::MatrixXcd &T_der, const Eigen::MatrixXcd &R, int q) {
         unsigned int N = R.rows();
         Eigen::Vector2d res;
-        Eigen::MatrixXcd W, W_der;
+        Eigen::MatrixXcd W;
         W.setZero(2 * N, 2 * N);
-        W_der.setZero(2 * N, 2 * N);
         W.block(0, N, N, N) = T;
         W.block(N, 0, N, N) = T.adjoint();
-        W_der.block(0, N, N, N) = T_der;
-        W_der.block(N, 0, N, N) = T_der.adjoint();
         // the smallest singular value
         double s = sv(T, R, q);
         // get the corresponding eigenvector of the Wielandt
         // matrix W as the last column in the matrix Q of
         // a QR factorization of W - s * I
-        Eigen::MatrixXcd A = W - (s * Eigen::VectorXcd::Ones(2 * N)).asDiagonal().toDenseMatrix();
-        Eigen::MatrixXcd Q = A.colPivHouseholderQr().matrixQ();
-        Eigen::VectorXcd x = Q.col(2 * N - 1);
+        W.diagonal() -= s * Eigen::VectorXd::Ones(2 * N);
+        Eigen::MatrixXcd Q = W.colPivHouseholderQr().matrixQ();
+        Eigen::VectorXcd x = Q.col(2 * N - 1), p(2 * N);
+        p.head(N) = T_der * x.tail(N);
+        p.tail(N) = T_der.adjoint() * x.head(N);
         // compute the derivative of s
         res(0) = s;
-        res(1) = x.dot(W_der * x).real();
+        res(1) = x.dot(p).real();
         return res;
     }
 
     Eigen::Vector3d sv_der2(const Eigen::MatrixXcd &T, const Eigen::MatrixXcd &T_der, const Eigen::MatrixXcd T_der2, const Eigen::MatrixXcd &R, int q) {
         unsigned int N = R.rows();
         Eigen::Vector3d res;
-        Eigen::MatrixXcd W, W_der, W_der2, B(2 * N, 2 * N);
+        Eigen::MatrixXcd W;
         W.setZero(2 * N, 2 * N);
-        W_der.setZero(2 * N, 2 * N);
-        W_der2.setZero(2 * N, 2 * N);
         W.block(0, N, N, N) = T;
         W.block(N, 0, N, N) = T.adjoint();
-        W_der.block(0, N, N, N) = T_der;
-        W_der.block(N, 0, N, N) = T_der.adjoint();
-        W_der2.block(0, N, N, N) = T_der2;
-        W_der2.block(N, 0, N, N) = T_der2.adjoint();
         // smallest singular value
         double s = sv(T, R, q);
         // compute the first derivative of s
-        Eigen::MatrixXcd A = W - (s * Eigen::VectorXcd::Ones(2 * N)).asDiagonal().toDenseMatrix();
-        auto qr = A.colPivHouseholderQr();
-        Eigen::MatrixXcd Q = qr.matrixQ();
-        Eigen::VectorXcd x = Q.col(2 * N - 1), u = x;
+        W.diagonal() -= s * Eigen::VectorXd::Ones(2 * N);
+        Eigen::MatrixXcd Q = W.colPivHouseholderQr().matrixQ();
+        Eigen::VectorXcd x = Q.col(2 * N - 1), u = x, p(2 * N);
         x.normalize();
+        p.head(N) = T_der * x.tail(N);
+        p.tail(N) = T_der.adjoint() * x.head(N);
         res(0) = s;
-        res(1) = x.dot(W_der * x).real();
+        res(1) = x.dot(p).real();
         // compute the second derivative of s
         double temp = 0;
         int m = 5;
@@ -101,27 +95,20 @@ namespace randomized_svd {
         m += 1;
         // normalize eigenvector
         u /= u.coeff(m - 1);
-        // build matrix with deleted column from Wielandt matrix and eigenvector
-        W -= (s * Eigen::VectorXcd::Ones(2 * N)).asDiagonal();
-        B.block(0, 0, 2 * N, m - 1) = W.block(0, 0, 2 * N, m - 1);
-        B.block(0, m - 1, 2 * N, 2 * N - m) = W.block(0, m, 2 * N, 2 * N - m);
-        B.col(2 * N - 1) = -u;
-        // compute right hand side
-        auto r = W_der * u;
+        W.col(m - 1) = -u;
         // solve linear system of equations for derivative of eigenvalue and eigenvector
-        Eigen::PartialPivLU<Eigen::MatrixXcd> lu_B(B);
-        auto u_der_temp = -lu_B.solve(r);
-        // construct eigenvector using derivative of normalization condition
-        Eigen::VectorXcd u_der(2 * N);
-        u_der.segment(0, m - 1) = u_der_temp.segment(0, m - 1);
+        Eigen::PartialPivLU<Eigen::MatrixXcd> lu_B(W);
+        p.head(N) = T_der * u.tail(N);
+        p.tail(N) = T_der.adjoint() * u.head(N);
+        Eigen::VectorXcd u_der = -lu_B.solve(p), p2(2 * N);
+        auto t = u_der[m - 1];
         u_der[m - 1] = 0;
-        u_der.segment(m, 2 * N - m) = u_der_temp.segment(m - 1, 2 * N - m);
-        // compute right hand side for second derivative
-        W_der -= (u_der_temp[2 * N - 1] * Eigen::VectorXcd::Ones(2 * N)).asDiagonal();
-        auto t = W_der2 * u + 2. * (W_der * u_der);
+        p.head(N) = T_der * u_der.tail(N);
+        p.tail(N) = T_der.adjoint() * u_der.head(N);
+        p2.head(N) = T_der2 * u.tail(N);
+        p2.tail(N) = T_der2.adjoint() * u.head(N);
         // solve linear system of equations second derivative of eigenvector and eigenvalue
-        auto u_der2 = -lu_B.solve(t);
-        res(2) = u_der2[2 * N - 1].real();
+        res(2) = -lu_B.solve(p2 + 2. * (p - t * u_der))[m - 1].real();
         return res;
     }
 
